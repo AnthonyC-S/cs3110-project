@@ -10,9 +10,8 @@
 
 (** CS 3110 Spring 2021 Assignment Final Group Project - Rummikub
 
-    @author Anthony Coffin-Schmitt (awc93) 
-    @author 
-    @author  *)
+    @author Anthony Coffin-Schmitt (awc93), Mina Huh (mh859), and
+    Christy Song (cs966) *)
 
 (************************************************************ 
 
