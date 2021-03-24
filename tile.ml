@@ -23,13 +23,13 @@ let c_lst = [ Blue; Orange; Red; Black ]
 
 let joker = Joker { number = 0; color = None }
 
+let rec make_tile_aux acc n_lst c =
+  match n_lst with
+  | [] -> acc
+  | n :: ns ->
+      make_tile_aux (Tile { number = n; color = c } :: acc) ns c
+
 let make_tile_lst () =
-  let rec make_tile_aux acc n_lst c =
-    match n_lst with
-    | [] -> acc
-    | n :: ns ->
-        make_tile_aux (Tile { number = n; color = c } :: acc) ns c
-  in
   joker :: joker
   :: List.concat_map (make_tile_aux [] n_lst) (c_lst @ c_lst)
 
@@ -47,11 +47,10 @@ let make_tile_stack () =
 let draw_tile (stack : tile Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
 
+let rec make_rack_aux stack acc = function
+  | 0 -> acc
+  | i -> make_rack_aux stack (draw_tile stack :: acc) (i - 1)
+
 let make_tile_rack stack =
-  if Stack.length stack >= 14 then
-    let rec make_rack_aux stack acc = function
-      | 0 -> acc
-      | i -> make_rack_aux stack (draw_tile stack :: acc) (i - 1)
-    in
-    make_rack_aux stack [] 14
+  if Stack.length stack >= 14 then make_rack_aux stack [] 14
   else raise NotEnoughTiles

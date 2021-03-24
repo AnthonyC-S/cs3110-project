@@ -94,11 +94,11 @@ print_meta "Checking for required definitions"
 # I commented this block out as we do not know most of our final types 
 # in the signatures.
 #
-# $OCAMLBUILD checktypes.byte
-# if [[ $? -ne 0 ]]; then
-#  print_fatal "Your code does not provide some required definitions."
-#  exit 1
-#fi
+$OCAMLBUILD checktypes.byte
+if [[ $? -ne 0 ]]; then
+ print_fatal "Your code does not provide some required definitions."
+ exit 1
+fi
  
 print_meta "Congratulations! You have passed [make check]."
 
