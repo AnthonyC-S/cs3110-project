@@ -4,3 +4,6 @@
 #load "tile.cmo";;
 #load "board.cmo";;
 #load "player.cmo";;
+open Tile
+open Board
+open Player
