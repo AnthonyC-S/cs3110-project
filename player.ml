@@ -1,6 +1,6 @@
 open Tile
 
-type player = {
+type p = {
   name : string;
   number : int;
   played_valid_meld : bool;
