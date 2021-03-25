@@ -7,6 +7,7 @@
 
 (** The abstract type of colors used for tiles, and None for
     representing unassigned jokers. *)
+
 type color =
   | Blue
   | Orange
@@ -16,15 +17,13 @@ type color =
 
 (** The abstract type record used for tiles both of type Tile and type
     Joker. *)
-type t_rec = {
-  number : int;
-  color : color;
-}
+
+(* type t_rec = { number : int; color : color; } *)
 
 (** The abstract type of values representing tiles. *)
-type t =
-  | Tile of t_rec
-  | Joker of t_rec
+type t
+
+(* type t = | Tile of t_rec | Joker of t_rec *)
 
 (** Raised when an stack does not have enough tiles for [draw_tile] or
     [make_tile_rack]. *)
@@ -32,6 +31,8 @@ exception NotEnoughTiles
 
 (** Raised when an expected Joker tile is not a Joker. *)
 exception NotAJoker
+
+val make_t : string -> int -> color -> t
 
 (** [n_lst] is a list of the numbers used in Rummikub, 1..13. *)
 val n_lst : int list

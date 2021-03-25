@@ -23,17 +23,22 @@ let n_lst = List.init 13 (( + ) 1)
 
 let c_lst = [ Blue; Orange; Red; Black ]
 
-let joker = Joker { number = 0; color = None }
+let make_t t n c =
+  match t with
+  | "T" -> Tile { number = n; color = c }
+  | "J" -> Joker { number = n; color = c }
+  | _ -> failwith "Not a Tile or Joker"
+
+let joker = make_t "J" 0 None
 
 let update_joker n c = function
-  | Joker t -> Joker { number = n; color = c }
+  | Joker t -> make_t "J" n c
   | Tile t -> raise NotAJoker
 
 let rec make_tile_aux acc n_lst c =
   match n_lst with
   | [] -> acc
-  | n :: ns ->
-      make_tile_aux (Tile { number = n; color = c } :: acc) ns c
+  | n :: ns -> make_tile_aux (make_t "T" n c :: acc) ns c
 
 let make_tile_lst () =
   joker :: joker
