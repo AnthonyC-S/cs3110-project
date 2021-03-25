@@ -28,4 +28,32 @@ let rec make_players acc stack = function
         :: acc)
         stack t
 
-(* TODO *)
+let empty_past_rack player = { player with past_racks = [] }
+
+let update_past_rack player =
+  { player with past_racks = player.past_racks @ [ player.rack ] }
+
+exception EmptyRack
+
+(* helper *)
+let last_ele_lst_rest lst =
+  match List.rev lst with
+  | [] -> raise EmptyRack
+  | h :: t -> (h, List.rev t)
+
+(* could use nth, but suggested to not use nth? *)
+
+let undo_past_rack player =
+  let last_ele_rest = last_ele_lst_rest player.past_racks in
+  {
+    player with
+    rack = fst last_ele_rest;
+    past_racks = snd last_ele_rest;
+  }
+
+(* helper *)
+let fst_ele = function [] -> raise EmptyRack | h :: t -> h
+
+let reset_current_turn_rack player =
+  let fst_rack = fst_ele player.past_racks in
+  { (empty_past_rack player) with rack = fst_rack }
