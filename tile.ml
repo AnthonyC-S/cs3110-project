@@ -23,6 +23,10 @@ let c_lst = [ Blue; Orange; Red; Black ]
 
 let joker = Joker { number = 0; color = None }
 
+let update_joker n c = function
+  | Joker t -> Joker { number = n; color = c }
+  | Tile t -> failwith "Not a Joker"
+
 let rec make_tile_aux acc n_lst c =
   match n_lst with
   | [] -> acc
