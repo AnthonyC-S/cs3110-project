@@ -1,9 +1,9 @@
-type tile =
-  | Tile of t
-  | Joker of t
+type t =
+  | Tile of t_rec
+  | Joker of t_rec
 
 (* [t] is a helper for tile type and defines a tile record.*)
-and t = {
+and t_rec = {
   number : int;
   color : color;
 }
@@ -35,7 +35,7 @@ let make_tile_lst () =
 
 (* Note, this helper function was modified from here:
    https://stackoverflow.com/a/15095713 *)
-let shuffle_tile_lst (acc : tile list) =
+let shuffle_tile_lst (acc : t list) =
   Random.self_init ();
   let random_int_lst = List.map (fun x -> (Random.int 1000, x)) acc in
   let sorted_int_lst = List.sort compare random_int_lst in
@@ -44,7 +44,7 @@ let shuffle_tile_lst (acc : tile list) =
 let make_tile_stack () =
   make_tile_lst () |> shuffle_tile_lst |> List.to_seq |> Stack.of_seq
 
-let draw_tile (stack : tile Stack.t) =
+let draw_tile (stack : t Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
 
 let rec make_rack_aux stack acc = function
@@ -54,3 +54,38 @@ let rec make_rack_aux stack acc = function
 let make_tile_rack stack =
   if Stack.length stack >= 14 then make_rack_aux stack [] 14
   else raise NotEnoughTiles
+
+let rec numbers_of_t acc = function
+  | [] -> List.rev acc
+  | Tile t :: tail -> numbers_of_t (t.number :: acc) tail
+  | Joker t :: tail -> numbers_of_t (t.number :: acc) tail
+
+let rec colors_of_t acc = function
+  | [] -> List.rev acc
+  | Tile t :: tail -> colors_of_t (t.color :: acc) tail
+  | Joker t :: tail -> colors_of_t (t.color :: acc) tail
+
+let valid_group lst =
+  let len = List.length lst in
+  (len = 3 || len = 4)
+  && numbers_of_t [] lst |> List.sort_uniq compare |> List.length = 1
+  && colors_of_t [] lst |> List.sort_uniq compare |> List.length = len
+
+let rec valid_run_aux acc = function
+  | [ h ] -> acc
+  | [ h; h2 ] -> h + 1 = h2 && acc
+  | h :: h2 :: t -> valid_run_aux (h + 1 = h2 && acc) t
+  | [] -> acc
+
+let valid_run lst =
+  let len = List.length lst in
+  len >= 3
+  && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
+  && valid_run_aux true (List.sort compare (numbers_of_t [] lst))
+
+let rec valid_board acc = function
+  | [] -> acc
+  | h :: t ->
+      valid_board
+        ((List.length h = 0 || valid_run h || valid_group h) && acc)
+        t
