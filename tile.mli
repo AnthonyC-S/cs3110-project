@@ -5,16 +5,33 @@
     shuffling the pile, initilizing a tile stack to be used as a draw
     pile, and making a new rack from the draw pile of 14 tiles. *)
 
-(** The abstract type of values representing tiles. *)
-type t
-
 (** The abstract type of colors used for tiles, and None for
-    representing new jokers. *)
-type color
+    representing unassigned jokers. *)
+type color =
+  | Blue
+  | Orange
+  | Red
+  | Black
+  | None
+
+(** The abstract type record used for tiles both of type Tile and type
+    Joker. *)
+type t_rec = {
+  number : int;
+  color : color;
+}
+
+(** The abstract type of values representing tiles. *)
+type t =
+  | Tile of t_rec
+  | Joker of t_rec
 
 (** Raised when an stack does not have enough tiles for [draw_tile] or
     [make_tile_rack]. *)
 exception NotEnoughTiles
+
+(** Raised when an expected Joker tile is not a Joker. *)
+exception NotAJoker
 
 (** [n_lst] is a list of the numbers used in Rummikub, 1..13. *)
 val n_lst : int list
@@ -25,6 +42,9 @@ val c_lst : color list
 
 (** [joker] is tile representing an unassigned Joker. *)
 val joker : t
+
+(** [update_joker n c t] is tile representing a newly assigned joker. *)
+val update_joker : int -> color -> t -> t
 
 (** [make_tile_lst] is the 106 ordered tiles representing a full
     Rummikub pile. *)
@@ -47,3 +67,9 @@ val draw_tile : t Stack.t -> t
     player, drawn from the top of tile stack [ts]. Raises
     [NotEnoughTiles] if the stack does not contain at least 14 tiles. *)
 val make_tile_rack : t Stack.t -> t list
+
+val valid_group : t list -> bool
+
+val valid_run : t list -> bool
+
+val valid_board : bool -> t list list -> bool

@@ -9,7 +9,7 @@ let print_green = ANSITerminal.print_string [ ANSITerminal.green ]
 
 let print_on_blue = ANSITerminal.print_string [ ANSITerminal.on_blue ]
 
-let print_on_orange =
+let print_on_yellow =
   ANSITerminal.print_string [ ANSITerminal.on_yellow ]
 
 let print_on_red = ANSITerminal.print_string [ ANSITerminal.on_red ]
@@ -24,11 +24,11 @@ let play_game file_name = print_endline "Playing Game"
 let main () =
   print_string "\n\nWelcome to the game ";
   print_on_blue "R";
-  print_on_orange "U";
+  print_on_yellow "U";
   print_on_red "M";
   print_on_black "M";
   print_on_blue "I";
-  print_on_orange "K";
+  print_on_yellow "K";
   print_on_red "U";
   print_on_black "B";
   print_on_blue "!";

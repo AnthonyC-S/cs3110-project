@@ -1,12 +1,12 @@
 open Tile
 
-type board_row = {
+type b = board_row list
+
+and board_row = {
   row : string;
   visible : bool;
   tiles : t list;
 }
-
-type board = board_row list
 
 let rows =
   (List.init 26 (( + ) 65)
@@ -25,3 +25,35 @@ let rec init_board_aux (acc : board_row list) (rows : string list) =
         t
 
 let init_board () = List.rev (init_board_aux [] rows)
+
+let rec add_tile tile row_letter acc = function
+  | [] -> failwith "Row not on board."
+  | { row = r; visible = v; tiles = ts } :: t ->
+      if r = row_letter then
+        acc
+        @ {
+            row = row_letter;
+            visible = true;
+            tiles = List.sort compare (tile :: ts);
+          }
+          :: t
+      else
+        add_tile tile row_letter
+          (acc @ [ { row = r; visible = v; tiles = ts } ])
+          t
+
+let rec remove_tile tile row_letter acc = function
+  | [] -> failwith "Row not on board."
+  | { row = r; visible = v; tiles = ts } :: t ->
+      if r = row_letter then
+        acc
+        @ {
+            row = row_letter;
+            visible = true;
+            tiles = List.filter (fun x -> x <> tile) ts;
+          }
+          :: t
+      else
+        add_tile tile row_letter
+          (acc @ [ { row = r; visible = v; tiles = ts } ])
+          t
