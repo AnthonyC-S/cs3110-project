@@ -19,15 +19,9 @@ type color =
     Joker. *)
 
 (* type t_rec = { number : int; color : color; } *)
-type t_rec = {
-  number : int;
-  color : color;
-}
 
 (** The abstract type of values representing tiles. *)
-type t =
-  | Tile of t_rec
-  | Joker of t_rec
+type t
 
 (* type t = | Tile of t_rec | Joker of t_rec *)
 
