@@ -1,6 +1,6 @@
 open Tile
 
-type player = {
+type p = {
   name : string;
   number : int;
   played_valid_meld : bool;
@@ -9,7 +9,7 @@ type player = {
   score : int;
 }
 
-and rack = tile list
+and rack = t list
 
 (* Input is a player association list in the format [(player_num *
    player_name);..]. Example: [(1, "Clarkson"); (2, "Lee")]. *)

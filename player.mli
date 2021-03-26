@@ -1,3 +1,5 @@
+type p
+
 (* type player = { name : string ; number : int ; played_initial_meld :
    bool ; rack : rack ; start_turn_rack : rack; past_rack : rack list ;
    score : int }
