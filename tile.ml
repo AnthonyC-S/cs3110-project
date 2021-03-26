@@ -59,9 +59,9 @@ let make_tile_lst () =
 (** [shuffle_tile_lst tl] is the randomly ordered tiles from [tl] the
     tile list. Note, this helper function was modified from here:
     https://stackoverflow.com/a/15095713. *)
-let shuffle_tile_lst (acc : t list) =
+let shuffle_tile_lst (t_lst : t list) =
   Random.self_init ();
-  let random_int_lst = List.map (fun x -> (Random.int 1000, x)) acc in
+  let random_int_lst = List.map (fun x -> (Random.int 1000, x)) t_lst in
   let sorted_int_lst = List.sort compare random_int_lst in
   List.map snd sorted_int_lst
 
@@ -70,6 +70,8 @@ let make_tile_stack () =
 
 let draw_tile (stack : t Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
+
+let tile_stack_size (stack : t Stack.t) = Stack.length stack
 
 (* [make_rack_aux stack acc i] is a helper to [make_tile_rack]. Gives
    resulting tiles after drawing [i] number of tiles from the [stack].*)
