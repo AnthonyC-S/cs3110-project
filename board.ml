@@ -12,9 +12,7 @@ let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
   |> List.map (String.make 1))
-  @ (List.init 9 (( + ) 65)
-    |> List.map Char.chr
-    |> List.map (String.make 2))
+  @ [ "!"; "@"; "#"; "$"; "%"; "^"; " &"; "?" ]
 
 let rec init_board_aux (acc : board_row list) (rows : string list) =
   match rows with

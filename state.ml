@@ -29,3 +29,20 @@ let past_moves st = st.past_moves
 let players st = st.players
 
 let t_stack st = st.t_stack
+
+let empty_past_moves st = { st with past_moves = [] }
+
+let update_past_moves st =
+  { st with past_moves = st.past_moves @ [ st.current_board ] }
+
+let undo_past_move st =
+  let last_b =
+    match List.rev st.past_moves with
+    | h :: t -> h
+    | [] -> failwith "Empty past_moves list"
+  in
+  {
+    st with
+    current_board = last_b;
+    past_moves = List.filter (fun x -> x <> last_b) st.past_moves;
+  }
