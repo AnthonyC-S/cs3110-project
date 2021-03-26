@@ -35,14 +35,24 @@ let empty_past_moves st = { st with past_moves = [] }
 let update_past_moves st =
   { st with past_moves = st.past_moves @ [ st.current_board ] }
 
+(* helper for undo_past_move and reset_current_board*)
+let get_fst_elm = function
+  | h :: t -> h
+  | [] -> failwith "Empty past_moves list"
+
 let undo_past_move st =
-  let last_b =
-    match List.rev st.past_moves with
-    | h :: t -> h
-    | [] -> failwith "Empty past_moves list"
-  in
+  let last_b = get_fst_elm (List.rev st.past_moves) in
   {
     st with
     current_board = last_b;
     past_moves = List.filter (fun x -> x <> last_b) st.past_moves;
+  }
+
+let reset_current_board st =
+  empty_past_moves { st with current_board = get_fst_elm st.past_moves }
+
+let update_current_turn st =
+  {
+    st with
+    current_turn = (st.current_turn mod List.length st.players) + 1;
   }

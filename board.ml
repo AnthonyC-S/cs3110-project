@@ -1,8 +1,8 @@
 open Tile
 
-type b = board_row list
+type b = b_row list
 
-and board_row = {
+and b_row = {
   row : string;
   visible : bool;
   tiles : t list;
@@ -14,7 +14,7 @@ let rows =
   |> List.map (String.make 1))
   @ [ "!"; "@"; "#"; "$"; "%"; "^"; " &"; "?" ]
 
-let rec init_board_aux (acc : board_row list) (rows : string list) =
+let rec init_board_aux (acc : b_row list) (rows : string list) =
   match rows with
   | [] -> acc
   | str :: t ->
