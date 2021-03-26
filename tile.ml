@@ -1,19 +1,19 @@
-type t =
-  | Tile of t_rec
-  | Joker of t_rec
-
-(* [t] is a helper for tile type and defines a tile record.*)
-and t_rec = {
-  number : int;
-  color : color;
-}
-
-and color =
+type color =
   | Blue
   | Orange
   | Red
   | Black
   | None
+
+(* [t] is a helper for tile type and defines a tile record.*)
+type t_rec = {
+  number : int;
+  color : color;
+}
+
+type t =
+  | Tile of t_rec
+  | Joker of t_rec
 
 exception NotEnoughTiles
 
@@ -75,28 +75,3 @@ let rec colors_of_t acc = function
   | [] -> List.rev acc
   | Tile t :: tail -> colors_of_t (t.color :: acc) tail
   | Joker t :: tail -> colors_of_t (t.color :: acc) tail
-
-let valid_group lst =
-  let len = List.length lst in
-  (len = 3 || len = 4)
-  && numbers_of_t [] lst |> List.sort_uniq compare |> List.length = 1
-  && colors_of_t [] lst |> List.sort_uniq compare |> List.length = len
-
-let rec valid_run_aux acc = function
-  | [ h ] -> acc
-  | [ h; h2 ] -> h + 1 = h2 && acc
-  | h :: h2 :: t -> valid_run_aux (h + 1 = h2 && acc) t
-  | [] -> acc
-
-let valid_run lst =
-  let len = List.length lst in
-  len >= 3
-  && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
-  && valid_run_aux true (List.sort compare (numbers_of_t [] lst))
-
-let rec valid_board acc = function
-  | [] -> acc
-  | h :: t ->
-      valid_board
-        ((List.length h = 0 || valid_run h || valid_group h) && acc)
-        t

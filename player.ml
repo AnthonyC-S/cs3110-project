@@ -14,14 +14,14 @@ and rack = t list
 (* Input is a player association list in the format [(player_num *
    player_name);..]. Example: [(1, "Clarkson"); (2, "Lee")]. *)
 let rec make_players acc stack = function
-  | [] -> acc
+  | [] -> List.rev acc
   | (number, name) :: t ->
       make_players
         ({
            name;
            number;
            played_valid_meld = false;
-           rack = Tile.make_tile_rack stack;
+           rack = make_tile_rack stack;
            past_racks = [];
            score = 0;
          }

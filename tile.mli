@@ -19,9 +19,15 @@ type color =
     Joker. *)
 
 (* type t_rec = { number : int; color : color; } *)
+type t_rec = {
+  number : int;
+  color : color;
+}
 
 (** The abstract type of values representing tiles. *)
-type t
+type t =
+  | Tile of t_rec
+  | Joker of t_rec
 
 (* type t = | Tile of t_rec | Joker of t_rec *)
 
@@ -69,8 +75,12 @@ val draw_tile : t Stack.t -> t
     [NotEnoughTiles] if the stack does not contain at least 14 tiles. *)
 val make_tile_rack : t Stack.t -> t list
 
-val valid_group : t list -> bool
+(* val valid_group : t list -> bool
 
-val valid_run : t list -> bool
+   val valid_run : t list -> bool
 
-val valid_board : bool -> t list list -> bool
+   val valid_board : bool -> t list list -> bool *)
+
+val numbers_of_t : int list -> t list -> int list
+
+val colors_of_t : color list -> t list -> color list
