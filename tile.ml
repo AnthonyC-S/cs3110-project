@@ -71,8 +71,8 @@ let make_tile_stack () =
 let draw_tile (stack : t Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
 
-(* [make_rack_aux stack acc i] is a helper to [make_tile_rack]. Draws
-   [i] number of tiles from the [stack].*)
+(* [make_rack_aux stack acc i] is a helper to [make_tile_rack]. Gives
+   resulting tiles after drawing [i] number of tiles from the [stack].*)
 let rec make_rack_aux stack acc = function
   | 0 -> acc
   | i -> make_rack_aux stack (draw_tile stack :: acc) (i - 1)
