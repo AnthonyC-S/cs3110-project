@@ -19,6 +19,10 @@
 
    function rack_size : returns number of tiles in rack
 
+   (from here-------------)
+
+   exception EmptyRack
+
    function empty_past_rack : creates a new player object with the
    “past_rack” field set to [ ]
 
