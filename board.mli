@@ -9,6 +9,7 @@ type b_row = {
 
 type b = b_row list
 
+(** [init_board] is the initial state of the board with no tiles. *)
 val init_board : unit -> b
 
 val add_tile :
@@ -19,6 +20,6 @@ val remove_tile :
 
 val valid_group : Tile.t list -> bool
 
-val valid_run : Tile.t list -> bool
-
-val valid_board : bool -> Tile.t list list -> bool
+(** [valid_board acc board] is the result of removing a tile from the
+    board *)
+val valid_board : bool -> b -> bool
