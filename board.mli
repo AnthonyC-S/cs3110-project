@@ -1,6 +1,13 @@
-type b
+(* type b type b_row *)
 
-type b_row
+(*new*)
+type b_row = {
+  row : string;
+  visible : bool;
+  tiles : Tile.t list;
+}
+
+type b = b_row list
 
 val init_board : unit -> b
 

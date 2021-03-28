@@ -1,44 +1,38 @@
-type p
+(* type p type rack = Tile.t list *)
+
+(*new*)
+type rack = Tile.t list
+
+type p = {
+  name : string;
+  number : int;
+  played_valid_meld : bool;
+  rack : rack;
+  past_racks : rack list;
+  score : int;
+}
 
 val make_players :
   p list -> Tile.t Stack.t -> (int * string) list -> p list
 
-(* type player = { name : string ; number : int ; played_initial_meld :
-   bool ; rack : rack ; start_turn_rack : rack; past_rack : rack list ;
-   score : int }
+val empty_past_rack : p -> p
 
-   function make_player : initializes a new player
+val update_past_rack : p -> p
 
-   type rack = tile list
+val undo_past_rack : p -> p
 
-   function fill_rack : adds a list of 14 tiles by Pile.deal_rack and
-   assigns it to player.rack
+val reset_current_turn_rack : p -> p
 
-   function sort_by_color : sorts the rack based on color first then
-   ascending numbers, jokers last.
+val add_to_rack : int -> p list -> Tile.t -> p list
 
-   function sort_by_number : sorts the rack based off number first then
-   color, jokers last
+val remove_from_rack : int -> p list -> int -> p list
 
-   function print_rack : pretty print rack
+val get_current_name : int -> p list -> string
 
-   function rack_size : returns number of tiles in rack
+val get_current_meld_status : int -> p list -> bool
 
-   (from here-------------)
+val get_current_rack : int -> p list -> rack
 
-   exception EmptyRack
+val get_past_racks : int -> p list -> rack list
 
-   function empty_past_rack : creates a new player object with the
-   “past_rack” field set to [ ]
-
-   function update_past_rack : creates a new player object with a new
-   rack list with current “rack” field value appended to the “past_rack”
-   field.
-
-   function undo_past_rack : creates a new player object with the last
-   rack element in the “past_rack” field deleted and set to the “rack”
-   field.
-
-   function reset_current_turn_rack : creates a new player object with
-   the first rack element in the “past_rack” field and calls
-   empty_past_rack *)
+val get_current_score : int -> p list -> int

@@ -6,7 +6,8 @@
     pile, and making a new rack from the draw pile of 14 tiles. *)
 
 (** The abstract type of values representing tiles. *)
-type t
+
+(* type t *)
 
 (** The abstract type of colors used for tiles, and None for
     representing unassigned jokers. *)
@@ -16,6 +17,16 @@ type color =
   | Red
   | Black
   | None
+
+(*new*)
+type t_rec = {
+  number : int;
+  color : color;
+}
+
+type t =
+  | Tile of t_rec
+  | Joker of t_rec
 
 (** Raised when an stack does not have enough tiles for [draw_tile] or
     [make_tile_rack]. *)
@@ -52,6 +63,7 @@ val draw_tile : t Stack.t -> t
     [NotEnoughTiles] if the stack does not contain at least 14 tiles. *)
 val make_tile_rack : t Stack.t -> t list
 
+(** [numbers_of_t a tl] is the *)
 val numbers_of_t : int list -> t list -> int list
 
 val colors_of_t : color list -> t list -> color list
