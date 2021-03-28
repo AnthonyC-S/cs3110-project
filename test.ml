@@ -18,7 +18,7 @@ let update_joker_exception name n c t expected_output =
 
 let tile_tests =
   [
-    update_joker_test "Joker is now 1 Red" 1 Red joker
+    update_joker_test "Joker is now 1 Red" 1 Red (make_t "J" 0 None)
       (make_t "J" 1 Red);
     update_joker_exception "Not a Joker exception" 1 Red
       (make_t "T" 5 Black) Tile.NotAJoker;

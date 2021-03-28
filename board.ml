@@ -1,20 +1,22 @@
 open Tile
 
-type b = board_row list
+type b = b_row list
 
-and board_row = {
+and b_row = {
   row : string;
   visible : bool;
   tiles : t list;
 }
 
+exception NotValidBoardRow
+
 let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
   |> List.map (String.make 1))
-  @ [ "!"; "@"; "#"; "$"; "%"; "^"; " &"; "?" ]
+  @ [ "!"; "@"; "#"; "$"; "%"; "^"; "&"; "?" ]
 
-let rec init_board_aux (acc : board_row list) (rows : string list) =
+let rec init_board_aux (acc : b_row list) (rows : string list) =
   match rows with
   | [] -> acc
   | str :: t ->
@@ -25,7 +27,7 @@ let rec init_board_aux (acc : board_row list) (rows : string list) =
 let init_board () = List.rev (init_board_aux [] rows)
 
 let rec add_tile tile row_letter acc = function
-  | [] -> failwith "Row not on board."
+  | [] -> raise NotValidBoardRow
   | { row = r; visible = v; tiles = ts } :: t ->
       if r = row_letter then
         acc
@@ -41,9 +43,8 @@ let rec add_tile tile row_letter acc = function
           (acc @ [ { row = r; visible = v; tiles = ts } ])
           t
 
-(* Need to check remove....*)
 let rec remove_tile tile row_letter acc = function
-  | [] -> failwith "Row not on board."
+  | [] -> raise NotValidBoardRow
   | { row = r; visible = v; tiles = ts } :: t ->
       if r = row_letter then
         acc
