@@ -44,7 +44,7 @@ let rec add_tile tile row_letter acc = function
             row = row_letter;
             visible = true;
             (* test sorting later, need to fix adding sort Joker*)
-            tiles = List.sort compare (tile :: ts);
+            tiles = sort_by_number (tile :: ts);
           }
           :: t
       else
