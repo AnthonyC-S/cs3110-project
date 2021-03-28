@@ -28,17 +28,17 @@ let n_lst = List.init 13 (( + ) 1)
     to represent unassigned Jokers. *)
 let c_lst = [ Blue; Orange; Red; Black ]
 
-let make_t n c t =
+let make_t t n c =
   match t with
   | "T" -> Tile { number = n; color = c }
   | "J" -> Joker { number = n; color = c }
   | _ -> failwith "Not a Tile or Joker"
 
 (** [joker] is tile representing an unassigned Joker. *)
-let joker = make_t 0 None "J"
+let joker = make_t "J" 0 None
 
 let update_joker n c = function
-  | Joker t -> make_t n c "J"
+  | Joker t -> make_t "J" n c
   | Tile t -> raise NotAJoker
 
 (*[make_tile_aux acc n_lst c] is a helper to [make_tile_lst]. [acc] is
@@ -46,7 +46,7 @@ let update_joker n c = function
 let rec make_tile_aux acc n_lst c =
   match n_lst with
   | [] -> acc
-  | n :: ns -> make_tile_aux (make_t n c "T" :: acc) ns c
+  | n :: ns -> make_tile_aux (make_t "T" n c :: acc) ns c
 
 (** [make_tile_lst] is the 106 ordered tiles representing a full
     Rummikub pile. Ordered as with two jokers at the head and then sets

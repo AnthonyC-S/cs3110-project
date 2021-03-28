@@ -42,7 +42,7 @@ exception InvalidTile
     tile color, and [t] or either "T" for Tile or "J" for Joker type.
     Requires: [t] is either "T" or "J" [n] is 0 .. 13 [c] is a valid
     color type. Raises: [InvalidTile] if [t] is not a valid tile type.*)
-val make_t : int -> color -> string -> t
+val make_t : string -> int -> color -> t
 
 (** [update_joker n c t] is tile representing a newly assigned Joker,
     with [n] for the tile number, [c] for the tile color, and [t] for
