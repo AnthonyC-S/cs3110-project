@@ -168,3 +168,18 @@ let rec sort_by_number_aux tlst nlst acc =
 let sort_by_number tlst =
   let nums = List.sort_uniq compare (numbers_of_t [] tlst) in
   sort_by_number_aux (num_sort tlst) nums []
+
+(***)
+let tile_of_string = function
+  | Tile t -> string_of_int t.number
+  | Joker t -> if t.number <= 13 then string_of_int t.number else "J"
+
+let space_t s t =
+  let len_s = String.length s and s_t = tile_of_string t in
+  if len_s = 1 then s_t ^ "  " else s_t ^ " "
+
+let rec tiles_of_string acc = function
+  | [] -> acc
+  | h :: t ->
+      let new_acc = acc ^ space_t "" h in
+      tiles_of_string new_acc t

@@ -12,9 +12,7 @@ let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
   |> List.map (String.make 1))
-  @ (List.init 9 (( + ) 65)
-    |> List.map Char.chr
-    |> List.map (String.make 2))
+  @ [ "!"; "@"; "#"; "$"; "%"; "^"; " &"; "?" ]
 
 let rec init_board_aux (acc : board_row list) (rows : string list) =
   match rows with
@@ -84,3 +82,14 @@ let rec valid_board acc = function
       valid_board
         ((List.length h = 0 || valid_run h || valid_group h) && acc)
         t
+
+exception EmptyBoard
+
+let board_row_of_string r = r.row ^ ": " ^ tiles_of_string "" r.tiles
+
+(** *)
+let print_rows = function
+  | [] -> raise EmptyBoard
+  | h :: t -> h.row ^ ": " ^ "TODO"
+
+(* might not need visible field? *)
