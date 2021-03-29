@@ -67,3 +67,11 @@ val make_tile_rack : t Stack.t -> t list
 val numbers_of_t : int list -> t list -> int list
 
 val colors_of_t : color list -> t list -> color list
+
+val sort_by_color : t list -> t list
+
+val sort_by_number : t list -> t list
+
+val tiles_of_string : string -> t list -> string
+
+val get_tile_of_index : int -> 'a list -> 'a
