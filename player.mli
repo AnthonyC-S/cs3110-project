@@ -8,7 +8,7 @@ type p = {
   number : int;
   played_valid_meld : bool;
   meld_count : Tile.t list;
-  past_meld_count : Tile.t list list;
+  past_meld_counts : Tile.t list list;
   rack : rack;
   past_racks : rack list;
   score : int;

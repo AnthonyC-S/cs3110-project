@@ -48,12 +48,24 @@ let undo_move st =
   let cur_player = get_cur_player st in
   let last_b = get_fst_elm (List.rev st.past_boards) in
   let last_r = get_fst_elm (List.rev cur_player.past_racks) in
+  let last_meld_count = get_fst_elm (List.rev cur_player.meld_count) in
+  let last_past_meld_counts =
+    get_fst_elm (List.rev cur_player.past_meld_counts)
+  in
   let new_player =
     {
       cur_player with
       past_racks =
         List.filter (fun x -> x <> last_r) cur_player.past_racks;
       rack = get_fst_elm (List.rev cur_player.past_racks);
+      meld_count =
+        List.filter
+          (fun x -> x <> last_meld_count)
+          cur_player.meld_count;
+      past_meld_counts =
+        List.filter
+          (fun x -> x <> last_past_meld_counts)
+          cur_player.past_meld_counts;
     }
   in
   {
@@ -75,6 +87,8 @@ let reset_turn st =
       cur_player with
       rack = get_fst_elm cur_player.past_racks;
       past_racks = [];
+      meld_count = [];
+      past_meld_counts = [];
     }
   in
   {
@@ -95,8 +109,8 @@ let move_from_rack st index row =
       {
         cur_player with
         meld_count = tile_to_move :: cur_player.meld_count;
-        past_meld_count =
-          cur_player.past_meld_count @ [ cur_player.meld_count ];
+        past_meld_counts =
+          cur_player.past_meld_counts @ [ cur_player.meld_count ];
       }
       |> update_past_rack
     in

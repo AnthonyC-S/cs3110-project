@@ -7,7 +7,7 @@ type p = {
   number : int;
   played_valid_meld : bool;
   meld_count : t list;
-  past_meld_count : t list list;
+  past_meld_counts : t list list;
   rack : rack;
   past_racks : rack list;
   score : int;
@@ -26,7 +26,7 @@ let rec make_players acc stack = function
            number;
            played_valid_meld = false;
            meld_count = [];
-           past_meld_count = [];
+           past_meld_counts = [];
            rack = make_tile_rack stack;
            past_racks = [];
            score = 0;
