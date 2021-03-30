@@ -106,12 +106,3 @@ let valid_board acc board =
   valid_rows acc tile_rows
 
 exception EmptyBoard
-
-let board_row_of_string r = r.row ^ ": " ^ tiles_of_string "" r.tiles
-
-(** *)
-let print_rows = function
-  | [] -> raise EmptyBoard
-  | h :: t -> h.row ^ ": " ^ "TODO"
-
-(* might not need visible field? *)

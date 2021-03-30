@@ -185,17 +185,25 @@ let sort_by_number tlst =
   let nums = List.sort_uniq compare (numbers_of_t [] tlst) in
   sort_by_number_aux (num_sort tlst) nums []
 
-(***)
+(** [tiles_of_string t] is a string representation of tile [t]. If the
+    [t] is a normal tile, the number field of [t] is stringified. If [t]
+    is a Joker tile, "J" is returned. *)
 let tile_of_string = function
   | Tile t -> string_of_int t.number
-  | Joker t -> if t.number <= 13 then string_of_int t.number else "J"
+  | Joker t -> "J"
 
-let space_t s t =
-  let len_s = String.length s and s_t = tile_of_string t in
-  if len_s = 1 then s_t ^ "  " else s_t ^ " "
+(** [string_lst_13 slst] is a list of string [slst] with exactly 13
+    string elements. If [slst] has less than 13 elements, a string with
+    3 empty spaces is added to the end of [slst]. *)
+let rec string_lst_13 slst =
+  if List.length slst < 9 then string_lst_13 (slst @ [ "   " ])
+  else if List.length slst < 13 then string_lst_13 (slst @ [ "    " ])
+  else slst
 
-let rec tiles_of_string acc = function
-  | [] -> acc
+(** [tiles_of_string_lst acc tlst] is a string representation of list of
+    tiles [tlst]. *)
+let rec tiles_of_string_lst acc = function
+  | [] -> string_lst_13 (List.rev acc)
   | h :: t ->
-      let new_acc = acc ^ space_t "" h in
-      tiles_of_string new_acc t
+      let new_acc = tile_of_string h :: acc in
+      tiles_of_string_lst new_acc t

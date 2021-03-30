@@ -54,6 +54,8 @@ val update_joker : int -> color -> t -> t
     tile to end turn. *)
 val make_tile_stack : unit -> t Stack.t
 
+val tile_stack_size : t Stack.t -> int
+
 (** [draw_tile ts] is a single random tile drawn from the top of tile
     stack [ts]. Raises [NotEnoughTiles] if stack is empty. *)
 val draw_tile : t Stack.t -> t
@@ -72,4 +74,4 @@ val sort_by_color : t list -> t list
 
 val sort_by_number : t list -> t list
 
-val tiles_of_string : string -> t list -> string
+val tiles_of_string_lst : string list -> t list -> string list

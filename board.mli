@@ -23,3 +23,5 @@ val valid_group : Tile.t list -> bool
 (** [valid_board acc board] is the result of removing a tile from the
     board *)
 val valid_board : bool -> b -> bool
+
+exception EmptyBoard
