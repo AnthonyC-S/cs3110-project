@@ -3,66 +3,75 @@ open Player
 open State
 open Command
 
-let print_blue =
-  ANSITerminal.print_string [ ANSITerminal.blue; ANSITerminal.on_white ]
+(* [rp acc str i] concatanates [str] [i] number of times. *)
+let rec rp acc str = function
+  | 0 -> acc
+  | i -> rp (str ^ acc) str (i - 1)
 
-(*black on white background *)
-let bk =
-  ANSITerminal.print_string
-    [ ANSITerminal.black; ANSITerminal.on_white ]
+(* black *)
+let k s = "\027[38;5;8;1m" ^ s ^ "\027[0m"
 
-let on_white = ANSITerminal.print_string [ ANSITerminal.on_white ]
+(* red *)
+let r s = "\027[38;5;9;1m" ^ s ^ "\027[0m"
 
-(* bold red*)
-let br s = print_string ("\027[31;1m" ^ s ^ "\027[0m")
+(* orange *)
+let o s = "\027[38;5;208;1m" ^ s ^ "\027[0m"
 
-(* bold yellow*)
-let by s = print_string ("\027[33;1m" ^ s ^ "\027[0m")
+(* blue *)
+let b s = "\027[38;5;033;1m" ^ s ^ "\027[0m"
 
-(* bold blue*)
-let bb s = print_string ("\027[34;1m" ^ s ^ "\027[0m")
+(* italic green *)
+let ig s = "\027[38;5;82;3m" ^ s ^ "\027[0m"
 
-(* green *)
-let bg s = print_string ("\027[32;1m" ^ s ^ "\027[0m")
+let g s = "\027[38;5;82m" ^ s ^ "\027[0m"
 
-let play_game file_name = failwith "TODO"
+let tabs = "|\t\t\t\t\t\t\t\t\t\t\t\t\t|\n"
 
+let print_state (st : State.s) : unit =
+  ANSITerminal.erase Screen;
+  ANSITerminal.resize 105 45;
+  ANSITerminal.set_cursor 1 1
+
+let rec play_turn (st : State.s) : unit = failwith "TODO"
+
+let rec game_start str =
+  try play_turn (init_state (parse_start str))
+  with Malformed -> (
+    print_string (g "\nThere was a problem starting your game. \n");
+    print_endline
+      "Are you sure you entered the start game command in the correct \
+       format? \n\
+       try again or type \"quit\" to exit.";
+    print_string (g "> ");
+    match read_line () with
+    | exception End_of_file -> raise Malformed
+    | "quit" -> Stdlib.exit 0
+    | init_game -> game_start init_game)
+
+(* [main] is the initial welcome screen and has player input in number
+   of players and player names to start a new game. *)
 let main () =
   ANSITerminal.erase Screen;
   ANSITerminal.resize 105 45;
   ANSITerminal.set_cursor 1 1;
-  print_string " ";
-  print_string (String.make 103 '_');
-  print_string " ";
-  bg "\n\n  Welcome to ";
-  br "R";
-  print_string " ";
-  bk "U";
-  print_string " ";
-  by "M";
-  print_string " ";
-  bb "M";
-  print_string " ";
-  br "I";
-  print_string " ";
-  bk "K";
-  print_string " ";
-  by "U";
-  print_string " ";
-  bb "B";
-  print_string " ";
-  bg "!";
-
   print_string
-    "\n\n\
-    \  Enter the number of players (2 or 4) and the player names.\n\
-    \  For example: ";
-  bg "> ";
-  print_string "4 Clarkson Gries Dijkstra Turing\n\n";
-  bg "  > ";
+    (" " ^ String.make 103 '_' ^ " " ^ rp "" tabs 6 ^ "|\t\t\t\t"
+   ^ ig "WELCOME TO THE  " ^ r "R " ^ k "U " ^ o "M " ^ b "M " ^ r "I "
+   ^ k "K " ^ o "U " ^ b "B" ^ ig "  GAME" ^ "\t\t\t\t\t|"
+   ^ rp "" tabs 4 ^ "|"
+    ^ g
+        "\t\t   Developed by Anthony Coffin-Schmitt, Mina Huh, and \
+         Christy Song"
+    ^ "\t\t\t\t\t|\n|" ^ "\t\t\t\t"
+    ^ g "   For CS 3110, Spring 2021"
+    ^ "\t\t\t\t\t\t|\n" ^ rp "" tabs 4 ^ "|" ^ String.make 103 '_'
+    ^ "|\n\n"
+    ^ "  Enter the number of players (2 or 4) and, optionally, the \
+       player names. For example:\n" ^ g "  > "
+    ^ "4 Clarkson Gries Dijkstra Turing\n\n" ^ g "  > ");
   match read_line () with
   | exception End_of_file -> ()
-  | init_game -> play_game init_game
+  | init_game -> game_start init_game
 
 (* Execute the game engine. *)
 let () = main ()

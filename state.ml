@@ -197,7 +197,8 @@ let assign_joker_from_board st n c from =
   { st with current_board = new_board }
 
 (* Note, I did not update past_moves or past rack lists since this will
-   be automatically followed by [end_turn] via main.ml. *)
+   be automatically followed by [reset_turn] and then [end_turn] via
+   main.ml. *)
 let draw (st : s) : s =
   {
     st with
