@@ -2,6 +2,8 @@ exception BlankInput
 
 exception Malformed
 
+exception NameTooLong
+
 type move_phrase = string list
 
 type command =
@@ -41,12 +43,26 @@ let trim_lc_fst_word str =
   |> List.mapi (fun i x ->
          if i = 0 then String.lowercase_ascii x else x)
 
+let rec check_name_len = function
+  | [] -> ()
+  | h :: t ->
+      if String.length h > 21 then raise NameTooLong
+      else check_name_len t
+
 let parse_start str =
   match trim_lc_fst_word str with
-  | "2" :: t -> init_two_players t
-  | "two" :: t -> init_two_players t
-  | "4" :: t -> init_four_players t
-  | "four" :: t -> init_four_players t
+  | "2" :: t ->
+      check_name_len t;
+      init_two_players t
+  | "two" :: t ->
+      check_name_len t;
+      init_two_players t
+  | "4" :: t ->
+      check_name_len t;
+      init_four_players t
+  | "four" :: t ->
+      check_name_len t;
+      init_four_players t
   | [ "quit" ] ->
       print_string "Thank you for playing! Goodby.";
       Stdlib.exit 0

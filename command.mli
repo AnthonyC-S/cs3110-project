@@ -17,6 +17,8 @@ exception BlankInput
 
 exception Malformed
 
+exception NameTooLong
+
 val parse : string -> command
 
 val parse_start : string -> (int * string) list
