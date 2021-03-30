@@ -46,7 +46,7 @@ let trim_lc_fst_word str =
 let rec check_name_len = function
   | [] -> ()
   | h :: t ->
-      if String.length h > 21 then raise NameTooLong
+      if String.length h >= 20 then raise NameTooLong
       else check_name_len t
 
 let parse_start str =
@@ -64,11 +64,11 @@ let parse_start str =
       check_name_len t;
       init_four_players t
   | [ "quit" ] ->
-      print_string "Thank you for playing! Goodby.";
+      print_string "Thank you for playing! Goodby\n\n.";
       Stdlib.exit 0
   | _ -> raise Malformed
 
-let parse_move str_lst = failwith "TODO"
+let parse_move str_lst = failwith "parse_move Need To Do"
 
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
@@ -85,6 +85,8 @@ let parse str =
       | [ "color"; "sort" ] -> SortByColor
       | [ "number"; "sort" ] -> SortByNumber
       | [ "draw" ] -> Draw
+      | [ "end"; "turn" ] -> EndTurn
+      | [ "help" ] -> Help
       | _ -> raise Malformed
     in
     check_lst str_lst
