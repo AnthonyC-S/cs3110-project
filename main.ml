@@ -33,6 +33,17 @@ let top_r = " " ^ String.make 103 '_' ^ " \n"
 
 let empty_r = "|\t\t\t\t\t\t\t\t\t\t\t\t\t|\n"
 
+let turn_r cur_player tab_n =
+  "|  " ^ g "Current Turn: " ^ cur_player ^ rp "" "\t" tab_n ^ "|\n"
+
+let pile_r pile_size =
+  "|     " ^ g "Pile Size: " ^ pile_size ^ rp "" "\t" 11 ^ "|\n"
+
+let top_index_r =
+  "| " ^ g "Index:"
+  ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||     1  2  3  4  \
+     5  6  7  8  9  10  11  12  13   |\n"
+
 let bottom_r = "|" ^ String.make 103 '_' ^ "|\n\n"
 
 let welcome_msg =
@@ -76,9 +87,52 @@ let clear_board () =
   ANSITerminal.resize 105 45;
   ANSITerminal.set_cursor 1 1
 
+let calc_tabs_needed total_len cur_len =
+  (total_len - cur_len + ((total_len - cur_len) mod 8)) / 8
+
+let space_n i =
+  if i = 10 || i = 11 || i = 12 || i = 13 then " " else "  "
+
+let convert_n i = string_of_int i ^ space_n i
+
+let convert_tile (tile : Tile.t) =
+  match tile with
+  | Tile { number = i; color = Blue } -> b (convert_n i)
+  | Tile { number = i; color = Orange } -> o (convert_n i)
+  | Tile { number = i; color = Red } -> r (convert_n i)
+  | Tile { number = i; color = Black } -> k (convert_n i)
+  | Tile { number = i; color = None } -> ""
+  | Joker _ -> "J  "
+
+let rec string_of_tiles (acc : string) (tiles : Tile.t list) : string =
+  match tiles with
+  | [] -> acc
+  | h :: t -> string_of_tiles (acc ^ convert_tile h) t
+
+let rec string_of_board_rows (acc : string) (board : Board.b_row list) :
+    string =
+  match board with
+  | [] -> acc
+  | { row = r1; visible = v1; tiles = t1 } :: t ->
+      string_of_board_rows
+        (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1 ^ "\n")
+        t
+
+let build_board (st : State.s) : string =
+  let cur_player = get_current_name st.current_turn st.players in
+  let name_length = String.length cur_player in
+  let tabs_for_turn = calc_tabs_needed 107 (name_length + 17) in
+  let turn_r = turn_r cur_player tabs_for_turn in
+  let pile_size = string_of_int (Stack.length st.t_stack) in
+  let pile_r = pile_r pile_size in
+  let dash_r = "|" ^ rp "" "-" 103 ^ "|\n" in
+  top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
+  ^ string_of_board_rows "" st.current_board
+  ^ "\n\n\n"
+
 let rec play_turn (st : State.s) msg : unit =
   clear_board ();
-  print_string "Now in play_turn"
+  print_string (build_board st)
 
 let rec welcome (st : State.s) msg : unit =
   clear_board ();
@@ -90,7 +144,8 @@ let rec welcome (st : State.s) msg : unit =
     ^ ip);
   match read_line () with
   | input ->
-      if input = "play" then play_turn st "Enter your command to play."
+      if input = "play" || input = "p" then
+        play_turn st "Enter your command to play."
       else if input = "quit" then quit_game ()
       else welcome st game_commands
 
@@ -100,6 +155,8 @@ let repeat_init_game_aux () =
   | "quit" -> quit_game ()
   | init_game -> init_game
 
+(* [game_start] attempts to initilize state using entered number of
+   players and player names. *)
 let rec game_start str =
   try welcome (init_state (parse_start str)) game_commands with
   | NameTooLong ->
