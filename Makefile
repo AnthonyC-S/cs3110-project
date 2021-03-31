@@ -25,7 +25,7 @@ finalcheck:
 	@bash check.sh final
 
 zip:
-	zip rummikub.zip *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
+	zip camlkub.zip *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
 	
 docs: docs-public docs-private
 	
@@ -42,4 +42,4 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
-	rm -rf _doc.public _doc.private rummikub.zip
+	rm -rf _doc.public _doc.private camlkub.zip
