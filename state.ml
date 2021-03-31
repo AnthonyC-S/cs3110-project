@@ -83,4 +83,10 @@ let move_from_rack (st : s) (index : int) (row : string) =
     }
   else raise NotValidIndex
 
-let move_from_board = failwith "TODO"
+let move_from_board = ()
+
+(** helper *)
+let rec get_current_player cp (plst : p list) =
+  match plst with
+  | [] -> []
+  | h :: t -> if h.number = cp then h.rack else get_current_player cp t

@@ -28,3 +28,5 @@ val update_past_boards : s -> s
 val undo_past_move : s -> s
 
 val move_from_rack : s -> int -> string -> s
+
+val get_current_player : int -> Player.p list -> Tile.t list

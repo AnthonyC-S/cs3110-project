@@ -1,8 +1,11 @@
 open Tile
 open Board
 open State
+open Player
 
 let stack_size s = s.t_stack |> tile_stack_size |> string_of_int
+
+(* Stack.size/length *)
 
 let pile_string s =
   let stack_size_str = stack_size s in
@@ -56,11 +59,11 @@ let print_tile tstr c i =
     ANSITerminal.print_string [ ANSITerminal.on_white; c ] tstr;
     ANSITerminal.print_string [] (space_t tstr i))
 
-let row_color_list slst r =
+let row_color_list slst tlst =
   if List.hd slst = "   " then
     List.init 13 (fun _ -> ANSITerminal.default)
   else
-    let colors = match_color_ANSI [] (colors_of_t [] r.tiles) in
+    let colors = match_color_ANSI [] (colors_of_t [] tlst) in
     let clst_l = List.length colors in
     if clst_l < 13 then
       colors @ List.init (13 - clst_l) (fun _ -> ANSITerminal.default)
@@ -75,7 +78,7 @@ let row_num_style rname n =
 let rec print_row_line r n =
   let slst = tiles_of_string_lst [] r.tiles
   and row_style = row_num_style r.row n in
-  let clst = row_color_list slst r in
+  let clst = row_color_list slst r.tiles in
   ANSITerminal.print_string [] (fst row_style);
   for i = 0 to 12 do
     print_tile (List.nth slst i) (List.nth clst i) i
@@ -107,7 +110,26 @@ let print_bottom () =
     " \
      |_______________________________________________________________________________________________________|"
 
+exception PlayerNotExist
+
+let rec print_rack r =
+  let slst = tiles_of_string_lst [] r in
+  let clst = row_color_list slst r in
+  for i = 0 to List.length slst - 1 do
+    print_tile (List.nth slst i) (List.nth clst i) i
+  done
+
+let print_current_player_rack s =
+  ANSITerminal.print_string []
+    "\n\n\
+     index: 1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  \
+     18  19  20\n";
+  ANSITerminal.print_string [] " Rack: ";
+  print_rack (get_current_player s.current_turn s.players);
+  ANSITerminal.print_string [] " \n"
+
 let print_state s =
   print_top s;
   print_rows s;
-  print_bottom ()
+  print_bottom ();
+  print_current_player_rack s
