@@ -2,6 +2,7 @@ open Tile
 open Player
 open State
 open Command
+open Textgui
 
 (* [rp acc str i] concatanates [str] [i] number of times. *)
 let rec rp acc str = function
@@ -90,7 +91,7 @@ let quit_game () =
 
 let clear_board () =
   ANSITerminal.erase Screen;
-  ANSITerminal.resize 105 45;
+  ANSITerminal.resize 110 45;
   ANSITerminal.set_cursor 1 1
 
 let calc_tabs_needed total_len cur_len =
@@ -153,7 +154,8 @@ let build_board (st : State.s) : string =
 
 let rec play_turn (st : State.s) msg : unit =
   clear_board ();
-  print_string (build_board st)
+  (* print_string (build_board st) *)
+  print_state st
 
 let rec welcome (st : State.s) msg : unit =
   clear_board ();
