@@ -85,7 +85,7 @@ let rec remove_tile tile row_letter acc = function
         acc
         @ {
             row = row_letter;
-            visible = true;
+            visible = if List.length ts = 1 then false else true;
             tiles = List.filter (fun x -> x <> tile) ts;
           }
           :: t

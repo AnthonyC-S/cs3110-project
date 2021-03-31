@@ -4,10 +4,15 @@ exception Malformed
 
 exception NameTooLong
 
-type move_phrase = string list
+(* type move_phrase = string list *)
+
+type object_phrase = {
+  tiles : string list;
+  row : string;
+}
 
 type command =
-  | Move of move_phrase
+  | Move of object_phrase
   | Undo
   | Reset
   | SortByNumber
@@ -68,7 +73,14 @@ let parse_start str =
       Stdlib.exit 0
   | _ -> raise Malformed
 
-let parse_move str_lst = failwith "parse_move Need To Do"
+let parse_move str_lst =
+  let cmd = String.concat " " str_lst in
+  let length = String.length cmd in
+  Move
+    {
+      tiles = String.split_on_char ' ' (String.sub cmd 0 (length - 5));
+      row = Char.escaped cmd.[length - 1];
+    }
 
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
@@ -89,3 +101,23 @@ let parse str =
       | _ -> raise Malformed
     in
     check_lst str_lst
+
+(* type object_phrase = {tiles: string list; row: string}
+
+   type command = | Draw | Move of object_phrase | End | Quit
+
+   exception Empty
+
+   exception Malformed
+
+   let rec cleanup lst = match lst with |[] -> [] |h::t -> if h = ""
+   then cleanup t else h::cleanup t let parse str = let strlist =
+   String.split_on_char ' ' (String.lowercase_ascii str) in match
+   cleanup strlist with | [] -> raise Empty | h::t -> if h = "draw" then
+   if t = [] then Draw else raise Malformed else if h = "move" then if t
+   = [] then raise Malformed else let cmd = String.concat " " t in let
+   length = String.length cmd in Move {tiles = String.split_on_char ' '
+   (String.sub cmd 0 (length - 5)); row = Char.escaped (String.get cmd
+   (length-1))} else if h = "end" then if t = [] then End else raise
+   Malformed else if h = "quit" then if t = [] then Quit else raise
+   Malformed else raise Malformed *)

@@ -1,9 +1,14 @@
+type object_phrase = {
+  tiles : string list;
+  row : string;
+}
+
 (* type object_phrase = string list type command = object_phrase list *)
 
-type move_phrase = string list
+(* type move_phrase = string list *)
 
 type command =
-  | Move of move_phrase
+  | Move of object_phrase
   | Undo
   | Reset
   | SortByNumber
