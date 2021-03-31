@@ -111,7 +111,9 @@ let parse_move str_lst =
     in
     let from_rack =
       List.filter
-        (fun x -> Str.string_match (Str.regexp "[0-9]+$") x 0)
+        (fun x ->
+          Str.string_match (Str.regexp "[0-9]") x 0
+          && (String.length x = 1 || String.length x = 2))
         to_removed
       |> List.map (fun x -> int_of_string x)
     in
@@ -119,15 +121,15 @@ let parse_move str_lst =
       List.hd
         (List.filter
            (fun x ->
-             Str.string_match (Str.regexp "^[a-zA-Z!@#$%^&?]") x 0)
+             Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) x 0
+             && String.length x = 1)
            to_removed)
     in
     let board =
       List.filter
         (fun x ->
-          Str.string_match
-            (Str.regexp "[a-zA-Z!@#$%^&?][1-9][0-9]?")
-            x 0)
+          Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) x 0
+          && (String.length x = 2 || String.length x = 3))
         to_removed
     in
     let board_split = split_board [] board in
