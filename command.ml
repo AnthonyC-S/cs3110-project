@@ -77,7 +77,6 @@ let parse str =
 
     let check_lst = function
       | [ "quit" ] -> Quit
-      | "quit" :: t -> raise Malformed
       | [ "move" ] -> raise Malformed
       | "move" :: t -> parse_move t
       | [ "undo" ] -> Undo

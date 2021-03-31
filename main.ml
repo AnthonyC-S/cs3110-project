@@ -44,7 +44,13 @@ let top_index_r =
   ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||     1  2  3  4  \
      5  6  7  8  9  10  11  12  13   |\n"
 
+let dash_r = "|" ^ rp "" "-" 103 ^ "|\n"
+
 let bottom_r = "|" ^ String.make 103 '_' ^ "|\n\n"
+
+let rack_index_r =
+  g "Index:"
+  ^ "  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20\n"
 
 let welcome_msg =
   "|\t\t\t\t" ^ ig "  WELCOME TO THE  " ^ r "R " ^ k "U " ^ o "M "
@@ -113,10 +119,23 @@ let rec string_of_board_rows (acc : string) (board : Board.b_row list) :
     string =
   match board with
   | [] -> acc
-  | { row = r1; visible = v1; tiles = t1 } :: t ->
+  | { row = r1; visible = v1; tiles = t1 }
+    :: { row = r2; visible = v2; tiles = t2 } :: t ->
+      string_of_board_rows
+        (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1
+        ^ rp "" "\t"
+            (calc_tabs_needed 53
+               (String.length (string_of_tiles "" t1) + 10))
+        ^ "     ||  " ^ r2 ^ ":  " ^ string_of_tiles "" t2
+        ^ rp "" "\t"
+            (calc_tabs_needed 56
+               (String.length (string_of_tiles "" t2) + 10))
+        ^ "|\n")
+        t
+  | [ { row = r1; visible = v1; tiles = t1 } ] ->
       string_of_board_rows
         (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1 ^ "\n")
-        t
+        []
 
 let build_board (st : State.s) : string =
   let cur_player = get_current_name st.current_turn st.players in
@@ -125,9 +144,11 @@ let build_board (st : State.s) : string =
   let turn_r = turn_r cur_player tabs_for_turn in
   let pile_size = string_of_int (Stack.length st.t_stack) in
   let pile_r = pile_r pile_size in
-  let dash_r = "|" ^ rp "" "-" 103 ^ "|\n" in
+  let cur_rack = get_current_rack st.current_turn st.players in
   top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
   ^ string_of_board_rows "" st.current_board
+  ^ bottom_r ^ rack_index_r ^ "        "
+  ^ string_of_tiles "" cur_rack
   ^ "\n\n\n"
 
 let rec play_turn (st : State.s) msg : unit =
