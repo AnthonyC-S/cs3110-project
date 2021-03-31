@@ -34,42 +34,87 @@ let player_tests = []
 (* Start of board tests.*)
 (*****************************************************************)
 
-let validjokergroup = [(make_t "T" 1 Red);(make_t "T" 1 Blue); (make_t "J" 1 Black); (make_t "T" 1 Orange)]
-let validjokerrun = [(make_t "T" 5 Red);(make_t "J" 6 Red); (make_t "T" 7 Red); (make_t "T" 8 Red)]
-let invalidgroup = [(make_t "T" 2 Red);(make_t "T" 2 Black); (make_t "T" 2 Blue); (make_t "T" 2 Black)]
-let invalidrun = [(make_t "T" 1 Red);(make_t "T" 2 Red); (make_t "T" 3 Red); (make_t "T" 5 Red)]
-let board = init_board()
+let validjokergroup =
+  [
+    make_t "T" 1 Red;
+    make_t "T" 1 Blue;
+    make_t "J" 1 Black;
+    make_t "T" 1 Orange;
+  ]
+
+let validjokerrun =
+  [
+    make_t "T" 5 Red;
+    make_t "J" 6 Red;
+    make_t "T" 7 Red;
+    make_t "T" 8 Red;
+  ]
+
+let invalidgroup =
+  [
+    make_t "T" 2 Red;
+    make_t "T" 2 Black;
+    make_t "T" 2 Blue;
+    make_t "T" 2 Black;
+  ]
+
+let invalidrun =
+  [
+    make_t "T" 1 Red;
+    make_t "T" 2 Red;
+    make_t "T" 3 Red;
+    make_t "T" 5 Red;
+  ]
+
+let board = init_board ()
+
 let board2 = add_tile (make_t "T" 1 Red) "B" [] board
+
 let board3 = add_tile (make_t "T" 1 Orange) "B" [] board2
 
 let board4 = add_tile (make_t "T" 1 Blue) "B" [] board3
+
 let board5 = add_tile (make_t "T" 1 Black) "B" [] board4
+
 let board6 = add_tile (make_t "T" 3 Black) "G" [] board5
 
+let add_tile_test
+    (name : string)
+    (tile : t)
+    (row : string)
+    (board : b)
+    (expected_output : b) =
+  name >:: fun _ ->
+  assert_equal expected_output (add_tile tile row [] board)
 
-let add_tile_test (name : string) (tile : t) (row : string) 
-(board : b) (expected_output : b) = 
-  name >:: fun _ -> assert_equal expected_output (add_tile tile row [] board)
-let remove_tile_test (name : string) (tile : t) (row : string) 
-(board : b) (expected_output : b) = 
-  name >:: fun _ -> assert_equal expected_output (remove_tile tile row [] board)
+let remove_tile_test
+    (name : string)
+    (tile : t)
+    (row : string)
+    (board : b)
+    (expected_output : b) =
+  name >:: fun _ ->
+  assert_equal expected_output (remove_tile tile row [] board)
 
 (*Testing for validity of groups and runs*)
-let valid_board_test (name : string) (board : b) (expected_output : bool) = 
-  name >:: fun _ -> assert_equal expected_output (valid_board true board)
-
+let valid_board_test
+    (name : string)
+    (board : b)
+    (expected_output : bool) =
+  name >:: fun _ -> assert_equal expected_output (valid_board board)
 
 (*Testing adding/removing tiles from board*)
 
-let board_tests = [
-  add_tile_test "Add Red 1 tile to empty board" (make_t "T" 1 Red) "B" board board2;
-  remove_tile_test "Remove Red 1 tile" (make_t "T" 1 Red) "B" board2 board;
-  valid_board_test "Valid board with one group" board5 true;
-  valid_board_test "Empty board" board true;
-  valid_board_test "One valid group, one invalid" board6 false;
-
-
-]
+let board_tests =
+  [
+    add_tile_test "Add Red 1 tile to empty board" (make_t "T" 1 Red) "B"
+      board board2;
+    remove_tile_test "Remove Red 1 tile" (make_t "T" 1 Red) "B" board2
+      board;
+    valid_board_test "Valid board with one group" board5 true;
+    valid_board_test "Empty board" board true;
+    valid_board_test "One valid group, one invalid" board6 false;
+  ]
 
 (*****************************************************************)
 (* Start of state tests.*)
