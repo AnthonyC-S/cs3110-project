@@ -28,6 +28,10 @@ let n_lst = List.init 13 (( + ) 1)
     to represent unassigned Jokers. *)
 let c_lst = [ Blue; Orange; Red; Black ]
 
+let s =
+  List.init 14 (( + ) 1)
+  |> List.map (fun i -> string_of_int i ^ if i < 10 then "  " else " ")
+
 let make_t t n c =
   match t with
   | "T" -> Tile { number = n; color = c }

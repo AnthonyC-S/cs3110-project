@@ -1,6 +1,7 @@
-type object_phrase = {
-  tiles : string list;
-  row : string;
+type move_phrase = {
+  from_board : (string * int) list;
+  from_rack : int list;
+  to_row : string;
 }
 
 (* type object_phrase = string list type command = object_phrase list *)
@@ -8,7 +9,7 @@ type object_phrase = {
 (* type move_phrase = string list *)
 
 type command =
-  | Move of object_phrase
+  | Move of move_phrase
   | Undo
   | Reset
   | SortByNumber

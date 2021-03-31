@@ -34,4 +34,8 @@ val move_from_rack : s -> int -> string -> s
 
 val get_current_player : int -> Player.p list -> Tile.t list
 
+val sort_rack_by_color : s -> s
+
+val sort_rack_by_number : s -> s
+
 val end_turn : s -> s

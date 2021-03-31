@@ -5,6 +5,7 @@
 #load "board.cmo";;
 #load "player.cmo";;
 #load "state.cmo";;
+#load "str.cma"
 open Tile
 open Board
 open Player

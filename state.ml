@@ -212,6 +212,20 @@ let draw (st : s) : s =
       add_to_rack st.current_turn st.players (draw_tile st.t_stack);
   }
 
+let sort_rack_by_color st =
+  let cur_player = get_cur_player st in
+  let new_player =
+    { cur_player with rack = sort_by_color cur_player.rack }
+  in
+  { st with players = new_player :: get_other_players st }
+
+let sort_rack_by_number st =
+  let cur_player = get_cur_player st in
+  let new_player =
+    { cur_player with rack = sort_by_number cur_player.rack }
+  in
+  { st with players = new_player :: get_other_players st }
+
 let check_valid_board st = valid_board st.current_board
 
 let update_current_turn st =

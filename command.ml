@@ -1,3 +1,5 @@
+open Str
+
 exception BlankInput
 
 exception Malformed
@@ -6,13 +8,14 @@ exception NameTooLong
 
 (* type move_phrase = string list *)
 
-type object_phrase = {
-  tiles : string list;
-  row : string;
+type move_phrase = {
+  from_board : (string * int) list;
+  from_rack : int list;
+  to_row : string;
 }
 
 type command =
-  | Move of object_phrase
+  | Move of move_phrase
   | Undo
   | Reset
   | SortByNumber
@@ -73,14 +76,63 @@ let parse_start str =
       Stdlib.exit 0
   | _ -> raise Malformed
 
+(* let rec get_from_rack board_acc rack_acc = function | [] ->
+   {board=to_row = List.filter (fun x -> String.length x = 1); rack =
+   rack_acc; bo | h:: t -> try get_from_rack ((int_of_string h) :: acc)
+   t with _ -> let parse_move str_lst = let to_removed = List.filter
+   (fun x -> x <> "to") str_lst in let rack = List.filter
+   (Str.string_match (Str.regexp "[0-9]+$") to_removed 0)
+
+   let cmd = String.concat " " str_lst in let length = String.length cmd
+   in let move_rec = Move { tiles = String.split_on_char ' ' (String.sub
+   cmd 0 (length - 5)); row = Char.escaped cmd.[length - 1]; } in *)
+
+let rec split_board (acc : (string * int) list) = function
+  | [] -> acc
+  | h :: t ->
+      if String.length h = 2 then
+        split_board
+          ((String.make 1 h.[0], int_of_string (String.make 1 h.[1]))
+          :: acc)
+          t
+      else if String.length h = 3 then
+        split_board
+          ((String.make 1 h.[0], int_of_string (String.sub h 1 2))
+          :: acc)
+          t
+      else raise Malformed
+
 let parse_move str_lst =
-  let cmd = String.concat " " str_lst in
-  let length = String.length cmd in
-  Move
-    {
-      tiles = String.split_on_char ' ' (String.sub cmd 0 (length - 5));
-      row = Char.escaped cmd.[length - 1];
-    }
+  try
+    let to_removed =
+      if List.exists (fun x -> x = "to") str_lst then
+        List.filter (fun x -> x <> "to") str_lst
+      else raise Malformed
+    in
+    let from_rack =
+      List.filter
+        (fun x -> Str.string_match (Str.regexp "[0-9]+$") x 0)
+        to_removed
+      |> List.map (fun x -> int_of_string x)
+    in
+    let to_row =
+      List.hd
+        (List.filter
+           (fun x ->
+             Str.string_match (Str.regexp "^[a-zA-Z!@#$%^&?]") x 0)
+           to_removed)
+    in
+    let board =
+      List.filter
+        (fun x ->
+          Str.string_match
+            (Str.regexp "[a-zA-Z!@#$%^&?][1-9][0-9]?")
+            x 0)
+        to_removed
+    in
+    let board_split = split_board [] board in
+    Move { from_board = board_split; from_rack; to_row }
+  with _ -> raise Malformed
 
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput

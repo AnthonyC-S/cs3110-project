@@ -9,16 +9,28 @@ let rec rp acc str = function
   | 0 -> acc
   | i -> rp (str ^ acc) str (i - 1)
 
-(* black *)
-let k s = "\027[38;5;8;1m" ^ s ^ "\027[0m"
+(* black on white *)
+let kw s = "\027[38;5;0;1m\027[48;5;15;1m" ^ s ^ "\027[0m\027[0m"
 
-(* red *)
+(* red on white *)
+let rw s = "\027[38;5;9;1m\027[48;5;15;1m" ^ s ^ "\027[0m"
+
+(* orange on white *)
+let ow s = "\027[38;5;208;1m\027[48;5;15;1m" ^ s ^ "\027[0m"
+
+(* blue on white*)
+let bw s = "\027[38;5;26;1m\027[48;5;15;1m" ^ s ^ "\027[0m"
+
+(* black*)
+let k s = "\027[38;5;16;1m" ^ s ^ "\027[0m"
+
+(* red*)
 let r s = "\027[38;5;9;1m" ^ s ^ "\027[0m"
 
-(* orange *)
+(* orange*)
 let o s = "\027[38;5;208;1m" ^ s ^ "\027[0m"
 
-(* blue *)
+(* blue*)
 let b s = "\027[38;5;033;1m" ^ s ^ "\027[0m"
 
 (* italic green *)
@@ -30,9 +42,16 @@ let g s = "\027[38;5;70m" ^ s ^ "\027[0m"
 (* [ip] is short for input and is frequently used before a read_line. *)
 let ip : string = g "  > "
 
-let top_r = " " ^ String.make 103 '_' ^ " \n"
+let top_r = String.make 105 '_' ^ " \n"
 
-let empty_r = "|\t\t\t\t\t\t\t\t\t\t\t\t\t|\n"
+let center_str str =
+  let str_len = String.length str in
+  let spaces_needed = 103 - str_len in
+  let space = String.make (spaces_needed / 2) ' ' in
+  if spaces_needed mod 2 = 0 then "|" ^ space ^ str ^ space ^ "|\n"
+  else "|" ^ space ^ str ^ space ^ " |\n"
+
+let empty_r = center_str ""
 
 let turn_r cur_player tab_n =
   "|  " ^ g "Current Turn: " ^ cur_player ^ rp "" "\t" tab_n ^ "|\n"
@@ -45,27 +64,36 @@ let top_index_r =
   ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||     1  2  3  4  \
      5  6  7  8  9  10  11  12  13   |\n"
 
-let dash_r = "|" ^ rp "" "-" 103 ^ "|\n"
+let dash_r = "|" ^ String.make 103 '-' ^ "|\n"
 
 let bottom_r = "|" ^ String.make 103 '_' ^ "|\n\n"
 
-let rack_index_r =
-  g "Index:"
-  ^ "  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20\n"
+(* [rack_index_r t_lst] gives the rack index string that is equal in
+   length to size of rack [t_lst]. Accounts for spacing needed between
+   numbers single digit numbers vs. double digit numbers. *)
+let rec rack_index_r t_lst =
+  g "Index:  "
+  ^ (List.init (List.length t_lst) (( + ) 1)
+    |> List.map (fun i ->
+           string_of_int i ^ if i < 10 then "  " else " ")
+    |> String.concat "")
+  ^ "\n"
 
 let welcome_msg =
-  "|\t\t\t\t" ^ ig "  WELCOME TO THE  " ^ r "R " ^ k "U " ^ o "M "
-  ^ b "M " ^ r "I " ^ k "K " ^ o "U " ^ b "B" ^ ig "  GAME    "
-  ^ "\t\t\t\t|\n"
+  "|" ^ String.make 28 ' '
+  ^ ig " 🐫 WELCOME TO THE  "
+  ^ rw "C" ^ " " ^ kw "A" ^ " " ^ ow "M" ^ " " ^ bw "L" ^ " " ^ kw "K"
+  ^ " " ^ ow "U" ^ " " ^ bw "B" ^ ig "  GAME  🐫   "
+  ^ String.make 29 ' ' ^ "|\n" ^ empty_r ^ "|" ^ String.make 38 ' '
+  ^ ig "Based on the game Rummikub"
+  ^ String.make 39 ' ' ^ "|\n"
 
 let developed_by_msg =
-  "|"
-  ^ g
-      "\t\t     Developed by Anthony Coffin-Schmitt, Mina Huh, and \
-       Christy Song"
-  ^ "\t\t\t|\n|" ^ "\t\t\t\t"
-  ^ g "        For CS 3110, Spring 2021"
-  ^ "\t\t\t\t\t|\n"
+  "|" ^ String.make 20 ' '
+  ^ g "Developed by Anthony Coffin-Schmitt, Mina Huh, and Christy Song"
+  ^ String.make 20 ' ' ^ "|\n" ^ "|" ^ String.make 39 ' '
+  ^ g "For CS 3110, Spring 2021"
+  ^ String.make 40 ' ' ^ "|\n"
 
 let welcome_board =
   top_r ^ rp "" empty_r 6 ^ welcome_msg ^ rp "" empty_r 4
@@ -97,27 +125,26 @@ let clear_board () =
 let calc_tabs_needed total_len cur_len =
   (total_len - cur_len + ((total_len - cur_len) mod 8)) / 8
 
-let space_n i =
-  if i = 10 || i = 11 || i = 12 || i = 13 then " " else "  "
+let space i = if i = 10 || i = 11 || i = 12 || i = 13 then " " else "  "
 
-let convert_n i = string_of_int i ^ space_n i
+let convert_n i = string_of_int i ^ space i
 
-let convert_tile (tile : Tile.t) =
+let string_of_tile tile =
   match tile with
-  | Tile { number = i; color = Blue } -> b (convert_n i)
-  | Tile { number = i; color = Orange } -> o (convert_n i)
-  | Tile { number = i; color = Red } -> r (convert_n i)
-  | Tile { number = i; color = Black } -> k (convert_n i)
+  | Tile { number = i; color = Blue } -> bw (string_of_int i) ^ space i
+  | Tile { number = i; color = Orange } ->
+      ow (string_of_int i) ^ space i
+  | Tile { number = i; color = Red } -> rw (string_of_int i) ^ space i
+  | Tile { number = i; color = Black } -> kw (string_of_int i) ^ space i
   | Tile { number = i; color = None } -> ""
-  | Joker _ -> "J  "
+  | Joker _ -> kw "J" ^ "  "
 
-let rec string_of_tiles (acc : string) (tiles : Tile.t list) : string =
+let rec string_of_tiles acc tiles =
   match tiles with
-  | [] -> acc
-  | h :: t -> string_of_tiles (acc ^ convert_tile h) t
+  | [] -> acc ^ "\027[0m"
+  | h :: t -> string_of_tiles (acc ^ string_of_tile h) t
 
-let rec string_of_board_rows (acc : string) (board : Board.b_row list) :
-    string =
+let rec string_of_board_rows acc (board : Board.b_row list) =
   match board with
   | [] -> acc
   | { row = r1; visible = v1; tiles = t1 }
@@ -138,7 +165,7 @@ let rec string_of_board_rows (acc : string) (board : Board.b_row list) :
         (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1 ^ "\n")
         []
 
-let build_board (st : State.s) : string =
+let build_board st =
   let cur_player = get_current_name st.current_turn st.players in
   let name_length = String.length cur_player in
   let tabs_for_turn = calc_tabs_needed 107 (name_length + 17) in
@@ -148,16 +175,45 @@ let build_board (st : State.s) : string =
   let cur_rack = get_current_rack st.current_turn st.players in
   top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
   ^ string_of_board_rows "" st.current_board
-  ^ bottom_r ^ rack_index_r ^ "        "
+  ^ bottom_r ^ rack_index_r cur_rack ^ "        "
   ^ string_of_tiles "" cur_rack
   ^ "\n\n\n"
 
-let rec play_turn (st : State.s) msg : unit =
+let rec play_turn st (msg : string) =
   clear_board ();
-  (* print_string (build_board st) *)
-  print_state st
+  print_string (build_board st);
+  print_state st;
+  (* print_string (g msg); *)
+  match read_line () with
+  | exception End_of_file -> ()
+  | str -> (
+      try
+        let command = parse str in
+        commands command st
+      with Malformed ->
+        play_turn st
+          ("Did you enter the command correctly? Type \"help\" for \
+            commands." ^ ip))
 
-let rec welcome (st : State.s) msg : unit =
+and commands command st =
+  match command with
+  | Quit -> quit_game ()
+  | Undo -> play_turn (undo_move st) ("Went back one move." ^ ip)
+  | Move m -> play_turn st "Need to implment Move"
+  | Reset -> play_turn (reset_turn st) ("Reset to start of turn" ^ ip)
+  | SortByColor ->
+      play_turn (sort_rack_by_color st) ("Sorted by color.\n" ^ ip)
+  | SortByNumber ->
+      play_turn (sort_rack_by_number st) ("Sorted by number.\n" ^ ip)
+  | Draw ->
+      play_turn
+        (reset_turn st |> draw)
+        ("Drawed tile from pile. Type \"end turn\".\n" ^ ip)
+  | EndTurn ->
+      play_turn (end_turn st) ("Starting next players turn." ^ ip)
+  | Help -> play_turn st (game_commands ^ ip)
+
+let rec welcome st msg =
   clear_board ();
   print_string welcome_board;
   print_string msg;
@@ -168,7 +224,7 @@ let rec welcome (st : State.s) msg : unit =
   match read_line () with
   | input ->
       if input = "play" || input = "p" then
-        play_turn st "Enter your command to play."
+        play_turn st ("  Enter your command to play.\n  " ^ ip)
       else if input = "quit" then quit_game ()
       else welcome st game_commands
 
@@ -194,14 +250,15 @@ let rec game_start str =
 (* [main] is the initial welcome screen and has player input in number
    of players and player names to start a new game. *)
 let main () =
-  ANSITerminal.resize 105 45;
+  ANSITerminal.resize 107 45;
   ANSITerminal.set_cursor 1 1;
   ANSITerminal.erase Screen;
   print_string
     (welcome_board
-   ^ "  Enter the number of players (2 or 4) and, optionally, the \
-      player names. For example:\n" ^ ip
-   ^ "4 Clarkson Gries Dijkstra Turing\n" ^ ip);
+    ^ g
+        "  Enter the number of players (2 or 4) and, optionally, the \
+         player names. For example:\n"
+    ^ ip ^ "4 Clarkson Gries Dijkstra Turing\n" ^ ip);
   match read_line () with init_game -> game_start init_game
 
 (* Execute the game engine. *)
