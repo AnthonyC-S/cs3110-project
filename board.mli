@@ -18,7 +18,6 @@ val add_tile :
 val remove_tile :
   Tile.t -> string -> b_row list -> b_row list -> b_row list
 
-val valid_group : Tile.t list -> bool
 
 (** [valid_board acc board] is the result of removing a tile from the
     board *)
