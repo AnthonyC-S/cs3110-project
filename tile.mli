@@ -75,3 +75,5 @@ val sort_by_color : t list -> t list
 val sort_by_number : t list -> t list
 
 val tiles_of_string_lst : string list -> t list -> string list
+
+val get_tile_of_index : int -> 'a list -> 'a

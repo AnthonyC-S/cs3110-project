@@ -6,6 +6,8 @@ type p = {
   name : string;
   number : int;
   played_valid_meld : bool;
+  meld_count : t list;
+  past_meld_counts : t list list;
   rack : rack;
   past_racks : rack list;
   score : int;
@@ -23,6 +25,8 @@ let rec make_players acc stack = function
            name;
            number;
            played_valid_meld = false;
+           meld_count = [];
+           past_meld_counts = [];
            rack = make_tile_rack stack;
            past_racks = [];
            score = 0;
@@ -76,19 +80,14 @@ let player_to_update turn player_lst =
 (* Called from State.ml when player draws a new tile. *)
 let add_to_rack turn player_lst tile =
   let update_player = player_to_update turn player_lst in
-  {
-    update_player with
-    rack = List.sort compare (tile :: update_player.rack);
-  }
+  { update_player with rack = tile :: update_player.rack }
   :: List.filter (fun x -> x <> update_player) player_lst
 
-let remove_from_rack turn player_lst index =
+let remove_from_rack turn index player_lst =
   let update_player = player_to_update turn player_lst in
   {
     update_player with
-    rack =
-      List.sort compare
-        (List.filteri (fun i _ -> i <> index - 1) update_player.rack);
+    rack = List.filteri (fun i _ -> i <> index - 1) update_player.rack;
   }
   :: List.filter (fun x -> x <> update_player) player_lst
 
@@ -113,3 +112,16 @@ let get_past_racks turn player_lst =
 
 let get_current_score turn player_lst =
   (current_player turn player_lst).score
+
+let meld_sum player =
+  List.fold_left ( + ) 0 (numbers_of_t [] player.meld_count)
+
+let check_for_valid_meld (player : p) : bool =
+  meld_sum player >= 30 || meld_sum player = 0
+
+(* Note, requires that the board is valid and this is called at
+   [end_turn]. *)
+let update_played_valid_meld player : p =
+  if (not player.played_valid_meld) && meld_sum player >= 30 then
+    { player with played_valid_meld = true }
+  else player

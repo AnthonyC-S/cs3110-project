@@ -37,7 +37,8 @@ let make_t t n c =
 let joker = make_t "J" 100 None
 
 let update_joker n c = function
-  | Joker t -> make_t "J" n c
+  | Joker t ->
+      if n < 1 || n > 13 then raise NotAJoker else make_t "J" n c
   | Tile t -> raise NotAJoker
 
 (*[make_tile_aux acc n_lst c] is a helper to [make_tile_lst]. [acc] is
@@ -207,3 +208,8 @@ let rec tiles_of_string_lst acc = function
   | h :: t ->
       let new_acc = tile_of_string h :: acc in
       tiles_of_string_lst new_acc t
+
+let get_tile_of_index index t_lst =
+  match List.filteri (fun i _ -> i = index - 1) t_lst with
+  | h :: t -> h
+  | [] -> raise InvalidTile

@@ -1,32 +1,37 @@
-(* type s *)
-
-(*new*)
 type s = {
   current_turn : int;
   current_board : Board.b;
-  past_boards : Board.b list;
   players : Player.p list;
+  past_boards : Board.b list;
   t_stack : Tile.t Stack.t;
 }
 
+exception NotValidIndex
+
+exception HaveNotPlayedMeld
+
+exception InvalidBoardSets
+
 val init_state : (int * string) list -> s
 
-val current_turn : s -> int
+val undo_move : s -> s
 
-val current_board : s -> Board.b
+val reset_turn : s -> s
 
-val past_boards : s -> Board.b list
+val move_from_rack : s -> int -> string -> s
 
-val players : s -> Player.p list
+val multiple_moves_from_rack : s -> int list -> string -> s
 
-val t_stack : s -> Tile.t Stack.t
+val assign_joker_in_rack : s -> int -> Tile.color -> int -> s
 
-val empty_past_boards : s -> s
+val move_from_board : s -> string -> int -> string -> s
 
-val update_past_boards : s -> s
+val multiple_moves_from_board : s -> (int * string) list -> string -> s
 
-val undo_past_move : s -> s
+val draw : s -> s
 
 val move_from_rack : s -> int -> string -> s
 
 val get_current_player : int -> Player.p list -> Tile.t list
+
+val end_turn : s -> s

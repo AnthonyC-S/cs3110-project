@@ -1,12 +1,12 @@
 open Tile
 
-type b = b_row list
-
-and b_row = {
+type b_row = {
   row : string;
   visible : bool;
   tiles : t list;
 }
+
+type b = b_row list
 
 exception NotValidBoardRow
 
@@ -43,8 +43,34 @@ let rec add_tile tile row_letter acc = function
         @ {
             row = row_letter;
             visible = true;
-            (* test sorting later, need to fix adding sort Joker*)
-            tiles = sort_by_number (tile :: ts);
+            (* I had to remove the sort_by_number applied to (tile ::
+               ts) here because when there are multiple tiles to move,
+               changing the order messes up the index of the rack it
+               will move the wrong tiles after the correct first tile. *)
+            tiles = tile :: ts;
+          }
+          :: t
+      else
+        add_tile tile row_letter
+          (acc @ [ { row = r; visible = v; tiles = ts } ])
+          t
+
+let rec add_tile_by_index tile row_letter acc index = function
+  | [] -> raise NotValidBoardRow
+  | { row = r; visible = v; tiles = ts } :: t ->
+      if r = row_letter then
+        acc
+        @ {
+            row = row_letter;
+            visible = true;
+            (* I had to remove the sort_by_number applied to (tile ::
+               ts) here because when there are multiple tiles to move,
+               changing the order messes up the index of the rack it
+               will move the wrong tiles after the correct first tile. *)
+            tiles =
+              List.filteri (fun i _ -> i < index - 1) ts
+              @ [ tile ]
+              @ List.filteri (fun i _ -> i >= index - 1) ts;
           }
           :: t
       else
@@ -101,8 +127,15 @@ let rec valid_rows acc tile_rows =
         ((List.length h = 0 || valid_run h || valid_group h) && acc)
         t
 
-let valid_board acc board =
+let valid_board board =
   let tile_rows = tiles_of_board board in
-  valid_rows acc tile_rows
+  valid_rows true tile_rows
 
 exception EmptyBoard
+
+let rec sort_board_by_num acc = function
+  | [] -> acc
+  | h :: t ->
+      sort_board_by_num
+        (acc @ [ { h with tiles = sort_by_number h.tiles } ])
+        t
