@@ -97,7 +97,7 @@ let welcome_msg =
 let developed_by_msg =
   "|" ^ String.make 20 ' '
   ^ g "Developed by Anthony Coffin-Schmitt, Mina Huh, and Christy Song"
-  ^ String.make 20 ' ' ^ "|\n" ^ "|" ^ String.make 39 ' '
+  ^ String.make 20 ' ' ^ "|\n|" ^ String.make 39 ' '
   ^ g "For CS 3110, Spring 2021"
   ^ String.make 40 ' ' ^ "|\n"
 
@@ -221,7 +221,8 @@ and commands command st =
             (multiple_moves_from_board m.from_board m.to_row st)
             ("  Completed move, what next?\n" ^ ip)
     | Reset ->
-        play_turn (reset_turn st) ("  Reset to start of turn.\n" ^ ip)
+        play_turn (reset_turn st)
+          ("  Board and rack have been reset.\n" ^ ip)
     | SortByColor ->
         play_turn (sort_rack_by_color st) ("  Sorted by color.\n" ^ ip)
     | SortByNumber ->
