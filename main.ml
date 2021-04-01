@@ -54,11 +54,17 @@ let center_str str =
 
 let empty_r = center_str ""
 
-let turn_r cur_player tab_n =
-  "|  " ^ g "Current Turn: " ^ cur_player ^ rp "" "\t" tab_n ^ "|\n"
+let turn_r cur_player =
+  "|  " ^ g "Turn:  " ^ cur_player
+  ^ String.make (94 - String.length cur_player) ' '
+  ^ "|\n"
 
 let pile_r pile_size =
-  "|     " ^ g "Pile Size: " ^ pile_size ^ rp "" "\t" 11 ^ "|\n"
+  let pile_size_str = string_of_int pile_size in
+  "|  " ^ g "Pile:  " ^ pile_size_str
+  ^
+  if pile_size < 10 then String.make 93 ' ' ^ "|\n"
+  else String.make 92 ' ' ^ "|\n"
 
 let top_index_r =
   "| " ^ g "Index:"
@@ -92,7 +98,7 @@ let welcome_msg =
 let developed_by_msg =
   "|" ^ String.make 20 ' '
   ^ g "Developed by Anthony Coffin-Schmitt, Mina Huh, and Christy Song"
-  ^ String.make 20 ' ' ^ "|\n" ^ "|" ^ String.make 39 ' '
+  ^ String.make 20 ' ' ^ "|\n|" ^ String.make 39 ' '
   ^ g "For CS 3110, Spring 2021"
   ^ String.make 40 ' ' ^ "|\n"
 
@@ -115,7 +121,7 @@ let game_commands : string =
   ^ "help              Display game play commands.\n\n"
 
 let quit_game () =
-  print_string (g "  Thank you for playing, goodbye!\n\n");
+  print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
 
 let clear_board () =
@@ -123,12 +129,7 @@ let clear_board () =
   ANSITerminal.resize 110 45;
   ANSITerminal.set_cursor 1 1
 
-let calc_tabs_needed total_len cur_len =
-  (total_len - cur_len + ((total_len - cur_len) mod 8)) / 8
-
 let space i = if i = 10 || i = 11 || i = 12 || i = 13 then " " else "  "
-
-let convert_n i = string_of_int i ^ space i
 
 let string_of_tile tile =
   match tile with
@@ -172,13 +173,10 @@ let rec string_of_board_rows acc (board : Board.b_row list) =
 
 let build_board st msg =
   let cur_player = get_current_name st.current_turn st.players in
-  let name_length = String.length cur_player in
-  let tabs_for_turn = calc_tabs_needed 107 (name_length + 17) in
-  let turn_r = turn_r cur_player tabs_for_turn in
-  let pile_size = string_of_int (Stack.length st.t_stack) in
-  let pile_r = pile_r pile_size in
+  let turn_r = turn_r cur_player in
+  let pile_r = pile_r (Stack.length st.t_stack) in
   let cur_rack = get_current_rack st.current_turn st.players in
-  top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
+  top_r ^ turn_r ^ pile_r ^ dash_r ^ top_index_r
   ^ string_of_board_rows "" st.current_board
   ^ bottom_r ^ rack_index_r cur_rack ^ g " Rack:  "
   ^ string_of_tiles "" cur_rack
@@ -213,23 +211,26 @@ and commands command st =
           play_turn st ("  No moves to go back to.\n" ^ ip)
         else play_turn (undo_move st) ("  Went back one move.\n" ^ ip)
     | Move m ->
-        if m.from_rack = [] && m.from_board = [] then
-          play_turn st ("  No moves to make." ^ ip)
-        else if m.from_rack <> [] && m.from_board <> [] then
-          play_turn
-            (multiple_moves_from_board m.from_board m.to_row st
-            |> multiple_moves_from_rack m.from_rack m.to_row)
-            ("  Completed move, what next?\n" ^ ip)
-        else if m.from_rack <> [] then
-          play_turn
-            (multiple_moves_from_rack m.from_rack m.to_row st)
-            ("  Completed move, what next?\n" ^ ip)
-        else
-          play_turn
-            (multiple_moves_from_board m.from_board m.to_row st)
-            ("  Completed move, what next?\n" ^ ip)
+        play_turn
+          (multiple_moves_from_board m.from_board m.to_row st
+          |> multiple_moves_from_rack m.from_rack m.to_row)
+          ("  Completed move, what next?\n" ^ ip)
+        (* if m.from_rack = [] && m.from_board = [] then play_turn st ("
+           No moves to make." ^ ip) else if m.from_rack <> [] &&
+           m.from_board <> [] then play_turn (multiple_moves_from_board
+           m.from_board m.to_row st |> multiple_moves_from_rack
+           m.from_rack m.to_row) (" Completed move, what next?\n" ^ ip)
+           else if m.from_rack <> [] then play_turn
+           (multiple_moves_from_rack m.from_rack m.to_row st) ("
+           Completed move, what next?\n" ^ ip) else play_turn
+           (multiple_moves_from_board m.from_board m.to_row st) ("
+           Completed move, what next?\n" ^ ip) *)
     | Reset ->
-        play_turn (reset_turn st) ("  Reset to start of turn.\n" ^ ip)
+        if st.past_boards = [] then
+          play_turn st ("  No moves to go back to.\n" ^ ip)
+        else
+          play_turn (reset_turn st)
+            ("  Board and rack have been reset.\n" ^ ip)
     | SortByColor ->
         play_turn (sort_rack_by_color st) ("  Sorted by color.\n" ^ ip)
     | SortByNumber ->
@@ -255,19 +256,29 @@ and commands command st =
           \"reset\".\n" ^ ip)
   | NotValidIndex ->
       play_turn st
-        ("  Could not find the tile you eneterd. Check to make sure \
-          you entered the tile with the correct\n\
+        ("  Could not find the tile you entered. Check if the tile has \
+          the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
   | InvalidTile ->
       play_turn st
-        ("  Could not find the tile you eneterd. Check to make sure \
-          you entered the tile with the correct\n\
+        ("  Could not find the tile you entered. Check if the tile has \
+          the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
   | NotValidBoardRow ->
       play_turn st
         ("  Could not find the row you eneterd. Check the \
           capitalization of the row name. Type \"help\" to see \
           commands.\n" ^ ip)
+  | InvalidMeld ->
+      play_turn st
+        ("  Can not end turn since since you do not have a valid meld, \
+          i.e. 30 points or higher.\n\n\
+         \  You can either play more tiles to make a meld or undo the \
+          tiles and draw to end your turn.\n" ^ ip)
+  | NotEnoughTiles ->
+      play_turn st
+        ("  The pile is empty and there are no tiles left to draw.\n\
+         \  There should be enough tiles to finish the game!\n" ^ ip)
 
 let rec welcome st msg =
   clear_board ();
