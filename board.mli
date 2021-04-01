@@ -1,6 +1,5 @@
 type b_row = {
   row : string;
-  visible : bool;
   tiles : Tile.t list;
 }
 
@@ -14,7 +13,6 @@ val add_tile : Tile.t -> string -> b -> b -> b
 val add_tile_by_index : Tile.t -> string -> b -> int -> b -> b
 
 val remove_tile : Tile.t -> string -> b -> b -> b
-
 
 (** [valid_board acc board] is the result of removing a tile from the
     board *)

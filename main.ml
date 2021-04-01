@@ -61,8 +61,8 @@ let pile_r pile_size =
 
 let top_index_r =
   "| " ^ g "Index:"
-  ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||     1  2  3  4  \
-     5  6  7  8  9  10  11  12  13   |\n"
+  ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||      1  2  3  4  \
+     5  6  7  8  9  10  11  12  13  |\n"
 
 let dash_r = "|" ^ String.make 103 '-' ^ "|\n"
 
@@ -100,7 +100,7 @@ let welcome_board =
   ^ developed_by_msg ^ rp "" empty_r 4 ^ bottom_r
 
 let game_commands : string =
-  g "  Game commands needed to play:\n\n"
+  g "  Game Commands:\n\n"
   ^ ip ^ "move t to r       Moves the tile(s) [t] to board row [r].\n"
   ^ g "  For Example:\n" ^ ip
   ^ "move 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board \
@@ -144,28 +144,32 @@ let rec string_of_tiles acc tiles =
   | [] -> acc ^ "\027[0m"
   | h :: t -> string_of_tiles (acc ^ string_of_tile h) t
 
+(* [get_spaces t_lst] is the number of spaces needed to give a total
+   string length of 43 for each row of the board. Note tile indexes < 9
+   use 3 characters each and indexes > 9 use 4 characters each, i.e. 9*3
+   + 4*4 = 43. *)
+let get_spaces t_lst : int =
+  let lst_len = List.length t_lst in
+  if lst_len < 9 then 43 - (lst_len * 3)
+  else 43 - (27 + ((lst_len - 9) * 4))
+
 let rec string_of_board_rows acc (board : Board.b_row list) =
   match board with
   | [] -> acc
-  | { row = r1; visible = v1; tiles = t1 }
-    :: { row = r2; visible = v2; tiles = t2 } :: t ->
+  | { row = r1; tiles = t1 } :: { row = r2; tiles = t2 } :: t ->
       string_of_board_rows
         (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1
-        ^ rp "" "\t"
-            (calc_tabs_needed 53
-               (String.length (string_of_tiles "" t1) + 10))
-        ^ "     ||  " ^ r2 ^ ":  " ^ string_of_tiles "" t2
-        ^ rp "" "\t"
-            (calc_tabs_needed 56
-               (String.length (string_of_tiles "" t2) + 10))
+        ^ String.make (get_spaces t1) ' '
+        ^ "||  " ^ r2 ^ ":  " ^ string_of_tiles "" t2
+        ^ String.make (get_spaces t2) ' '
         ^ "|\n")
         t
-  | [ { row = r1; visible = v1; tiles = t1 } ] ->
+  | [ { row = r1; tiles = t1 } ] ->
       string_of_board_rows
         (acc ^ "|     " ^ r1 ^ ":  " ^ string_of_tiles "" t1 ^ "\n")
         []
 
-let build_board st =
+let build_board st msg =
   let cur_player = get_current_name st.current_turn st.players in
   let name_length = String.length cur_player in
   let tabs_for_turn = calc_tabs_needed 107 (name_length + 17) in
@@ -175,15 +179,14 @@ let build_board st =
   let cur_rack = get_current_rack st.current_turn st.players in
   top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
   ^ string_of_board_rows "" st.current_board
-  ^ bottom_r ^ rack_index_r cur_rack ^ "        "
+  ^ bottom_r ^ rack_index_r cur_rack ^ g " Rack:  "
   ^ string_of_tiles "" cur_rack
-  ^ "\n\n\n"
+  ^ "\n\n" ^ msg
 
 let rec play_turn st (msg : string) =
   clear_board ();
-  print_string (build_board st);
-  print_state st;
-  (* print_string (g msg); *)
+  print_string (build_board st msg);
+  (* print_state st; print_string ("\n" ^ g msg); *)
   match read_line () with
   | exception End_of_file -> ()
   | str -> (
@@ -192,26 +195,68 @@ let rec play_turn st (msg : string) =
         commands command st
       with Malformed ->
         play_turn st
-          ("Did you enter the command correctly? Type \"help\" for \
-            commands." ^ ip))
+          ("  Did you enter the command correctly? Type \"help\" for \
+            commands.\n" ^ ip))
 
 and commands command st =
-  match command with
-  | Quit -> quit_game ()
-  | Undo -> play_turn (undo_move st) ("Went back one move." ^ ip)
-  | Move m -> play_turn st "Need to implment Move"
-  | Reset -> play_turn (reset_turn st) ("Reset to start of turn" ^ ip)
-  | SortByColor ->
-      play_turn (sort_rack_by_color st) ("Sorted by color.\n" ^ ip)
-  | SortByNumber ->
-      play_turn (sort_rack_by_number st) ("Sorted by number.\n" ^ ip)
-  | Draw ->
-      play_turn
-        (reset_turn st |> draw)
-        ("Drawed tile from pile. Type \"end turn\".\n" ^ ip)
-  | EndTurn ->
-      play_turn (end_turn st) ("Starting next players turn." ^ ip)
-  | Help -> play_turn st (game_commands ^ ip)
+  try
+    match command with
+    | Quit -> quit_game ()
+    | Undo ->
+        if get_past_racks st.current_turn st.players = [] then
+          play_turn st ("  No moves to go back to.\n" ^ ip)
+        else play_turn (undo_move st) ("  Went back one move.\n" ^ ip)
+    | Move m ->
+        if m.from_rack = [] && m.from_board = [] then
+          play_turn st ("  No moves to make." ^ ip)
+        else if m.from_rack <> [] && m.from_board <> [] then
+          play_turn
+            (multiple_moves_from_board m.from_board m.to_row st
+            |> multiple_moves_from_rack m.from_rack m.to_row)
+            ("  Completed move, what next?\n" ^ ip)
+        else if m.from_rack <> [] then
+          play_turn
+            (multiple_moves_from_rack m.from_rack m.to_row st)
+            ("  Completed move, what next?\n" ^ ip)
+        else
+          play_turn
+            (multiple_moves_from_board m.from_board m.to_row st)
+            ("  Completed move, what next?\n" ^ ip)
+    | Reset ->
+        play_turn (reset_turn st) ("  Reset to start of turn.\n" ^ ip)
+    | SortByColor ->
+        play_turn (sort_rack_by_color st) ("  Sorted by color.\n" ^ ip)
+    | SortByNumber ->
+        play_turn (sort_rack_by_number st) ("  Sorted by number.\n" ^ ip)
+    | Draw ->
+        play_turn
+          (* (reset_turn st |> draw) -- Raises error due to trying to
+             reset from an empty list.*)
+          (draw st)
+          ("  Drawed tile from pile. Type \"end turn\".\n" ^ ip)
+    | EndTurn ->
+        play_turn (end_turn st) ("  Starting next players turn.\n" ^ ip)
+    | Help -> play_turn st (game_commands ^ ip)
+  with
+  | HaveNotPlayedMeld ->
+      play_turn st
+        ("  You cannot move board tiles until you have played a 30 \
+          point meld.\n" ^ ip)
+  | InvalidBoardSets ->
+      play_turn st
+        ("  You cannot end turn due to invalid sets on the board.\n\
+         \  Try to fix the invaid sets or go back with \"undo\" / \
+          \"reset\".\n" ^ ip)
+  | NotValidIndex ->
+      play_turn st
+        ("  Could not find the tile you eneterd. Check to make sure \
+          you entered the tile with the correct\n\
+         \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
+  | InvalidTile ->
+      play_turn st
+        ("  Could not find the tile you eneterd. Check to make sure \
+          you entered the tile with the correct\n\
+         \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
 
 let rec welcome st msg =
   clear_board ();
@@ -224,7 +269,7 @@ let rec welcome st msg =
   match read_line () with
   | input ->
       if input = "play" || input = "p" then
-        play_turn st ("  Enter your command to play.\n  " ^ ip)
+        play_turn st ("  Enter your command to play.\n" ^ ip)
       else if input = "quit" then quit_game ()
       else welcome st game_commands
 

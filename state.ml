@@ -35,9 +35,7 @@ type result =
 let update_past_boards st = st.past_boards @ [ st.current_board ]
 
 (* helper for undo_past_move and reset_current_board*)
-let get_fst_elm = function
-  | h :: t -> h
-  | [] -> failwith "Empty past_boards list"
+(* let get_fst_elm : 'a = function | h :: t -> h | [] -> *)
 
 let get_cur_player st = current_player st.current_turn st.players
 
@@ -46,18 +44,18 @@ let get_other_players st =
 
 let undo_move st =
   let cur_player = get_cur_player st in
-  let last_b = get_fst_elm (List.rev st.past_boards) in
-  let last_r = get_fst_elm (List.rev cur_player.past_racks) in
-  let last_meld_count = get_fst_elm (List.rev cur_player.meld_count) in
+  let last_b = List.hd (List.rev st.past_boards) in
+  let last_r = List.hd (List.rev cur_player.past_racks) in
+  let last_meld_count = List.hd (List.rev cur_player.meld_count) in
   let last_past_meld_counts =
-    get_fst_elm (List.rev cur_player.past_meld_counts)
+    List.hd (List.rev cur_player.past_meld_counts)
   in
   let new_player =
     {
       cur_player with
       past_racks =
         List.filter (fun x -> x <> last_r) cur_player.past_racks;
-      rack = get_fst_elm (List.rev cur_player.past_racks);
+      rack = List.hd (List.rev cur_player.past_racks);
       meld_count =
         List.filter
           (fun x -> x <> last_meld_count)
@@ -85,7 +83,7 @@ let reset_turn st =
   let new_player =
     {
       cur_player with
-      rack = get_fst_elm cur_player.past_racks;
+      rack = List.hd cur_player.past_racks;
       past_racks = [];
       meld_count = [];
       past_meld_counts = [];
@@ -93,7 +91,7 @@ let reset_turn st =
   in
   {
     st with
-    current_board = get_fst_elm st.past_boards;
+    current_board = List.hd st.past_boards;
     past_boards = [];
     players = new_player :: get_other_players st;
   }
@@ -133,11 +131,11 @@ let rec get_current_player cp (plst : p list) =
 (*Note, had to do the sort list and reverse order so the higher index
   tiles would be moved first and not mess up the index order other
   tiles. *)
-let rec multiple_moves_from_rack st index_lst row =
+let rec multiple_moves_from_rack index_lst row st =
   match List.rev (List.sort compare index_lst) with
   | [] ->
       { st with current_board = sort_board_by_num [] st.current_board }
-  | h :: t -> multiple_moves_from_rack (move_from_rack st h row) t row
+  | h :: t -> multiple_moves_from_rack t row (move_from_rack st h row)
 
 (* Note, main.ml needs to check if there are any tiles for all moves
    from rack and assign jokers tiles if they are included. If there are
@@ -175,13 +173,14 @@ let move_from_board st from_row index to_row =
     }
 
 (* Note, [multiple_moves_from_board] needs to have the board tiles to
-   move come in as an association list set up as (index, from_row) list. *)
-let rec multiple_moves_from_board st from_lst to_row =
+   move come in as an association list set up as (string * int) list
+   i.e. (from_row * from_index) list. *)
+let rec multiple_moves_from_board from_lst to_row st =
   match List.rev (List.sort compare from_lst) with
   | [] ->
       { st with current_board = sort_board_by_num [] st.current_board }
-  | (i, r) :: t ->
-      multiple_moves_from_board (move_from_board st r i to_row) t to_row
+  | (r, i) :: t ->
+      multiple_moves_from_board t to_row (move_from_board st r i to_row)
 
 (* Note, main.ml needs to check if there are any tiles for all moves
    from the board and assign jokers tiles if they are included. If there

@@ -20,13 +20,13 @@ val reset_turn : s -> s
 
 val move_from_rack : s -> int -> string -> s
 
-val multiple_moves_from_rack : s -> int list -> string -> s
+val multiple_moves_from_rack : int list -> string -> s -> s
 
 val assign_joker_in_rack : s -> int -> Tile.color -> int -> s
 
 val move_from_board : s -> string -> int -> string -> s
 
-val multiple_moves_from_board : s -> (int * string) list -> string -> s
+val multiple_moves_from_board : (string * int) list -> string -> s -> s
 
 val draw : s -> s
 

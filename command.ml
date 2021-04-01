@@ -1,5 +1,3 @@
-open Str
-
 exception BlankInput
 
 exception Malformed
@@ -72,20 +70,10 @@ let parse_start str =
       check_name_len t;
       init_four_players t
   | [ "quit" ] ->
-      print_string "Thank you for playing! Goodby\n\n.";
+      print_string
+        "\n  \027[38;5;70mThank you for playing! Goodbye.\027[0m\n\n";
       Stdlib.exit 0
   | _ -> raise Malformed
-
-(* let rec get_from_rack board_acc rack_acc = function | [] ->
-   {board=to_row = List.filter (fun x -> String.length x = 1); rack =
-   rack_acc; bo | h:: t -> try get_from_rack ((int_of_string h) :: acc)
-   t with _ -> let parse_move str_lst = let to_removed = List.filter
-   (fun x -> x <> "to") str_lst in let rack = List.filter
-   (Str.string_match (Str.regexp "[0-9]+$") to_removed 0)
-
-   let cmd = String.concat " " str_lst in let length = String.length cmd
-   in let move_rec = Move { tiles = String.split_on_char ' ' (String.sub
-   cmd 0 (length - 5)); row = Char.escaped cmd.[length - 1]; } in *)
 
 let rec split_board (acc : (string * int) list) = function
   | [] -> acc
@@ -143,35 +131,18 @@ let parse str =
 
     let check_lst = function
       | [ "quit" ] -> Quit
+      | [ "exit" ] -> Quit
       | [ "move" ] -> raise Malformed
       | "move" :: t -> parse_move t
       | [ "undo" ] -> Undo
       | [ "reset" ] -> Reset
       | [ "color"; "sort" ] -> SortByColor
+      | [ "sort"; "color" ] -> SortByColor
       | [ "number"; "sort" ] -> SortByNumber
+      | [ "sort"; "number" ] -> SortByNumber
       | [ "draw" ] -> Draw
       | [ "end"; "turn" ] -> EndTurn
       | [ "help" ] -> Help
       | _ -> raise Malformed
     in
     check_lst str_lst
-
-(* type object_phrase = {tiles: string list; row: string}
-
-   type command = | Draw | Move of object_phrase | End | Quit
-
-   exception Empty
-
-   exception Malformed
-
-   let rec cleanup lst = match lst with |[] -> [] |h::t -> if h = ""
-   then cleanup t else h::cleanup t let parse str = let strlist =
-   String.split_on_char ' ' (String.lowercase_ascii str) in match
-   cleanup strlist with | [] -> raise Empty | h::t -> if h = "draw" then
-   if t = [] then Draw else raise Malformed else if h = "move" then if t
-   = [] then raise Malformed else let cmd = String.concat " " t in let
-   length = String.length cmd in Move {tiles = String.split_on_char ' '
-   (String.sub cmd 0 (length - 5)); row = Char.escaped (String.get cmd
-   (length-1))} else if h = "end" then if t = [] then End else raise
-   Malformed else if h = "quit" then if t = [] then Quit else raise
-   Malformed else raise Malformed *)
