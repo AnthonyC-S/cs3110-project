@@ -53,11 +53,17 @@ let center_str str =
 
 let empty_r = center_str ""
 
-let turn_r cur_player tab_n =
-  "|  " ^ g "Current Turn: " ^ cur_player ^ rp "" "\t" tab_n ^ "|\n"
+let turn_r cur_player =
+  "|  " ^ g "Turn:  " ^ cur_player
+  ^ String.make (94 - String.length cur_player) ' '
+  ^ "|\n"
 
 let pile_r pile_size =
-  "|     " ^ g "Pile Size: " ^ pile_size ^ rp "" "\t" 11 ^ "|\n"
+  let pile_size_str = string_of_int pile_size in
+  "|  " ^ g "Pile:  " ^ pile_size_str
+  ^
+  if pile_size < 10 then String.make 93 ' ' ^ "|\n"
+  else String.make 92 ' ' ^ "|\n"
 
 let top_index_r =
   "| " ^ g "Index:"
@@ -114,7 +120,7 @@ let game_commands : string =
   ^ "help              Display game play commands.\n\n"
 
 let quit_game () =
-  print_string (g "  Thank you for playing, goodbye!\n\n");
+  print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
 
 let clear_board () =
@@ -122,12 +128,7 @@ let clear_board () =
   ANSITerminal.resize 110 45;
   ANSITerminal.set_cursor 1 1
 
-let calc_tabs_needed total_len cur_len =
-  (total_len - cur_len + ((total_len - cur_len) mod 8)) / 8
-
 let space i = if i = 10 || i = 11 || i = 12 || i = 13 then " " else "  "
-
-let convert_n i = string_of_int i ^ space i
 
 let string_of_tile tile =
   match tile with
@@ -171,13 +172,10 @@ let rec string_of_board_rows acc (board : Board.b_row list) =
 
 let build_board st msg =
   let cur_player = get_current_name st.current_turn st.players in
-  let name_length = String.length cur_player in
-  let tabs_for_turn = calc_tabs_needed 107 (name_length + 17) in
-  let turn_r = turn_r cur_player tabs_for_turn in
-  let pile_size = string_of_int (Stack.length st.t_stack) in
-  let pile_r = pile_r pile_size in
+  let turn_r = turn_r cur_player in
+  let pile_r = pile_r (Stack.length st.t_stack) in
   let cur_rack = get_current_rack st.current_turn st.players in
-  top_r ^ turn_r ^ pile_r ^ empty_r ^ dash_r ^ top_index_r
+  top_r ^ turn_r ^ pile_r ^ dash_r ^ top_index_r
   ^ string_of_board_rows "" st.current_board
   ^ bottom_r ^ rack_index_r cur_rack ^ g " Rack:  "
   ^ string_of_tiles "" cur_rack
