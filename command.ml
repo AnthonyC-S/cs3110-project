@@ -131,9 +131,11 @@ let parse str =
 
     let check_lst = function
       | [ "quit" ] -> Quit
+      | [ "q" ] -> Quit
       | [ "exit" ] -> Quit
       | [ "move" ] -> raise Malformed
       | "move" :: t -> parse_move t
+      | "mv" :: t -> parse_move t
       | [ "undo" ] -> Undo
       | [ "reset" ] -> Reset
       | [ "color"; "sort" ] -> SortByColor
@@ -143,6 +145,7 @@ let parse str =
       | [ "draw" ] -> Draw
       | [ "end"; "turn" ] -> EndTurn
       | [ "help" ] -> Help
+      | [ "h" ] -> Help
       | _ -> raise Malformed
     in
     check_lst str_lst

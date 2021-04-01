@@ -205,24 +205,26 @@ and commands command st =
           play_turn st ("  No moves to go back to.\n" ^ ip)
         else play_turn (undo_move st) ("  Went back one move.\n" ^ ip)
     | Move m ->
-        if m.from_rack = [] && m.from_board = [] then
-          play_turn st ("  No moves to make." ^ ip)
-        else if m.from_rack <> [] && m.from_board <> [] then
-          play_turn
-            (multiple_moves_from_board m.from_board m.to_row st
-            |> multiple_moves_from_rack m.from_rack m.to_row)
-            ("  Completed move, what next?\n" ^ ip)
-        else if m.from_rack <> [] then
-          play_turn
-            (multiple_moves_from_rack m.from_rack m.to_row st)
-            ("  Completed move, what next?\n" ^ ip)
-        else
-          play_turn
-            (multiple_moves_from_board m.from_board m.to_row st)
-            ("  Completed move, what next?\n" ^ ip)
+        play_turn
+          (multiple_moves_from_board m.from_board m.to_row st
+          |> multiple_moves_from_rack m.from_rack m.to_row)
+          ("  Completed move, what next?\n" ^ ip)
+        (* if m.from_rack = [] && m.from_board = [] then play_turn st ("
+           No moves to make." ^ ip) else if m.from_rack <> [] &&
+           m.from_board <> [] then play_turn (multiple_moves_from_board
+           m.from_board m.to_row st |> multiple_moves_from_rack
+           m.from_rack m.to_row) (" Completed move, what next?\n" ^ ip)
+           else if m.from_rack <> [] then play_turn
+           (multiple_moves_from_rack m.from_rack m.to_row st) ("
+           Completed move, what next?\n" ^ ip) else play_turn
+           (multiple_moves_from_board m.from_board m.to_row st) ("
+           Completed move, what next?\n" ^ ip) *)
     | Reset ->
-        play_turn (reset_turn st)
-          ("  Board and rack have been reset.\n" ^ ip)
+        if st.past_boards = [] then
+          play_turn st ("  No moves to go back to.\n" ^ ip)
+        else
+          play_turn (reset_turn st)
+            ("  Board and rack have been reset.\n" ^ ip)
     | SortByColor ->
         play_turn (sort_rack_by_color st) ("  Sorted by color.\n" ^ ip)
     | SortByNumber ->
@@ -248,13 +250,13 @@ and commands command st =
           \"reset\".\n" ^ ip)
   | NotValidIndex ->
       play_turn st
-        ("  Could not find the tile you eneterd. Check to make sure \
-          you entered the tile with the correct\n\
+        ("  Could not find the tile you entered. Check if the tile has \
+          the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
   | InvalidTile ->
       play_turn st
-        ("  Could not find the tile you eneterd. Check to make sure \
-          you entered the tile with the correct\n\
+        ("  Could not find the tile you entered. Check if the tile has \
+          the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
 
 let rec welcome st msg =
