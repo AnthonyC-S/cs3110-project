@@ -6,13 +6,14 @@ exception NameTooLong
 
 (* type move_phrase = string list *)
 
-type object_phrase = {
-  tiles : string list;
-  row : string;
+type move_phrase = {
+  from_board : (string * int) list;
+  from_rack : int list;
+  to_row : string;
 }
 
 type command =
-  | Move of object_phrase
+  | Move of move_phrase
   | Undo
   | Reset
   | SortByNumber
@@ -69,18 +70,59 @@ let parse_start str =
       check_name_len t;
       init_four_players t
   | [ "quit" ] ->
-      print_string "Thank you for playing! Goodby\n\n.";
+      print_string
+        "\n  \027[38;5;70mThank you for playing! Goodbye.\027[0m\n\n";
       Stdlib.exit 0
   | _ -> raise Malformed
 
+let rec split_board (acc : (string * int) list) = function
+  | [] -> acc
+  | h :: t ->
+      if String.length h = 2 then
+        split_board
+          ((String.make 1 h.[0], int_of_string (String.make 1 h.[1]))
+          :: acc)
+          t
+      else if String.length h = 3 then
+        split_board
+          ((String.make 1 h.[0], int_of_string (String.sub h 1 2))
+          :: acc)
+          t
+      else raise Malformed
+
 let parse_move str_lst =
-  let cmd = String.concat " " str_lst in
-  let length = String.length cmd in
-  Move
-    {
-      tiles = String.split_on_char ' ' (String.sub cmd 0 (length - 5));
-      row = Char.escaped cmd.[length - 1];
-    }
+  try
+    let to_removed =
+      if List.exists (fun x -> x = "to") str_lst then
+        List.filter (fun x -> x <> "to") str_lst
+      else raise Malformed
+    in
+    let from_rack =
+      List.filter
+        (fun x ->
+          Str.string_match (Str.regexp "[0-9]") x 0
+          && (String.length x = 1 || String.length x = 2))
+        to_removed
+      |> List.map (fun x -> int_of_string x)
+    in
+    let to_row =
+      List.hd
+        (List.filter
+           (fun x ->
+             Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) x 0
+             && String.length x = 1)
+           to_removed)
+    in
+    let board =
+      List.filter
+        (fun x ->
+          Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) x 0
+          && (String.length x = 2 || String.length x = 3))
+        to_removed
+    in
+    let board_split = split_board [] board in
+    Move { from_board = board_split; from_rack; to_row }
+  with _ -> raise Malformed
 
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
@@ -89,35 +131,26 @@ let parse str =
 
     let check_lst = function
       | [ "quit" ] -> Quit
+      | [ "q" ] -> Quit
+      | [ "exit" ] -> Quit
       | [ "move" ] -> raise Malformed
       | "move" :: t -> parse_move t
+      | "mv" :: t -> parse_move t
+      | "play" :: t -> parse_move t
+      | "add" :: t -> parse_move t
       | [ "undo" ] -> Undo
       | [ "reset" ] -> Reset
       | [ "color"; "sort" ] -> SortByColor
+      | [ "sort"; "color" ] -> SortByColor
+      | [ "sc" ] -> SortByColor
       | [ "number"; "sort" ] -> SortByNumber
+      | [ "sort"; "number" ] -> SortByNumber
+      | [ "sn" ] -> SortByNumber
       | [ "draw" ] -> Draw
+      | [ "d" ] -> Draw
       | [ "end"; "turn" ] -> EndTurn
       | [ "help" ] -> Help
+      | [ "h" ] -> Help
       | _ -> raise Malformed
     in
     check_lst str_lst
-
-(* type object_phrase = {tiles: string list; row: string}
-
-   type command = | Draw | Move of object_phrase | End | Quit
-
-   exception Empty
-
-   exception Malformed
-
-   let rec cleanup lst = match lst with |[] -> [] |h::t -> if h = ""
-   then cleanup t else h::cleanup t let parse str = let strlist =
-   String.split_on_char ' ' (String.lowercase_ascii str) in match
-   cleanup strlist with | [] -> raise Empty | h::t -> if h = "draw" then
-   if t = [] then Draw else raise Malformed else if h = "move" then if t
-   = [] then raise Malformed else let cmd = String.concat " " t in let
-   length = String.length cmd in Move {tiles = String.split_on_char ' '
-   (String.sub cmd 0 (length - 5)); row = Char.escaped (String.get cmd
-   (length-1))} else if h = "end" then if t = [] then End else raise
-   Malformed else if h = "quit" then if t = [] then Quit else raise
-   Malformed else raise Malformed *)

@@ -2,7 +2,6 @@ open Tile
 
 type b_row = {
   row : string;
-  visible : bool;
   tiles : t list;
 }
 
@@ -19,10 +18,7 @@ let rows =
 let rec init_board_aux (acc : b_row list) (rows : string list) =
   match rows with
   | [] -> acc
-  | str :: t ->
-      init_board_aux
-        ({ row = str; visible = false; tiles = [] } :: acc)
-        t
+  | str :: t -> init_board_aux ({ row = str; tiles = [] } :: acc) t
 
 let init_board () = List.rev (init_board_aux [] rows)
 
@@ -37,12 +33,11 @@ let init_board () = List.rev (init_board_aux [] rows)
 
 let rec add_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
-  | { row = r; visible = v; tiles = ts } :: t ->
+  | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
         @ {
             row = row_letter;
-            visible = true;
             (* I had to remove the sort_by_number applied to (tile ::
                ts) here because when there are multiple tiles to move,
                changing the order messes up the index of the rack it
@@ -51,18 +46,15 @@ let rec add_tile tile row_letter acc = function
           }
           :: t
       else
-        add_tile tile row_letter
-          (acc @ [ { row = r; visible = v; tiles = ts } ])
-          t
+        add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
 
 let rec add_tile_by_index tile row_letter acc index = function
   | [] -> raise NotValidBoardRow
-  | { row = r; visible = v; tiles = ts } :: t ->
+  | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
         @ {
             row = row_letter;
-            visible = true;
             (* I had to remove the sort_by_number applied to (tile ::
                ts) here because when there are multiple tiles to move,
                changing the order messes up the index of the rack it
@@ -74,24 +66,21 @@ let rec add_tile_by_index tile row_letter acc index = function
           }
           :: t
       else
-        add_tile tile row_letter
-          (acc @ [ { row = r; visible = v; tiles = ts } ])
-          t
+        add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
 
 let rec remove_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
-  | { row = r; visible = v; tiles = ts } :: t ->
+  | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
         @ {
             row = row_letter;
-            visible = if List.length ts = 1 then false else true;
             tiles = List.filter (fun x -> x <> tile) ts;
           }
           :: t
       else
         remove_tile tile row_letter
-          (acc @ [ { row = r; visible = v; tiles = ts } ])
+          (acc @ [ { row = r; tiles = ts } ])
           t
 
 let valid_group lst =
