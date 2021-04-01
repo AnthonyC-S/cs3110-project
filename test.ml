@@ -34,38 +34,6 @@ let player_tests = []
 (* Start of board tests.*)
 (*****************************************************************)
 
-let validjokergroup =
-  [
-    make_t "T" 1 Red;
-    make_t "T" 1 Blue;
-    make_t "J" 1 Black;
-    make_t "T" 1 Orange;
-  ]
-
-let validjokerrun =
-  [
-    make_t "T" 5 Red;
-    make_t "J" 6 Red;
-    make_t "T" 7 Red;
-    make_t "T" 8 Red;
-  ]
-
-let invalidgroup =
-  [
-    make_t "T" 2 Red;
-    make_t "T" 2 Black;
-    make_t "T" 2 Blue;
-    make_t "T" 2 Black;
-  ]
-
-let invalidrun =
-  [
-    make_t "T" 1 Red;
-    make_t "T" 2 Red;
-    make_t "T" 3 Red;
-    make_t "T" 5 Red;
-  ]
-
 let board = init_board ()
 
 let board2 = add_tile (make_t "T" 1 Red) "B" [] board
