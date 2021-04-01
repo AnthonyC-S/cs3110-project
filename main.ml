@@ -258,6 +258,16 @@ and commands command st =
         ("  Could not find the tile you entered. Check if the tile has \
           the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
+  | InvalidMeld ->
+      play_turn st
+        ("  Can not end turn since since you do not have a valid meld, \
+          i.e. 30 points or higher.\n\n\
+         \  You can either play more tiles to make a meld or undo the \
+          tiles and draw to end your turn.\n" ^ ip)
+  | NotEnoughTiles ->
+      play_turn st
+        ("  The pile is empty and there are no tiles left to draw.\n\
+         \  There should be enough tiles to finish the game!\n" ^ ip)
 
 let rec welcome st msg =
   clear_board ();

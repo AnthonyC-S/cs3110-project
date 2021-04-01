@@ -12,6 +12,8 @@ exception HaveNotPlayedMeld
 
 exception InvalidBoardSets
 
+exception InvalidMeld
+
 val init_state : (int * string) list -> s
 
 val undo_move : s -> s

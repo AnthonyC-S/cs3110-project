@@ -136,13 +136,18 @@ let parse str =
       | [ "move" ] -> raise Malformed
       | "move" :: t -> parse_move t
       | "mv" :: t -> parse_move t
+      | "play" :: t -> parse_move t
+      | "add" :: t -> parse_move t
       | [ "undo" ] -> Undo
       | [ "reset" ] -> Reset
       | [ "color"; "sort" ] -> SortByColor
       | [ "sort"; "color" ] -> SortByColor
+      | [ "sc" ] -> SortByColor
       | [ "number"; "sort" ] -> SortByNumber
       | [ "sort"; "number" ] -> SortByNumber
+      | [ "sn" ] -> SortByNumber
       | [ "draw" ] -> Draw
+      | [ "d" ] -> Draw
       | [ "end"; "turn" ] -> EndTurn
       | [ "help" ] -> Help
       | [ "h" ] -> Help
