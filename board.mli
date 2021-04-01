@@ -5,6 +5,8 @@ type b_row = {
 
 type b = b_row list
 
+exception NotValidBoardRow
+
 (** [init_board] is the initial state of the board with no tiles. *)
 val init_board : unit -> b
 

@@ -3,6 +3,7 @@ open Player
 open State
 open Command
 open Textgui
+open Board
 
 (* [rp acc str i] concatanates [str] [i] number of times. *)
 let rec rp acc str = function
@@ -193,10 +194,15 @@ let rec play_turn st (msg : string) =
       try
         let command = parse str in
         commands command st
-      with Malformed ->
-        play_turn st
-          ("  Did you enter the command correctly? Type \"help\" for \
-            commands.\n" ^ ip))
+      with
+      | Malformed ->
+          play_turn st
+            ("  Did you enter the command correctly? Type \"help\" for \
+              commands.\n" ^ ip)
+      | BlankInput ->
+          play_turn st
+            ("  Did you enter the command correctly? Type \"help\" for \
+              commands.\n" ^ ip))
 
 and commands command st =
   try
@@ -257,6 +263,11 @@ and commands command st =
         ("  Could not find the tile you eneterd. Check to make sure \
           you entered the tile with the correct\n\
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
+  | NotValidBoardRow ->
+      play_turn st
+        ("  Could not find the row you eneterd. Check the \
+          capitalization of the row name. Type \"help\" to see \
+          commands.\n" ^ ip)
 
 let rec welcome st msg =
   clear_board ();
