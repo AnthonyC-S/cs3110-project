@@ -14,6 +14,8 @@ type p = {
 
 exception NotAValidIndex
 
+exception EmptyList
+
 (* Input is a player association list in the format [(player_num *
    player_name);..]. Example: [(1, "Clarkson"); (2, "Lee")]. *)
 let rec make_players acc stack = function
@@ -60,15 +62,23 @@ let undo_past_rack p =
   let last_ele_rest = last_ele_lst_rest p.past_racks in
   { p with rack = fst last_ele_rest; past_racks = snd last_ele_rest }
 
-(** [fst_ele lst] is the first element of [lst]. It raises the
-    EmptryRack exception if [lst] is empty. SHOULD I JUST USE LIST.HD?? *)
-let fst_ele = function [] -> raise EmptyRack | h :: t -> h
+(** [get_fst_ele lst] is the first element of [lst]. It raises the
+    EmptryRack exception if [lst] is empty. *)
+let get_fst_ele = function [] -> raise EmptyList | h :: t -> h
+
+(** [remove_fst_elm lst] is [lst] with the first element of [lst] at
+    index 0 removed or an empty list if [lst] has one element. Raises
+    EmptyList if [lst] is empty.*)
+let remove_fst_ele = function
+  | [] -> raise EmptyList
+  | [ h ] -> []
+  | h :: t -> t
 
 (** [reset_current_turn_rack p] is player [p] with rack configuration
     set to the initial configuration from the start of its turn and the
     past_rack emptied out. *)
 let reset_current_turn_rack player =
-  let fst_rack = fst_ele player.past_racks in
+  let fst_rack = get_fst_ele player.past_racks in
   { (empty_past_rack player) with rack = fst_rack }
 
 (* Helper for [add_to_rack] and [remove_from_rack]. *)
@@ -88,9 +98,6 @@ let remove_from_rack turn index player_lst =
     rack = List.filteri (fun i _ -> i <> index - 1) update_player.rack;
   }
   :: List.filter (fun x -> x <> update_player) player_lst
-
-(* Need to implement a recursive function that can remove multiple tiles
-   from the rack in one call. *)
 
 (* Helper for the get_current_... functions below. *)
 let current_player turn player_lst =

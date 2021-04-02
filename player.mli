@@ -10,6 +10,10 @@ type p = {
   score : int;
 }
 
+exception NotAValidIndex
+
+exception EmptyList
+
 val make_players :
   p list -> Tile.t Stack.t -> (int * string) list -> p list
 
@@ -41,4 +45,6 @@ val check_for_valid_meld : p -> bool
 
 val update_played_valid_meld : p -> p
 
-val fst_ele : 'a list -> 'a
+val get_fst_ele : 'a list -> 'a
+
+val remove_fst_ele : 'a list -> 'a list
