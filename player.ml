@@ -7,7 +7,6 @@ type p = {
   number : int;
   played_valid_meld : bool;
   meld_count : t list;
-  past_meld_counts : t list list;
   rack : rack;
   past_racks : rack list;
   score : int;
@@ -26,7 +25,6 @@ let rec make_players acc stack = function
            number;
            played_valid_meld = false;
            meld_count = [];
-           past_meld_counts = [];
            rack = make_tile_rack stack;
            past_racks = [];
            score = 0;
@@ -80,7 +78,7 @@ let player_to_update turn player_lst =
 (* Called from State.ml when player draws a new tile. *)
 let add_to_rack turn player_lst tile =
   let update_player = player_to_update turn player_lst in
-  { update_player with rack = tile :: update_player.rack }
+  { update_player with rack = update_player.rack @ [ tile ] }
   :: List.filter (fun x -> x <> update_player) player_lst
 
 let remove_from_rack turn index player_lst =

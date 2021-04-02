@@ -9,6 +9,8 @@ type b = b_row list
 
 exception NotValidBoardRow
 
+exception RowAlreadyFull
+
 let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
@@ -34,31 +36,25 @@ let init_board () = List.rev (init_board_aux [] rows)
 let rec add_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
-      if r = row_letter then
-        acc
-        @ {
-            row = row_letter;
-            (* I had to remove the sort_by_number applied to (tile ::
-               ts) here because when there are multiple tiles to move,
-               changing the order messes up the index of the rack it
-               will move the wrong tiles after the correct first tile. *)
-            tiles = tile :: ts;
-          }
-          :: t
+      if r = row_letter && List.length ts == 13 then
+        raise RowAlreadyFull
+      else if r = row_letter && List.length ts < 13 then
+        acc @ ({ row = row_letter; tiles = tile :: ts } :: t)
       else
         add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
 
-let rec add_tile_by_index tile row_letter acc index = function
+(* [replace_tile_by_index tile row_letter acc index st.current_board]
+   replaces the old tile with a new [tile] in [st.current_board] at
+   [row_letter] and at the [index]. Specifically, this is used to assign
+   Jokers a number or color, no other tiles should ever need to be
+   replaced. *)
+let rec replace_tile_by_index tile row_letter acc index = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
         @ {
             row = row_letter;
-            (* I had to remove the sort_by_number applied to (tile ::
-               ts) here because when there are multiple tiles to move,
-               changing the order messes up the index of the rack it
-               will move the wrong tiles after the correct first tile. *)
             tiles =
               List.filteri (fun i _ -> i < index - 1) ts
               @ [ tile ]
