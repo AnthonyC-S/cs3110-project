@@ -44,11 +44,11 @@ let get_other_players st =
 
 let undo_move st =
   let cur_player = get_cur_player st in
-  let last_b = List.hd (List.rev st.past_boards) in
-  let last_r = List.hd (List.rev cur_player.past_racks) in
-  let last_meld_count = List.hd (List.rev cur_player.meld_count) in
+  let last_b = fst_ele (List.rev st.past_boards) in
+  let last_r = fst_ele (List.rev cur_player.past_racks) in
+  let last_meld_count = fst_ele (List.rev cur_player.meld_count) in
   let last_past_meld_counts =
-    List.hd (List.rev cur_player.past_meld_counts)
+    fst_ele (List.rev cur_player.past_meld_counts)
   in
   let new_player =
     {

@@ -44,3 +44,5 @@ val get_current_score : int -> p list -> int
 val check_for_valid_meld : p -> bool
 
 val update_played_valid_meld : p -> p
+
+val fst_ele : 'a list -> 'a

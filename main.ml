@@ -215,16 +215,6 @@ and commands command st =
           (multiple_moves_from_board m.from_board m.to_row st
           |> multiple_moves_from_rack m.from_rack m.to_row)
           ("  Completed move, what next?\n" ^ ip)
-        (* if m.from_rack = [] && m.from_board = [] then play_turn st ("
-           No moves to make." ^ ip) else if m.from_rack <> [] &&
-           m.from_board <> [] then play_turn (multiple_moves_from_board
-           m.from_board m.to_row st |> multiple_moves_from_rack
-           m.from_rack m.to_row) (" Completed move, what next?\n" ^ ip)
-           else if m.from_rack <> [] then play_turn
-           (multiple_moves_from_rack m.from_rack m.to_row st) ("
-           Completed move, what next?\n" ^ ip) else play_turn
-           (multiple_moves_from_board m.from_board m.to_row st) ("
-           Completed move, what next?\n" ^ ip) *)
     | Reset ->
         if st.past_boards = [] then
           play_turn st ("  No moves to go back to.\n" ^ ip)
@@ -266,7 +256,7 @@ and commands command st =
          \  index and/or row. Type \"help\" to see commands.\n" ^ ip)
   | NotValidBoardRow ->
       play_turn st
-        ("  Could not find the row you eneterd. Check the \
+        ("  Could not find the row you entered. Check the \
           capitalization of the row name. Type \"help\" to see \
           commands.\n" ^ ip)
   | InvalidMeld ->
