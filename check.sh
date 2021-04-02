@@ -106,19 +106,19 @@ if [[ $1 != "final" ]]; then
   exit 0
 fi
 
-print_meta "Checking [hours_worked]"
+# print_meta "Checking [hours_worked]"
 
-$OCAMLBUILD checkhours.byte
-if [[ $? -ne 0 ]]; then
-  print_fatal "Your code does not compile."
-  exit 1
-fi
+# $OCAMLBUILD checkhours.byte
+# if [[ $? -ne 0 ]]; then
+#   print_fatal "Your code does not compile."
+#   exit 1
+# fi
 
-./checkhours.byte
-if [[ $? -ne 0 ]]; then
-  print_fatal "You have not set [hours_worked]."
-  exit 1
-fi
+# ./checkhours.byte
+# if [[ $? -ne 0 ]]; then
+#   print_fatal "You have not set [hours_worked]."
+#   exit 1
+# fi
 
 print_meta "Checking for zip file"
 
