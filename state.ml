@@ -45,14 +45,12 @@ let get_other_players st =
 let undo_move st =
   let cur_player = get_cur_player st in
   let last_b = get_fst_ele (List.rev st.past_boards) in
-  let last_r = get_fst_ele (List.rev cur_player.past_racks) in
 
   let new_player =
     {
       cur_player with
-      past_racks =
-        List.filter (fun x -> x <> last_r) cur_player.past_racks;
-      rack = List.hd (List.rev cur_player.past_racks);
+      rack = get_fst_ele cur_player.past_racks;
+      past_racks = remove_fst_ele cur_player.past_racks;
       meld_count = remove_fst_ele cur_player.meld_count;
     }
   in
@@ -73,14 +71,14 @@ let reset_turn st =
   let new_player =
     {
       cur_player with
-      rack = List.hd cur_player.past_racks;
+      rack = get_fst_ele cur_player.past_racks;
       past_racks = [];
       meld_count = [];
     }
   in
   {
     st with
-    current_board = List.hd st.past_boards;
+    current_board = get_fst_ele st.past_boards;
     past_boards = [];
     players = new_player :: get_other_players st;
   }

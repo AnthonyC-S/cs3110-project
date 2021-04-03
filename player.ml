@@ -41,26 +41,7 @@ let empty_past_rack p = { p with past_racks = [] }
 (** [update_past_rack p] is player [p] with the current rack [r] of [p]
     appended at the end of past_racks list. *)
 let update_past_rack p =
-  { p with past_racks = p.past_racks @ [ p.rack ] }
-
-exception EmptyRack
-
-(** [last_ele_lst_rest lst] is a pair with the first element being the
-    last element of [lst] and the second element being the rest of
-    [lst]. *)
-let last_ele_lst_rest lst =
-  match List.rev lst with
-  | [] -> raise EmptyRack
-  | h :: t -> (h, List.rev t)
-
-(* could use nth, but suggested to not use nth?? *)
-
-(** [undo_past_rack p] is player [p] with rack in [p] set to the last
-    element of its past_racks which is the most recent configuration of
-    rack. The last element is then removed from the past_racks of [p]. *)
-let undo_past_rack p =
-  let last_ele_rest = last_ele_lst_rest p.past_racks in
-  { p with rack = fst last_ele_rest; past_racks = snd last_ele_rest }
+  { p with past_racks = [ p.rack ] @ p.past_racks }
 
 (** [get_fst_ele lst] is the first element of [lst]. It raises the
     EmptryRack exception if [lst] is empty. *)
