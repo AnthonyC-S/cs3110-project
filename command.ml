@@ -4,6 +4,8 @@ exception Malformed
 
 exception NameTooLong
 
+exception NotUniqueNames
+
 (* type move_phrase = string list *)
 
 type move_phrase = {
@@ -55,19 +57,30 @@ let rec check_name_len = function
       if String.length h >= 20 then raise NameTooLong
       else check_name_len t
 
+let check_unique_names name_list =
+  if
+    List.length name_list
+    <> List.length (List.sort_uniq compare name_list)
+  then raise NotUniqueNames
+  else ()
+
 let parse_start str =
   match trim_lc_fst_word str with
   | "2" :: t ->
       check_name_len t;
+      check_unique_names t;
       init_two_players t
   | "two" :: t ->
       check_name_len t;
+      check_unique_names t;
       init_two_players t
   | "4" :: t ->
       check_name_len t;
+      check_unique_names t;
       init_four_players t
   | "four" :: t ->
       check_name_len t;
+      check_unique_names t;
       init_four_players t
   | [ "quit" ] ->
       print_string

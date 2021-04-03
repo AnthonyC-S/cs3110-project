@@ -44,26 +44,16 @@ let get_other_players st =
 
 let undo_move st =
   let cur_player = get_cur_player st in
-  let last_b = fst_ele (List.rev st.past_boards) in
-  let last_r = fst_ele (List.rev cur_player.past_racks) in
-  let last_meld_count = fst_ele (List.rev cur_player.meld_count) in
-  let last_past_meld_counts =
-    fst_ele (List.rev cur_player.past_meld_counts)
-  in
+  let last_b = get_fst_ele (List.rev st.past_boards) in
+  let last_r = get_fst_ele (List.rev cur_player.past_racks) in
+
   let new_player =
     {
       cur_player with
       past_racks =
         List.filter (fun x -> x <> last_r) cur_player.past_racks;
       rack = List.hd (List.rev cur_player.past_racks);
-      meld_count =
-        List.filter
-          (fun x -> x <> last_meld_count)
-          cur_player.meld_count;
-      past_meld_counts =
-        List.filter
-          (fun x -> x <> last_past_meld_counts)
-          cur_player.past_meld_counts;
+      meld_count = remove_fst_ele cur_player.meld_count;
     }
   in
   {
@@ -86,7 +76,6 @@ let reset_turn st =
       rack = List.hd cur_player.past_racks;
       past_racks = [];
       meld_count = [];
-      past_meld_counts = [];
     }
   in
   {
@@ -96,7 +85,6 @@ let reset_turn st =
     players = new_player :: get_other_players st;
   }
 
-(* Need to update past board moves and past rack moves. *)
 let move_from_rack st index row =
   let cur_player = get_cur_player st in
   let rack = cur_player.rack in
@@ -107,8 +95,6 @@ let move_from_rack st index row =
       {
         cur_player with
         meld_count = tile_to_move :: cur_player.meld_count;
-        past_meld_counts =
-          cur_player.past_meld_counts @ [ cur_player.meld_count ];
       }
       |> update_past_rack
     in
@@ -186,18 +172,18 @@ let rec multiple_moves_from_board from_lst to_row st =
    from the board and assign jokers tiles if they are included. If there
    are jokers being moved from the board then this function needs to be
    called before the [multiple_moves_from_board]. Also, [from] is given
-   as (index int, row string). *)
+   as (row string, index int). *)
 let assign_joker_from_board st n c from =
   let tile_to_update =
-    get_tile_of_index (fst from)
-      (List.find (fun { row = x } -> x = snd from) st.current_board)
+    get_tile_of_index (snd from)
+      (List.find (fun { row = x } -> x = fst from) st.current_board)
         .tiles
   in
   let new_board =
-    remove_tile tile_to_update (snd from) [] st.current_board
-    |> add_tile_by_index
+    remove_tile tile_to_update (fst from) [] st.current_board
+    |> replace_tile_by_index
          (update_joker n c tile_to_update)
-         (snd from) [] (fst from)
+         (fst from) [] (snd from)
   in
   { st with current_board = new_board }
 
@@ -243,3 +229,16 @@ let end_turn (st : s) : s =
         :: get_other_players st;
       current_turn = update_current_turn st;
     }
+
+let debug st =
+  let cur_player = get_cur_player st in
+
+  print_string
+    ("Player's Name          : " ^ cur_player.name ^ "\n"
+   ^ "Meld Count Length      : "
+    ^ string_of_int (List.length cur_player.meld_count)
+    ^ "\n" ^ "Past Racks Length      : "
+    ^ string_of_int (List.length cur_player.past_racks)
+    ^ "\n" ^ "Past Boards Length     : "
+    ^ string_of_int (List.length st.past_boards)
+    ^ "\n")

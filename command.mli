@@ -4,10 +4,6 @@ type move_phrase = {
   to_row : string;
 }
 
-(* type object_phrase = string list type command = object_phrase list *)
-
-(* type move_phrase = string list *)
-
 type command =
   | Move of move_phrase
   | Undo
@@ -24,6 +20,8 @@ exception BlankInput
 exception Malformed
 
 exception NameTooLong
+
+exception NotUniqueNames
 
 val parse : string -> command
 

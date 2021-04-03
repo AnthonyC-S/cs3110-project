@@ -41,3 +41,5 @@ val sort_rack_by_color : s -> s
 val sort_rack_by_number : s -> s
 
 val end_turn : s -> s
+
+val debug : s -> unit
