@@ -21,8 +21,6 @@ val empty_past_rack : p -> p
 
 val update_past_rack : p -> p
 
-val undo_past_rack : p -> p
-
 val reset_current_turn_rack : p -> p
 
 val add_to_rack : int -> p list -> Tile.t -> p list
