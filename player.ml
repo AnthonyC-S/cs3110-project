@@ -45,14 +45,6 @@ let update_past_rack p =
 
 exception EmptyRack
 
-(** [last_ele_lst_rest lst] is a pair with the first element being the
-    last element of [lst] and the second element being the rest of
-    [lst]. *)
-let last_ele_lst_rest lst =
-  match List.rev lst with
-  | [] -> raise EmptyRack
-  | h :: t -> (h, List.rev t)
-
 (** [get_fst_ele lst] is the first element of [lst]. It raises the
     EmptryRack exception if [lst] is empty. *)
 let get_fst_ele = function [] -> raise EmptyList | h :: t -> h
