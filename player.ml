@@ -43,8 +43,6 @@ let empty_past_rack p = { p with past_racks = [] }
 let update_past_rack p =
   { p with past_racks = [ p.rack ] @ p.past_racks }
 
-exception EmptyRack
-
 (** [get_fst_ele lst] is the first element of [lst]. It raises the
     EmptryRack exception if [lst] is empty. *)
 let get_fst_ele = function [] -> raise EmptyList | h :: t -> h
