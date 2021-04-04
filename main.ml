@@ -74,7 +74,7 @@ let row_already_full_msg =
   "  Board rows can not have more than 13 tiles. Try adding fewer \
    tiles or adding to a new row.\n"
 
-let top_r = " " ^ String.make 105 '_' ^ " \n"
+let top_row = " " ^ String.make 105 '_' ^ " \n"
 
 let center_str str =
   let str_len = String.length str in
@@ -83,14 +83,21 @@ let center_str str =
   if spaces_needed mod 2 = 0 then " |" ^ space ^ str ^ space ^ "|\n"
   else " |" ^ space ^ str ^ space ^ " |\n"
 
-let empty_r = center_str ""
+let empty_row = center_str ""
 
-let turn_r cur_player =
+let turn_row cur_player =
   " |  " ^ g "Turn:  " ^ cur_player
   ^ String.make (94 - String.length cur_player) ' '
   ^ "|\n"
 
-let pile_r pile_size =
+let meld_row cur_player =
+  " |  " ^ g "Meld:  "
+  ^
+  if cur_player.played_valid_meld then
+    "Met" ^ String.make 91 ' ' ^ "|\n"
+  else "Not Met" ^ String.make 87 ' ' ^ "|\n"
+
+let pile_row pile_size =
   let pile_size_str = string_of_int pile_size in
   " |  " ^ g "Pile:  " ^ pile_size_str
   ^
@@ -102,9 +109,9 @@ let top_index_r =
   ^ "  1  2  3  4  5  6  7  8  9  10  11  12  13  ||      1  2  3  4  \
      5  6  7  8  9  10  11  12  13  |\n"
 
-let dash_r = " |" ^ String.make 103 '-' ^ "|\n"
+let dash_row = " |" ^ String.make 103 '-' ^ "|\n"
 
-let bottom_r = " |" ^ String.make 103 '_' ^ "|\n\n"
+let bottom_row = " |" ^ String.make 103 '_' ^ "|\n\n"
 
 (* [rack_index_r t_lst] gives the rack index string that is equal in
    length to size of rack [t_lst]. Accounts for spacing needed between
@@ -121,7 +128,7 @@ let welcome_msg =
   ^ ig " 🐫 WELCOME TO THE  "
   ^ rw "C" ^ " " ^ kw "A" ^ " " ^ ow "M" ^ " " ^ bw "L" ^ " " ^ kw "K"
   ^ " " ^ ow "U" ^ " " ^ bw "B" ^ ig "  GAME  🐫   "
-  ^ String.make 29 ' ' ^ "|\n" ^ empty_r ^ " |" ^ String.make 38 ' '
+  ^ String.make 29 ' ' ^ "|\n" ^ empty_row ^ " |" ^ String.make 38 ' '
   ^ ig "Based on the game Rummikub"
   ^ String.make 39 ' ' ^ "|\n"
 
@@ -133,8 +140,8 @@ let developed_by_msg =
   ^ String.make 40 ' ' ^ "|\n"
 
 let welcome_board =
-  top_r ^ rp "" empty_r 6 ^ welcome_msg ^ rp "" empty_r 4
-  ^ developed_by_msg ^ rp "" empty_r 4 ^ bottom_r
+  top_row ^ rp "" empty_row 6 ^ welcome_msg ^ rp "" empty_row 4
+  ^ developed_by_msg ^ rp "" empty_row 4 ^ bottom_row
 
 let game_commands : string =
   g "  Game Commands:\n\n"
@@ -221,13 +228,14 @@ let rec string_of_board_rows acc (board : Board.b_row list) =
         []
 
 let build_board st msg =
-  let cur_player = get_current_name st.current_turn st.players in
-  let turn_r = turn_r cur_player in
-  let pile_r = pile_r (Stack.length st.t_stack) in
+  let cur_player = get_current_player st in
+  let turn_row = turn_row cur_player.name in
+  let meld_row = meld_row cur_player in
+  let pile_row = pile_row (Stack.length st.t_stack) in
   let cur_rack = get_current_rack st.current_turn st.players in
-  top_r ^ turn_r ^ pile_r ^ dash_r ^ top_index_r
+  top_row ^ turn_row ^ meld_row ^ pile_row ^ dash_row ^ top_index_r
   ^ string_of_board_rows "" st.current_board
-  ^ bottom_r ^ rack_index_r cur_rack ^ g "   Rack:  "
+  ^ bottom_row ^ rack_index_r cur_rack ^ g "   Rack:  "
   ^ string_of_tiles "" 1 cur_rack
   ^ "\n\n" ^ msg ^ ip
 

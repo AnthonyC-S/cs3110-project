@@ -34,16 +34,13 @@ type result =
 
 let update_past_boards st = st.past_boards @ [ st.current_board ]
 
-(* helper for undo_past_move and reset_current_board*)
-(* let get_fst_elm : 'a = function | h :: t -> h | [] -> *)
-
-let get_cur_player st = current_player st.current_turn st.players
+let get_current_player st = current_player st.current_turn st.players
 
 let get_other_players st =
-  List.filter (fun x -> x <> get_cur_player st) st.players
+  List.filter (fun x -> x <> get_current_player st) st.players
 
 let undo_move st =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let last_b = get_fst_ele (List.rev st.past_boards) in
 
   let new_player =
@@ -67,7 +64,7 @@ let undo_move st =
    players rack to the tiles at the start of the turn. Need to also
    reset player rack. *)
 let reset_turn st =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let new_player =
     {
       cur_player with
@@ -84,7 +81,7 @@ let reset_turn st =
   }
 
 let move_from_rack st index row =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let rack = cur_player.rack in
   let rack_len = List.length rack in
   let tile_to_move = get_tile_of_index index rack in
@@ -106,12 +103,6 @@ let move_from_rack st index row =
     }
   else raise NotValidIndex
 
-(** helper *)
-let rec get_current_player cp (plst : p list) =
-  match plst with
-  | [] -> []
-  | h :: t -> if h.number = cp then h.rack else get_current_player cp t
-
 (*Note, had to do the sort list and reverse order so the higher index
   tiles would be moved first and not mess up the index order other
   tiles. *)
@@ -126,7 +117,7 @@ let rec multiple_moves_from_rack index_lst row st =
    jokers in the rack then this function needs to be called before the
    [multiple_moves_from_rack]*)
 let assign_joker_in_rack (st : s) (n : int) (c : color) (index : int) =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let rack = cur_player.rack in
   let new_rack =
     List.filteri (fun i _ -> i < index - 1) rack
@@ -137,7 +128,7 @@ let assign_joker_in_rack (st : s) (n : int) (c : color) (index : int) =
   { st with players = new_player :: get_other_players st }
 
 let move_from_board st from_row index to_row =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   if cur_player.played_valid_meld = false then raise HaveNotPlayedMeld
   else
     let tile =
@@ -196,14 +187,14 @@ let draw (st : s) : s =
   }
 
 let sort_rack_by_color st =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let new_player =
     { cur_player with rack = sort_by_color cur_player.rack }
   in
   { st with players = new_player :: get_other_players st }
 
 let sort_rack_by_number st =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
   let new_player =
     { cur_player with rack = sort_by_number cur_player.rack }
   in
@@ -215,21 +206,24 @@ let update_current_turn st =
   (st.current_turn mod List.length st.players) + 1
 
 let end_turn (st : s) : s =
+  let cur_player = get_current_player st in
   if not (check_valid_board st) then raise InvalidBoardSets
-  else if not (check_for_valid_meld (get_cur_player st)) then
-    raise InvalidMeld
+  else if
+    (not (check_for_valid_meld cur_player))
+    && cur_player.played_valid_meld = false
+  then raise InvalidMeld
   else
     {
       st with
       past_boards = [];
       players =
-        (empty_past_rack (get_cur_player st) |> update_played_valid_meld)
+        (empty_past_rack cur_player |> update_played_valid_meld)
         :: get_other_players st;
       current_turn = update_current_turn st;
     }
 
 let debug st =
-  let cur_player = get_cur_player st in
+  let cur_player = get_current_player st in
 
   print_string
     ("Player's Name          : " ^ cur_player.name ^ "\n"

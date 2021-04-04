@@ -3,7 +3,7 @@ open Board
 open State
 open Player
 
-let stack_size s = s.t_stack |> tile_stack_size |> string_of_int
+let stack_size s = Stack.length s.t_stack |> string_of_int
 
 (* Stack.size/length *)
 
@@ -125,7 +125,7 @@ let print_current_player_rack s =
      index: 1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  \
      18  19  20\n";
   ANSITerminal.print_string [] " Rack: ";
-  print_rack (get_current_player s.current_turn s.players);
+  print_rack (get_current_player s).rack;
   ANSITerminal.print_string [] " \n"
 
 let print_state s =
