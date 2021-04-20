@@ -1,5 +1,7 @@
 #require "ounit2";;
 #require "ANSITerminal";;
+#require "bisect_ppx.runtime";;
+#require "str";;
 #directory "_build";;
 #load "tile.cmo";;
 #load "board.cmo";;

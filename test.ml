@@ -16,12 +16,55 @@ let update_joker_exception name n c t expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun () -> update_joker n c t)
 
+let make_t_exception name t n c expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun () -> make_t t n c)
+
+let make_tile_stack_size_test name stack expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (Stack.length stack)
+    ~printer:string_of_int
+
+let draw_tile_test name stack expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (Stack.length stack)
+
+let new_tile_stack = make_tile_stack ()
+
+let draw_one_tile_stack =
+  let s = make_tile_stack () in
+  ignore (draw_tile s);
+  s
+
+let empty_stack_exception name stack expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (
+    let s = make_tile_stack () 
+  in 
+  let rec empty_stack acc = 
+    match acc with 
+    | 0 -> draw_tile s
+    | _ -> ignore (draw_tile s); empty_stack (acc - 1)
+  in empty_stack 106
+
 let tile_tests =
   [
     update_joker_test "Joker is now 1 Red" 1 Red (make_t "J" 0 None)
       (make_t "J" 1 Red);
+    update_joker_exception "Not a Joker exception" 0 Red
+      (make_t "J" 100 None) NotAJoker;
+    update_joker_exception "Not a Joker exception" 14 Red
+      (make_t "J" 100 None) NotAJoker;
     update_joker_exception "Not a Joker exception" 1 Red
-      (make_t "T" 5 Black) Tile.NotAJoker;
+      (make_t "T" 5 Black) NotAJoker;
+    make_t_exception "Not a Tile or Joker" "C" 10 Red
+      (Failure "Not a Tile or Joker");
+    make_tile_stack_size_test "Size of new tile stack is 106"
+      new_tile_stack 106;
+    draw_tile_test "Draw one tile, stack size is 105"
+      draw_one_tile_stack 105;
+    empty_stack_exception "Empty stack raises NotEnoughTiles" (Stack.create ())
+      NotEnoughTiles
   ]
 
 (*****************************************************************)
@@ -99,10 +142,9 @@ let suite =
   >::: List.flatten
          [
            tile_tests;
-           player_tests;
+           (* player_tests; *)
            board_tests;
-           state_tests;
-           command_tests;
+           (* state_tests; command_tests; *)
          ]
 
 let _ = run_test_tt_main suite
