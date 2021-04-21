@@ -70,7 +70,7 @@ let reset_turn st =
   let new_player =
     {
       cur_player with
-      rack = get_fst_ele cur_player.past_racks;
+      rack = get_fst_ele (List.rev cur_player.past_racks);
       past_racks = [];
       meld_count = [];
     }
@@ -92,6 +92,7 @@ let move_from_rack st index row =
       {
         cur_player with
         meld_count = tile_to_move :: cur_player.meld_count;
+        past_racks = cur_player.rack :: cur_player.past_racks;
       }
       |> update_past_rack
     in
