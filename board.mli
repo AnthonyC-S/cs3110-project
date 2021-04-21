@@ -23,3 +23,5 @@ val remove_tile : Tile.t -> string -> b -> b -> b
 val valid_board : b -> bool
 
 val sort_board_by_num : b -> b -> b
+
+val updated_row : b_row -> b_row

@@ -33,6 +33,56 @@ let init_board () = List.rev (init_board_aux [] rows)
 
 (* compare function should sort by num first then color*)
 
+(* assign_joker_from_board
+assign_joker_in_rack *)
+
+
+let rec color_filter acc list =
+  match list with 
+  | []-> acc
+  | h::t -> if ((List.find_opt (fun x -> x == h) list) != None ) 
+    then color_filter (List.filter (fun x -> x <> h) acc) t 
+    else  color_filter acc t
+(* Returns None if row already has every color*)
+let rec find_color ts = 
+  let colorlist = colors_of_t [] ts in
+  let colors = [ Black; Red; Blue; Orange; None ] in
+  let result = color_filter colors colorlist in
+  match result with
+  | [] -> raise NotValidBoardRow
+  | h::t -> h
+(* Has the Tile.NotAJoker if out of bounds *)
+let rec find_num fst tile ts = 
+  match ts with
+  | [] -> get_tile_number tile
+  | [ h ] ->  if (get_tile_number h) >= 13 then fst - 1 else get_tile_number h + 1
+  | [h; h2] -> if get_tile_number h2 - get_tile_number h = 1 then
+    if (get_tile_number h2) >= 13 then fst - 1 else get_tile_number h2 + 1
+    else  get_tile_number h + 1
+  | h::h2::t -> if get_tile_number h2 - get_tile_number h = 1 then find_num fst tile (h2::t) else get_tile_number h + 1
+
+  (* assumes that it is a valid move. If not, it will still be caught by checking valid_board*)
+let new_joker tile ts = 
+  let set = (List.filter (fun x -> x <> tile) ts)@[Joker { number = 1; color = None}] in
+  let fst = get_tile_number (List.hd set) in
+  match set with
+  | [] -> tile
+  | [ h ] -> update_joker (find_num fst tile set) (get_tile_color h) tile
+  | [h; h2] -> if get_tile_color h = get_tile_color h2 then update_joker (find_num fst tile set) (get_tile_color h) tile
+  else update_joker (fst) (find_color set) tile
+  | h::h2::t -> if get_tile_color h = get_tile_color h2 then update_joker (find_num fst tile set) (get_tile_color h) tile
+  else update_joker (fst) (find_color set) tile 
+
+let rec check_joker acc st orig = 
+  match st with 
+  | [] -> List.rev acc
+  | Joker t:: tail -> check_joker ((new_joker (Joker t) orig)::acc) tail orig
+  | Tile t :: tail -> check_joker ((Tile t):: acc) tail orig
+let updated_row st =
+  let joker_row = sort_by_number st.tiles in 
+  let new_tiles = sort_by_number (check_joker [] joker_row joker_row) in
+  {row= st.row; tiles= new_tiles}
+
 let rec add_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
@@ -63,6 +113,7 @@ let rec replace_tile_by_index tile row_letter acc index = function
           :: t
       else
         add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
+
 
 let rec remove_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
