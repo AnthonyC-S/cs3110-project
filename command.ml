@@ -1,3 +1,5 @@
+(** Need Command Module Description *)
+
 exception BlankInput
 
 exception Malformed

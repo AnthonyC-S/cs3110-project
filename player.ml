@@ -1,5 +1,7 @@
 open Tile
 
+(** Need Player Module Description *)
+
 type rack = Tile.t list
 
 type p = {

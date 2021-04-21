@@ -5,6 +5,8 @@ open Command
 open Textgui
 open Board
 
+(** Need Main Module Description *)
+
 (* [rp acc str i] concatanates [str] [i] number of times. *)
 let rec rp acc str = function
   | 0 -> acc

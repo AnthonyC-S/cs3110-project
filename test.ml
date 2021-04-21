@@ -5,8 +5,22 @@ open Board
 open State
 open Command
 
+(***************************************************************** Test
+  Plan - Need to Add
+
+  Test Plan Rubric [4 points] The test plan should be located in a
+  comment at the top of the test file.
+
+  -4: The test plan is missing. -1: The test plan does not explain which
+  parts of the system were automatically tested by OUnit vs. manually
+  tested. -1: The test plan does not explain what modules were tested by
+  OUnit and how test cases were developed (black box, glass box,
+  randomized, etc.). -1: The test plan does not provide an argument for
+  why the testing approach demonstrates the correctness of the system.
+  *****************************************************************)
+
 (*****************************************************************)
-(* Start of tile tests.*)
+(* Start of Tile Module Tests                                    *)
 (*****************************************************************)
 
 let update_joker_test name n c t expected_output =
@@ -20,14 +34,18 @@ let make_t_exception name t n c expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun () -> make_t t n c)
 
-let make_tile_stack_size_test name stack expected_output =
+let stack_size_test name stack expected_output =
   name >:: fun _ ->
-  OUnit2.assert_equal expected_output (Stack.length stack)
+  OUnit2.assert_equal expected_output (tile_stack_size stack)
     ~printer:string_of_int
 
-let draw_tile_test name stack expected_output =
+let draw_tile_exception name stack expected_output =
   name >:: fun _ ->
-  OUnit2.assert_equal expected_output (Stack.length stack)
+  OUnit2.assert_raises expected_output (fun () -> draw_tile stack)
+
+let make_rack_exception name stack expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun () -> make_tile_rack stack)
 
 let new_tile_stack = make_tile_stack ()
 
@@ -35,17 +53,6 @@ let draw_one_tile_stack =
   let s = make_tile_stack () in
   ignore (draw_tile s);
   s
-
-let empty_stack_exception name stack expected_output =
-  name >:: fun _ ->
-  OUnit2.assert_raises expected_output (
-    let s = make_tile_stack () 
-  in 
-  let rec empty_stack acc = 
-    match acc with 
-    | 0 -> draw_tile s
-    | _ -> ignore (draw_tile s); empty_stack (acc - 1)
-  in empty_stack 106
 
 let tile_tests =
   [
@@ -59,22 +66,36 @@ let tile_tests =
       (make_t "T" 5 Black) NotAJoker;
     make_t_exception "Not a Tile or Joker" "C" 10 Red
       (Failure "Not a Tile or Joker");
-    make_tile_stack_size_test "Size of new tile stack is 106"
-      new_tile_stack 106;
-    draw_tile_test "Draw one tile, stack size is 105"
+    stack_size_test "Size of new tile stack is 106" new_tile_stack 106;
+    stack_size_test "Draw one tile, stack size is 105"
       draw_one_tile_stack 105;
-    empty_stack_exception "Empty stack raises NotEnoughTiles" (Stack.create ())
-      NotEnoughTiles
+    draw_tile_exception
+      "Empty stack raises NotEnoughTiles when drawing tile"
+      (let s = make_tile_stack () in
+       Stack.clear s;
+       s)
+      NotEnoughTiles;
+    stack_size_test "Making a tile rack removes 14 tiles from stack"
+      (let s = make_tile_stack () in
+       ignore (make_tile_rack s);
+       s)
+      92;
+    make_rack_exception
+      "Empty stack raises NotEnoughTiles when making rack"
+      (let s = make_tile_stack () in
+       Stack.clear s;
+       s)
+      NotEnoughTiles;
   ]
 
 (*****************************************************************)
-(* Start of player tests.*)
+(* Start of Player Module Tests                                  *)
 (*****************************************************************)
 
 let player_tests = []
 
 (*****************************************************************)
-(* Start of board tests.*)
+(* Start of Board Module Tests                                   *)
 (*****************************************************************)
 
 let board = init_board ()
@@ -128,12 +149,12 @@ let board_tests =
   ]
 
 (*****************************************************************)
-(* Start of state tests.*)
+(* Start of State Module Tests                                   *)
 (*****************************************************************)
 let state_tests = []
 
 (*****************************************************************)
-(* Start of command tests.*)
+(* Start of Command Module Tests                                 *)
 (*****************************************************************)
 let command_tests = []
 
