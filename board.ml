@@ -35,6 +35,9 @@ let init_board () = List.rev (init_board_aux [] rows)
 
 (* compare function should sort by num first then color*)
 
+(* Most board manipulation methods can be simplified with List.map where
+   the map function checks if the row of a certain b_row matches
+   row_letter and returning a different b_row if so.*)
 let rec add_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
@@ -50,6 +53,10 @@ let rec add_tile tile row_letter acc = function
    [row_letter] and at the [index]. Specifically, this is used to assign
    Jokers a number or color, no other tiles should ever need to be
    replaced. *)
+
+(* Most board manipulation methods can be simplified with List.map where
+   the map function checks if the row of a certain b_row matches
+   row_letter and returning a different b_row if so.*)
 let rec replace_tile_by_index tile row_letter acc index = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
@@ -66,6 +73,9 @@ let rec replace_tile_by_index tile row_letter acc index = function
       else
         add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
 
+(* Most board manipulation methods can be simplified with List.map where
+   the map function checks if the row of a certain b_row matches
+   row_letter and returning a different b_row if so.*)
 let rec remove_tile tile row_letter acc = function
   | [] -> raise NotValidBoardRow
   | { row = r; tiles = ts } :: t ->
