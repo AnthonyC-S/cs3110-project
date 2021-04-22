@@ -5,7 +5,7 @@ type b_row = {
 
 type b = b_row list
 
-exception NotValidBoardRow
+exception InvalidBoardRow
 
 exception RowAlreadyFull
 

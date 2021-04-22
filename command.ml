@@ -68,29 +68,21 @@ let check_unique_names name_list =
 
 let parse_start str =
   match trim_lc_fst_word str with
-  | "2" :: t ->
+  | "2" :: t | "two" :: t ->
       check_name_len t;
       check_unique_names t;
       init_two_players t
-  | "two" :: t ->
-      check_name_len t;
-      check_unique_names t;
-      init_two_players t
-  | "4" :: t ->
+  | "4" :: t | "four" :: t ->
       check_name_len t;
       check_unique_names t;
       init_four_players t
-  | "four" :: t ->
-      check_name_len t;
-      check_unique_names t;
-      init_four_players t
-  | [ "quit" ] ->
+  | [ "q" ] | [ "quit" ] ->
       print_string
         "\n  \027[38;5;70mThank you for playing! Goodbye.\027[0m\n\n";
       Stdlib.exit 0
   | _ -> raise Malformed
 
-let rec split_board (acc : (string * int) list) = function
+let rec split_board acc = function
   | [] -> acc
   | h :: t ->
       if String.length h = 2 then

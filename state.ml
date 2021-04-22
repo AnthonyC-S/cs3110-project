@@ -22,8 +22,6 @@ let init_state player_lst =
     t_stack = stack;
   }
 
-exception NotValidIndex
-
 exception HaveNotPlayedMeld
 
 exception InvalidBoardSets
@@ -82,28 +80,26 @@ let reset_turn st =
     players = new_player :: get_other_players st;
   }
 
-let move_from_rack st index row =
+let move_from_rack st (index : int) row =
   let cur_player = get_current_player st in
   let rack = cur_player.rack in
-  let rack_len = List.length rack in
-  let tile_to_move = get_tile_of_index index rack in
-  if rack_len <> 0 && index - 1 < rack_len && index - 1 >= 0 then
-    let new_player =
-      {
-        cur_player with
-        meld_count = tile_to_move :: cur_player.meld_count;
-      }
-      |> update_past_rack
-    in
+  (* let rack_len = List.length rack in *)
+  let tile_to_move = get_tile_of_index "" index rack in
+  let new_player =
     {
-      st with
-      current_board = add_tile tile_to_move row [] st.current_board;
-      past_boards = update_past_boards st;
-      players =
-        new_player :: get_other_players st
-        |> remove_from_rack st.current_turn index;
+      cur_player with
+      meld_count = tile_to_move :: cur_player.meld_count;
     }
-  else raise NotValidIndex
+    |> update_past_rack
+  in
+  {
+    st with
+    current_board = add_tile tile_to_move row [] st.current_board;
+    past_boards = update_past_boards st;
+    players =
+      new_player :: get_other_players st
+      |> remove_from_rack st.current_turn index;
+  }
 
 (*Note, had to do the sort list and reverse order so the higher index
   tiles would be moved first and not mess up the index order other
@@ -123,7 +119,7 @@ let assign_joker_in_rack (st : s) (n : int) (c : color) (index : int) =
   let rack = cur_player.rack in
   let new_rack =
     List.filteri (fun i _ -> i < index - 1) rack
-    @ [ update_joker n c (get_tile_of_index index rack) ]
+    @ [ update_joker n c (get_tile_of_index "" index rack) ]
     @ List.filteri (fun i _ -> i > index - 1) rack
   in
   let new_player = { cur_player with rack = new_rack } in
@@ -134,7 +130,7 @@ let move_from_board st from_row index to_row =
   if cur_player.played_valid_meld = false then raise HaveNotPlayedMeld
   else
     let tile =
-      get_tile_of_index index
+      get_tile_of_index from_row index
         (List.find (fun { row = x } -> x = from_row) st.current_board)
           .tiles
     in
@@ -166,7 +162,7 @@ let rec multiple_moves_from_board from_lst to_row st =
    as (row string, index int). *)
 let assign_joker_from_board st n c from =
   let tile_to_update =
-    get_tile_of_index (snd from)
+    get_tile_of_index (fst from) (snd from)
       (List.find (fun { row = x } -> x = fst from) st.current_board)
         .tiles
   in

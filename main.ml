@@ -15,7 +15,15 @@ let invalid_board_sets_msg =
   "  You cannot end turn due to invalid sets on the board.\n\
   \  Try to fix the invaid sets or go back with \"undo\" / \"reset\".\n"
 
-let not_valid_index_and_invalid_tile_msg =
+let not_valid_index_msg i =
+  "  Could not find the tile on "
+  ^ (if fst i = "" then "rack" else "row " ^ fst i)
+  ^ ", index "
+  ^ string_of_int (snd i)
+  ^ ". Check if the tile has the correct\n\
+    \  index and/or row. Type \"help\" to see commands.\n"
+
+let not_valid_tile_msg =
   "  Could not find the tile you entered. Check if the tile has the \
    correct\n\
   \  index and/or row. Type \"help\" to see commands.\n"
@@ -102,9 +110,9 @@ and commands command st =
   with
   | HaveNotPlayedMeld -> play_turn st have_not_played_meld_msg
   | InvalidBoardSets -> play_turn st invalid_board_sets_msg
-  | NotValidIndex -> play_turn st not_valid_index_and_invalid_tile_msg
-  | InvalidTile -> play_turn st not_valid_index_and_invalid_tile_msg
-  | NotValidBoardRow -> play_turn st not_valid_board_row_msg
+  | InvalidIndex i -> play_turn st (not_valid_index_msg i)
+  | InvalidTile -> play_turn st not_valid_tile_msg
+  | InvalidBoardRow -> play_turn st not_valid_board_row_msg
   | InvalidMeld -> play_turn st invalid_meld_msg
   | NotEnoughTiles -> play_turn st not_enough_tiles_msg
   | RowAlreadyFull -> play_turn st row_already_full_msg

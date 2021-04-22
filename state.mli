@@ -6,8 +6,6 @@ type s = {
   t_stack : Tile.t Stack.t;
 }
 
-exception NotValidIndex
-
 exception HaveNotPlayedMeld
 
 exception InvalidBoardSets

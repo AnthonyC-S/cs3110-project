@@ -9,7 +9,7 @@ type b_row = {
 
 type b = b_row list
 
-exception NotValidBoardRow
+exception InvalidBoardRow
 
 exception RowAlreadyFull
 
@@ -39,7 +39,7 @@ let init_board () = List.rev (init_board_aux [] rows)
    the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
 let rec add_tile tile row_letter acc = function
-  | [] -> raise NotValidBoardRow
+  | [] -> raise InvalidBoardRow
   | { row = r; tiles = ts } :: t ->
       if r = row_letter && List.length ts == 13 then
         raise RowAlreadyFull
@@ -58,7 +58,7 @@ let rec add_tile tile row_letter acc = function
    the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
 let rec replace_tile_by_index tile row_letter acc index = function
-  | [] -> raise NotValidBoardRow
+  | [] -> raise InvalidBoardRow
   | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
@@ -77,7 +77,7 @@ let rec replace_tile_by_index tile row_letter acc index = function
    the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
 let rec remove_tile tile row_letter acc = function
-  | [] -> raise NotValidBoardRow
+  | [] -> raise InvalidBoardRow
   | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
