@@ -14,6 +14,7 @@ type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
   to_row : string;
+  errors : exn list;
 }
 
 type command =
@@ -90,12 +91,14 @@ let rec split_board acc = function
           ((String.make 1 h.[0], int_of_string (String.make 1 h.[1]))
           :: acc)
           t
-      else if String.length h = 3 then
+      else
+        (*if String.length h = 3 then *)
         split_board
           ((String.make 1 h.[0], int_of_string (String.sub h 1 2))
           :: acc)
           t
-      else raise Malformed
+
+(* else raise Malformed *)
 
 let parse_move_from_board str_lst =
   let board =
@@ -132,7 +135,13 @@ let parse_move str_lst =
           if List.length from_board = 0 && List.length from_rack = 0
           then raise Malformed
           else
-            Move { from_board; from_rack; to_row = parse_move_to_row t }
+            Move
+              {
+                from_board;
+                from_rack;
+                to_row = parse_move_to_row t;
+                errors = [];
+              }
       | h :: t -> split_at_to (h :: acc) t
       | [] -> raise Malformed
     in

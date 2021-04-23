@@ -1,0 +1,20 @@
+Malformed Move
+
+
+Invalid Index - Either Rack or Row
+
+Invalid From Row
+
+Invalid To Row
+
+Row already full
+
+Missing To
+
+Empty From Rack / From Board
+
+Empty To Row
+
+Completely Empty
+
+More than one two row
