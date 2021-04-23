@@ -2,6 +2,7 @@ type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
   to_row : string;
+  errors : exn list;
 }
 
 type command =

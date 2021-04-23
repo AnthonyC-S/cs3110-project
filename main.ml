@@ -28,9 +28,10 @@ let invalid_tile_msg =
    correct\n\
   \  index and/or row. Type \"help\" to see commands.\n"
 
-let invalid_board_row_msg =
-  "  Could not find the row you entered. Check the capitalization of \
-   the row name. Type \"help\" to see commands.\n"
+let invalid_board_row_msg s =
+  "  Could not find the board row " ^ s
+  ^ ". Check the capitalization of the row name. Type \"help\" to see \
+     commands.\n"
 
 let invalid_meld_msg =
   "  Can not end turn since since you do not have a valid meld, i.e. \
@@ -42,9 +43,10 @@ let not_enough_tiles_msg =
   "  The pile is empty and there are no tiles left to draw.\n\
   \  There should be enough tiles to finish the game!\n"
 
-let row_already_full_msg =
-  "  Board rows can not have more than 13 tiles. Try adding fewer \
-   tiles or adding to a new row.\n"
+let row_already_full_msg s =
+  "  Board row " ^ s
+  ^ " can not have more than 13 tiles. Try adding fewer tiles or \
+     adding to a new row.\n"
 
 let game_commands =
   g "  Game Commands:\n\n"
@@ -112,10 +114,10 @@ and commands command st =
   | InvalidBoardSets -> play_turn st invalid_board_sets_msg
   | InvalidIndex i -> play_turn st (invalid_index_msg i)
   | InvalidTile -> play_turn st invalid_tile_msg
-  | InvalidBoardRow -> play_turn st invalid_board_row_msg
+  | InvalidBoardRow s -> play_turn st (invalid_board_row_msg s)
   | InvalidMeld -> play_turn st invalid_meld_msg
   | NotEnoughTiles -> play_turn st not_enough_tiles_msg
-  | RowAlreadyFull -> play_turn st row_already_full_msg
+  | RowAlreadyFull s -> play_turn st (row_already_full_msg s)
 
 let rec welcome st msg =
   clear_board ();

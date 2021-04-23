@@ -94,7 +94,7 @@ let move_from_rack st (index : int) row =
   in
   {
     st with
-    current_board = add_tile tile_to_move row [] st.current_board;
+    current_board = add_tile tile_to_move row st.current_board;
     past_boards = update_past_boards st;
     players =
       new_player :: get_other_players st
@@ -135,8 +135,7 @@ let move_from_board st from_row index to_row =
           .tiles
     in
     let new_board =
-      remove_tile tile from_row [] st.current_board
-      |> add_tile tile to_row []
+      remove_tile tile from_row st.current_board |> add_tile tile to_row
     in
     {
       st with
@@ -167,7 +166,7 @@ let assign_joker_from_board st n c from =
         .tiles
   in
   let new_board =
-    remove_tile tile_to_update (fst from) [] st.current_board
+    remove_tile tile_to_update (fst from) st.current_board
     |> replace_tile_by_index
          (update_joker n c tile_to_update)
          (fst from) [] (snd from)

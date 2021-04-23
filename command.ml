@@ -100,6 +100,26 @@ let rec split_board acc = function
 
 (* else raise Malformed *)
 
+let valid_from_board_syntax s =
+  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) s 0
+  && (String.length s = 2 || String.length s = 3)
+
+let valid_from_rack_syntax s =
+  Str.string_match (Str.regexp "[0-9]") s 0
+  && (String.length s = 1 || String.length s = 2)
+
+let valid_to_row_syntax s =
+  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) s 0
+  && String.length s = 1
+
+(* let parse_rack_and_board before_to_str_lst = let from_board =
+   List.filter valid_from_board_syntax before_to_str_lst in let
+   from_rack = List.filter valid_from_rack_syntax before_to_str_lst in
+   let errors = List.map (fun x -> raise ) List.filter (fun x -> not
+   (List.mem x (from_board @ from_rack))) before_to_str_lst in
+   {from_board = split_board [] from_board; from_rack = List.map
+   int_of_string from_board; to_row = []; errors = errors} *)
+
 let parse_move_from_board str_lst =
   let board =
     List.filter
@@ -152,20 +172,22 @@ let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
   else
     let str_lst = trim_lc_fst_word str in
-
     let check_lst = function
       | [ "quit" ] | [ "q" ] | [ "exit" ] -> Quit
-      | [ "move" ] -> raise Malformed
       | "move" :: t | "mv" :: t | "play" :: t | "add" :: t ->
           parse_move t
-      | [ "undo" ] -> Undo
-      | [ "reset" ] -> Reset
-      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->
+      | [ "undo" ] | [ "u" ] -> Undo
+      | [ "reset" ] | [ "r" ] -> Reset
+      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] | [ "cs" ]
+        ->
           SortByColor
-      | [ "number"; "sort" ] | [ "sort"; "number" ] | [ "sn" ] ->
+      | [ "number"; "sort" ]
+      | [ "sort"; "number" ]
+      | [ "sn" ]
+      | [ "ns" ] ->
           SortByNumber
       | [ "draw" ] | [ "d" ] -> Draw
-      | [ "end"; "turn" ] -> EndTurn
+      | [ "end"; "turn" ] | [ "et" ] -> EndTurn
       | [ "help" ] | [ "h" ] -> Help
       | _ -> raise Malformed
     in

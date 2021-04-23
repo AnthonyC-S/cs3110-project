@@ -9,9 +9,9 @@ type b_row = {
 
 type b = b_row list
 
-exception InvalidBoardRow
+exception InvalidBoardRow of string
 
-exception RowAlreadyFull
+exception RowAlreadyFull of string
 
 let rows =
   (List.init 26 (( + ) 65)
@@ -38,15 +38,22 @@ let init_board () = List.rev (init_board_aux [] rows)
 (* Most board manipulation methods can be simplified with List.map where
    the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
-let rec add_tile tile row_letter acc = function
-  | [] -> raise InvalidBoardRow
-  | { row = r; tiles = ts } :: t ->
-      if r = row_letter && List.length ts == 13 then
-        raise RowAlreadyFull
-      else if r = row_letter && List.length ts < 13 then
-        acc @ ({ row = row_letter; tiles = tile :: ts } :: t)
-      else
-        add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
+
+let add_tile tile rl b =
+  List.map
+    (fun x ->
+      if x.row = rl && List.length x.tiles == 13 then
+        raise (RowAlreadyFull rl)
+      else if x.row = rl then { row = x.row; tiles = tile :: x.tiles }
+      else x)
+    b
+
+(* let rec add_tile tile row_letter acc = function | [] -> raise
+   (InvalidBoardRow row_letter) | { row = r; tiles = ts } :: t -> if r =
+   row_letter && List.length ts == 13 then raise RowAlreadyFull else if
+   r = row_letter && List.length ts < 13 then acc @ ({ row = row_letter;
+   tiles = tile :: ts } :: t) else add_tile tile row_letter (acc @ [ {
+   row = r; tiles = ts } ]) t *)
 
 (* [replace_tile_by_index tile row_letter acc index st.current_board]
    replaces the old tile with a new [tile] in [st.current_board] at
@@ -58,7 +65,7 @@ let rec add_tile tile row_letter acc = function
    the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
 let rec replace_tile_by_index tile row_letter acc index = function
-  | [] -> raise InvalidBoardRow
+  | [] -> raise (InvalidBoardRow row_letter)
   | { row = r; tiles = ts } :: t ->
       if r = row_letter then
         acc
@@ -70,26 +77,27 @@ let rec replace_tile_by_index tile row_letter acc index = function
               @ List.filteri (fun i _ -> i >= index - 1) ts;
           }
           :: t
-      else
-        add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
+      else add_tile tile row_letter t
 
 (* Most board manipulation methods can be simplified with List.map where
-   the map function checks if the row of a certain b_row matches
-   row_letter and returning a different b_row if so.*)
-let rec remove_tile tile row_letter acc = function
-  | [] -> raise InvalidBoardRow
-  | { row = r; tiles = ts } :: t ->
-      if r = row_letter then
-        acc
-        @ {
-            row = row_letter;
-            tiles = List.filter (fun x -> x <> tile) ts;
-          }
-          :: t
-      else
-        remove_tile tile row_letter
-          (acc @ [ { row = r; tiles = ts } ])
-          t
+   the map function checks if the row of a certain b_row matches (*
+   row_letter and returning a different b_row if so.*) let rec
+   remove_tile tile row_letter acc = function | [] -> raise
+   InvalidBoardRow | { row = r; tiles = ts } :: t -> if r = row_letter
+   then acc @ { row = row_letter; tiles = List.filter (fun x -> x <>
+   tile) ts; } :: t else remove_tile tile row_letter (acc @ [ { row = r;
+   tiles = ts } ]) t *)
+
+let remove_tile tile rl b =
+  List.map
+    (fun x ->
+      if x.row = rl then
+        {
+          row = x.row;
+          tiles = List.filter (fun t -> t <> tile) x.tiles;
+        }
+      else x)
+    b
 
 let valid_group lst =
   let len = List.length lst in
