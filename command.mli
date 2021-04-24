@@ -2,7 +2,6 @@ type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
   to_row : string;
-  errors : exn list;
 }
 
 type command =
@@ -23,6 +22,22 @@ exception Malformed
 exception NameTooLong
 
 exception NotUniqueNames
+
+exception InvalidMoveMissingTo
+
+exception EmptyMove
+
+exception EmptyMoveFrom
+
+exception InvalidMoveFrom of string list
+
+exception DuplicateMoveFrom of string list
+
+exception InvalidMoveTo of string list
+
+exception MultipleMoveTo of string list
+
+exception EmptyMoveTo
 
 val parse : string -> command
 

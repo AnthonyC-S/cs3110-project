@@ -62,9 +62,101 @@ let game_commands =
   ^ "end turn          Checks for a valid board and ends turn.\n" ^ ip
   ^ "help              Display game play commands.\n\n"
 
+let malformed_msg =
+  "  Did you enter the command correctly? Type \"help\" for commands.\n"
+
+let empty_move_msg =
+  "  The move command is empty. Type \"help\" to see the move command \
+   structure.\n"
+
+let empty_move_from_msg =
+  "  The move command does not have tiles to move. Type \"help\" to \
+   see the move command structure.\n"
+
+let empty_move_to_msg =
+  "  The move command is missing a row to move the tiles to. Type \
+   \"help\" to see the move command structure.\n"
+
+let invalid_move_missing_to_msg =
+  "  The move command is missing \"to\". Type \"help\" to see the move \
+   command structure.\n"
+
+let rec str_lst_syntax (str_lst : string list) : string =
+  match str_lst with
+  | [] -> ""
+  | [ h ] -> "\"" ^ g h ^ "\""
+  | [ h; t ] -> "\"" ^ g h ^ "\"" ^ " and " ^ "\"" ^ g t ^ "\""
+  | h :: t -> "\"" ^ g h ^ "\"" ^ ", " ^ str_lst_syntax t
+
+let invalid_move_from_msg str_lst =
+  "  Could not find " ^ str_lst_syntax str_lst
+  ^ ".\n  Double check the tile"
+  ^ (if List.length str_lst = 1 then "" else "s")
+  ^ " you are trying to move. Type \"help\" to see commands.\n"
+
+let invalid_move_to_msg str_lst =
+  "  Could not move to " ^ str_lst_syntax str_lst
+  ^ ".\n  Double check the row name you are trying to move to. "
+  ^
+  if List.length str_lst = 1 then "Type \"help\" to see commands.\n"
+  else
+    "You can only move to a single row.\n\
+    \  Type \"help\" to see commands.\n"
+
+let duplicate_move_from_msg str_lst =
+  "  You are trying to move the tile"
+  ^ (if List.length str_lst = 1 then " at position "
+    else "s at positions ")
+  ^ str_lst_syntax str_lst
+  ^ " twice.\n\
+    \  Each tile you move must have a unique location. Type \"help\" \
+     to see commands.\n"
+
+let multiple_move_to_msg str_lst =
+  "  You are trying to move to these locations: "
+  ^ str_lst_syntax str_lst
+  ^ ".\n\
+    \  But you can only move to a single row. Type \"help\" to see \
+     commands.\n"
+
+let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
+
+let end_turn_msg = "  Starting next players turn.\n"
+
+let reset_msg = "  Board and rack have been reset.\n"
+
+let sort_num_msg = "  Sorted by number.\n"
+
+let sort_col_msg = "  Sorted by color.\n"
+
 let quit_game () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
+
+let reset_st st = if st.past_boards = [] then st else reset_turn st
+
+let reset_msg st =
+  if st.past_boards = [] then "  No moves to go back to.\n"
+  else reset_msg
+
+let get_exception_msg = function
+  | EmptyMove -> empty_move_msg
+  | EmptyMoveFrom -> empty_move_from_msg
+  | EmptyMoveTo -> empty_move_to_msg
+  | InvalidMoveMissingTo -> invalid_move_missing_to_msg
+  | InvalidMoveFrom s -> invalid_move_from_msg s
+  | InvalidMoveTo s -> invalid_move_to_msg s
+  | DuplicateMoveFrom s -> duplicate_move_from_msg s
+  | MultipleMoveTo s -> multiple_move_to_msg s
+  | HaveNotPlayedMeld -> have_not_played_meld_msg
+  | InvalidBoardSets -> invalid_board_sets_msg
+  | InvalidIndex i -> invalid_index_msg i
+  | InvalidTile -> invalid_tile_msg
+  | InvalidBoardRow s -> invalid_board_row_msg s
+  | InvalidMeld -> invalid_meld_msg
+  | NotEnoughTiles -> not_enough_tiles_msg
+  | RowAlreadyFull s -> row_already_full_msg s
+  | Malformed | BlankInput | _ -> malformed_msg
 
 let rec play_turn st msg =
   clear_board ();
@@ -75,10 +167,7 @@ let rec play_turn st msg =
       try
         let command = parse str in
         commands command st
-      with Malformed | BlankInput ->
-        play_turn st
-          "  Did you enter the command correctly? Type \"help\" for \
-           commands.\n")
+      with e -> play_turn st (get_exception_msg e))
 
 and commands command st =
   try
@@ -93,31 +182,13 @@ and commands command st =
           (multiple_moves_from_board m.from_board m.to_row st
           |> multiple_moves_from_rack m.from_rack m.to_row)
           "  Completed move, what next?\n"
-    | Reset ->
-        if st.past_boards = [] then
-          play_turn st "  No moves to go back to.\n"
-        else
-          play_turn (reset_turn st)
-            "  Board and rack have been reset.\n"
-    | SortByColor ->
-        play_turn (sort_rack_by_color st) "  Sorted by color.\n"
-    | SortByNumber ->
-        play_turn (sort_rack_by_number st) "  Sorted by number.\n"
-    | Draw ->
-        play_turn (draw st)
-          "  Drawed tile from pile. Type \"end turn\".\n"
-    | EndTurn ->
-        play_turn (end_turn st) "  Starting next players turn.\n"
+    | Reset -> play_turn (reset_st st) (reset_msg st)
+    | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
+    | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
+    | Draw -> play_turn (draw st) draw_msg
+    | EndTurn -> play_turn (end_turn st) end_turn_msg
     | Help -> play_turn st game_commands
-  with
-  | HaveNotPlayedMeld -> play_turn st have_not_played_meld_msg
-  | InvalidBoardSets -> play_turn st invalid_board_sets_msg
-  | InvalidIndex i -> play_turn st (invalid_index_msg i)
-  | InvalidTile -> play_turn st invalid_tile_msg
-  | InvalidBoardRow s -> play_turn st (invalid_board_row_msg s)
-  | InvalidMeld -> play_turn st invalid_meld_msg
-  | NotEnoughTiles -> play_turn st not_enough_tiles_msg
-  | RowAlreadyFull s -> play_turn st (row_already_full_msg s)
+  with e -> play_turn st (get_exception_msg e)
 
 let rec welcome st msg =
   clear_board ();

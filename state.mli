@@ -36,7 +36,7 @@ val get_current_player : s -> Player.p
 
 val sort_rack_by_color : s -> s
 
-val sort_rack_by_number : s -> s
+val sort_rack_by_num : s -> s
 
 val end_turn : s -> s
 

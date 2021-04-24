@@ -2,34 +2,27 @@ Possible Malformed Move Commands
 
 Exceptions caught in Command.ml:
 
-InvalidMoveMissingTo -> If "to" is missing from move command.
-EmptyMove -> If move command does not have any argruements after it.
++ InvalidMoveMissingTo -> If "to" is missing from move command.
++ EmptyMove -> If move command does not have any argruements after it.
 
-InvalidMoveFrom [str] -> Catches strings that do not conform to valid board 
++ InvalidMoveFrom [str] -> Catches strings that do not conform to valid board 
                          locations or index locations.
-EmptyMoveFrom -> If both from_rack and from_board are empty.
-DuplicateMoveFrom [s] -> If either from_rack or from_board contain a duplicate.
++ EmptyMoveFrom -> If both from_rack and from_board are empty.
++ DuplicateMoveFrom [s] -> If either from_rack or from_board contain a duplicate.
 
-InvalidMoveTo [str] -> If to_row not a valid board row. 
-MultipleMoveTo [str] -> If length of to_row is greater than one. 
-EmptyMoveTo -> If to_row is empty
-
-
-
-
-
-
++I nvalidMoveTo [str] -> If to_row not a valid board row. 
++ DuplicateMoveTo [str]
++ MultipleMoveTo  -> If length of to_row is greater than one. 
++ EmptyMoveTo -> If to_row is empty
 
 
 
 Exceptions caught in Tile.
 
 
-InvalidIndex -> Valid syntax but Invalid Index - Either Rack or Row
-Row already full
+InvalidIndex [s] -> Valid syntax but invalid Index - in either from_rack or from_board
 
 
+Exceptions caught in Board.ml
 
-
-
-=
+RowAlreadyFull s -> Already 13 tiles on the board row .

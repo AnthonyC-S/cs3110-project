@@ -8,13 +8,28 @@ exception NameTooLong
 
 exception NotUniqueNames
 
+exception InvalidMoveMissingTo
+
+exception EmptyMove
+
+exception EmptyMoveFrom
+
+exception EmptyMoveTo
+
+exception InvalidMoveFrom of string list
+
+exception InvalidMoveTo of string list
+
+exception DuplicateMoveFrom of string list
+
+exception MultipleMoveTo of string list
+
 (* type move_phrase = string list *)
 
 type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
   to_row : string;
-  errors : exn list;
 }
 
 type command =
@@ -100,17 +115,12 @@ let rec split_board acc = function
 
 (* else raise Malformed *)
 
-let valid_from_board_syntax s =
-  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) s 0
-  && (String.length s = 2 || String.length s = 3)
+(* let valid_from_rack_lst str_lst = List.filter (fun s ->
+   Str.string_match (Str.regexp "[0-9]") s 0 && (String.length s = 1 ||
+   String.length s = 2)) str_lst
 
-let valid_from_rack_syntax s =
-  Str.string_match (Str.regexp "[0-9]") s 0
-  && (String.length s = 1 || String.length s = 2)
-
-let valid_to_row_syntax s =
-  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) s 0
-  && String.length s = 1
+   let malformed_from from_board from_rack str_lst = List.filter (fun s
+   -> not (List.mem s (from_board @ from_rack))) str_lst *)
 
 (* let parse_rack_and_board before_to_str_lst = let from_board =
    List.filter valid_from_board_syntax before_to_str_lst in let
@@ -120,53 +130,69 @@ let valid_to_row_syntax s =
    {from_board = split_board [] from_board; from_rack = List.map
    int_of_string from_board; to_row = []; errors = errors} *)
 
-let parse_move_from_board str_lst =
-  let board =
-    List.filter
-      (fun x ->
-        Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) x 0
-        && (String.length x = 2 || String.length x = 3))
-      str_lst
+(* let parse_move_from_board str_lst = let board = List.filter (fun x ->
+   Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) x 0 &&
+   (String.length x = 2 || String.length x = 3)) str_lst in split_board
+   [] board
+
+   let parse_move_from_rack str_lst = List.filter (fun x ->
+   Str.string_match (Str.regexp "[0-9]") x 0 && (String.length x = 1 ||
+   String.length x = 2)) str_lst |> List.map (fun x -> int_of_string x) *)
+
+let valid_board_syntax s =
+  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) s 0
+  && (String.length s = 2 || String.length s = 3)
+
+let valid_rack_syntax s =
+  Str.string_match (Str.regexp "[0-9]") s 0
+  && (String.length s = 1 || String.length s = 2)
+
+let rec check_for_dups = function
+  | [] -> []
+  | h :: t ->
+      if List.mem h t then h :: check_for_dups t else check_for_dups t
+
+let parse_from str_lst =
+  let f_board = List.filter valid_board_syntax str_lst in
+  let f_rack = List.filter valid_rack_syntax str_lst in
+  let f_malformed =
+    List.filter (fun s -> not (List.mem s (f_board @ f_rack))) str_lst
   in
-  split_board [] board
+  let f_dups = List.sort_uniq compare (check_for_dups str_lst) in
+  (f_board, f_rack, f_malformed, f_dups)
 
-let parse_move_from_rack str_lst =
-  List.filter
-    (fun x ->
-      Str.string_match (Str.regexp "[0-9]") x 0
-      && (String.length x = 1 || String.length x = 2))
-    str_lst
-  |> List.map (fun x -> int_of_string x)
+let valid_to_row_syntax s =
+  Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) s 0
+  && String.length s = 1
 
-let parse_move_to_row str_lst =
-  List.hd
-    (List.filter
-       (fun x ->
-         Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?]|}) x 0
-         && String.length x = 1)
-       str_lst)
+let parse_to str_lst =
+  let to_row = List.filter valid_to_row_syntax str_lst in
+  let to_malformed =
+    List.filter (fun s -> not (List.mem s to_row)) str_lst
+  in
+  (to_row, to_malformed)
 
-let parse_move str_lst =
-  try
-    let rec split_at_to acc = function
-      | "to" :: t ->
-          let from_board = parse_move_from_board acc in
-          let from_rack = parse_move_from_rack acc in
-          if List.length from_board = 0 && List.length from_rack = 0
-          then raise Malformed
-          else
-            Move
-              {
-                from_board;
-                from_rack;
-                to_row = parse_move_to_row t;
-                errors = [];
-              }
-      | h :: t -> split_at_to (h :: acc) t
-      | [] -> raise Malformed
-    in
-    split_at_to [] str_lst
-  with _ -> raise Malformed
+let parse_rack_and_board before_to_lst after_to_lst =
+  let f_board, f_rack, f_malformed, f_dups = parse_from before_to_lst in
+  let to_row, to_malformed = parse_to after_to_lst in
+  if f_malformed <> [] then raise (InvalidMoveFrom f_malformed)
+  else if f_dups <> [] then raise (DuplicateMoveFrom f_dups)
+  else if f_board = [] && f_rack = [] then raise EmptyMoveFrom
+  else if to_malformed <> [] then raise (InvalidMoveTo to_malformed)
+  else if List.length to_row > 1 then raise (MultipleMoveTo to_row)
+  else if to_row = [] then raise EmptyMoveTo
+  else
+    Move
+      {
+        from_board = split_board [] f_board;
+        from_rack = List.map (fun x -> int_of_string x) f_rack;
+        to_row = List.hd to_row;
+      }
+
+let rec parse_move acc = function
+  | "to" :: t -> parse_rack_and_board (List.rev acc) t
+  | h :: t -> parse_move (h :: acc) t
+  | [] -> raise InvalidMoveMissingTo
 
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
@@ -174,17 +200,15 @@ let parse str =
     let str_lst = trim_lc_fst_word str in
     let check_lst = function
       | [ "quit" ] | [ "q" ] | [ "exit" ] -> Quit
-      | "move" :: t | "mv" :: t | "play" :: t | "add" :: t ->
-          parse_move t
+      | [ "move" ] | [ "mv" ] | [ "m" ] | [ "play" ] | [ "add" ] ->
+          raise EmptyMove
+      | "move" :: t | "mv" :: t | "m" :: t | "play" :: t | "add" :: t ->
+          parse_move [] t
       | [ "undo" ] | [ "u" ] -> Undo
       | [ "reset" ] | [ "r" ] -> Reset
-      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] | [ "cs" ]
-        ->
+      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->
           SortByColor
-      | [ "number"; "sort" ]
-      | [ "sort"; "number" ]
-      | [ "sn" ]
-      | [ "ns" ] ->
+      | [ "number"; "sort" ] | [ "sort"; "number" ] | [ "sn" ] ->
           SortByNumber
       | [ "draw" ] | [ "d" ] -> Draw
       | [ "end"; "turn" ] | [ "et" ] -> EndTurn

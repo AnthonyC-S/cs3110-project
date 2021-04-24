@@ -28,10 +28,6 @@ exception InvalidBoardSets
 
 exception InvalidMeld
 
-type result =
-  | Legal of s
-  | Illegal
-
 let update_past_boards st = st.past_boards @ [ st.current_board ]
 
 let get_current_player st = current_player st.current_turn st.players
@@ -190,7 +186,7 @@ let sort_rack_by_color st =
   in
   { st with players = new_player :: get_other_players st }
 
-let sort_rack_by_number st =
+let sort_rack_by_num st =
   let cur_player = get_current_player st in
   let new_player =
     { cur_player with rack = sort_by_number cur_player.rack }
