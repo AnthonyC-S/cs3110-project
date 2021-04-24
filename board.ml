@@ -26,19 +26,6 @@ let rec init_board_aux (acc : b_row list) (rows : string list) =
 
 let init_board () = List.rev (init_board_aux [] rows)
 
-(*Helper for [compare_tiles] let get_number x = match x with |Tile
-  {number : int; color : color;} -> number |Joker {number : int; color :
-  color;} -> number
-
-  let compare_tiles x y = if (get_number x) > (get_number y) then 1 else
-  -1 *)
-
-(* compare function should sort by num first then color*)
-
-(* Most board manipulation methods can be simplified with List.map where
-   the map function checks if the row of a certain b_row matches
-   row_letter and returning a different b_row if so.*)
-
 let add_tile tile rl b =
   List.map
     (fun x ->
@@ -48,21 +35,8 @@ let add_tile tile rl b =
       else x)
     b
 
-(* let rec add_tile tile row_letter acc = function | [] -> raise
-   (InvalidBoardRow row_letter) | { row = r; tiles = ts } :: t -> if r =
-   row_letter && List.length ts == 13 then raise RowAlreadyFull else if
-   r = row_letter && List.length ts < 13 then acc @ ({ row = row_letter;
-   tiles = tile :: ts } :: t) else add_tile tile row_letter (acc @ [ {
-   row = r; tiles = ts } ]) t *)
-
-(* [replace_tile_by_index tile row_letter acc index st.current_board]
-   replaces the old tile with a new [tile] in [st.current_board] at
-   [row_letter] and at the [index]. Specifically, this is used to assign
-   Jokers a number or color, no other tiles should ever need to be
-   replaced. *)
-
-(* Most board manipulation methods can be simplified with List.map where
-   the map function checks if the row of a certain b_row matches
+(* Note, most board manipulation methods can be simplified with List.map
+   where the map function checks if the row of a certain b_row matches
    row_letter and returning a different b_row if so.*)
 let rec replace_tile_by_index tile row_letter acc index = function
   | [] -> raise (InvalidBoardRow row_letter)
@@ -78,15 +52,6 @@ let rec replace_tile_by_index tile row_letter acc index = function
           }
           :: t
       else add_tile tile row_letter t
-
-(* Most board manipulation methods can be simplified with List.map where
-   the map function checks if the row of a certain b_row matches (*
-   row_letter and returning a different b_row if so.*) let rec
-   remove_tile tile row_letter acc = function | [] -> raise
-   InvalidBoardRow | { row = r; tiles = ts } :: t -> if r = row_letter
-   then acc @ { row = row_letter; tiles = List.filter (fun x -> x <>
-   tile) ts; } :: t else remove_tile tile row_letter (acc @ [ { row = r;
-   tiles = ts } ]) t *)
 
 let remove_tile tile rl b =
   List.map
@@ -116,10 +81,6 @@ let valid_run lst =
   len >= 3
   && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
   && valid_run_aux true (List.sort compare (numbers_of_t [] lst))
-
-(*acc is true let rec valid_board acc = function | [] -> acc | h :: t ->
-  valid_board ((List.length h = 0 || valid_run h || valid_group h) &&
-  acc) t *)
 
 let rec tiles_of_board board =
   match board with [] -> [] | h :: t -> h.tiles :: tiles_of_board t

@@ -170,7 +170,7 @@ let build_board st msg =
   let pile_row = pile_row (Stack.length st.t_stack) in
   let cur_rack = get_current_rack st.current_turn st.players in
   top_row ^ turn_row ^ meld_row ^ pile_row ^ dash_row ^ top_index_r
-  ^ string_of_board_rows "" st.current_board
+  ^ string_of_board_rows "" st.board
   ^ bottom_row ^ rack_index_r cur_rack ^ g "   Rack:  "
   ^ string_of_tiles "" 1 cur_rack
   ^ "\n\n" ^ msg ^ ip
