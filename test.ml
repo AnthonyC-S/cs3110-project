@@ -100,15 +100,15 @@ let player_tests = []
 
 let board = init_board ()
 
-let board2 = add_tile (make_t "T" 1 Red) "B" [] board
+let board2 = add_tile (make_t "T" 1 Red) "B" board
 
-let board3 = add_tile (make_t "T" 1 Orange) "B" [] board2
+let board3 = add_tile (make_t "T" 1 Orange) "B" board2
 
-let board4 = add_tile (make_t "T" 1 Blue) "B" [] board3
+let board4 = add_tile (make_t "T" 1 Blue) "B" board3
 
-let board5 = add_tile (make_t "T" 1 Black) "B" [] board4
+let board5 = add_tile (make_t "T" 1 Black) "B" board4
 
-let board6 = add_tile (make_t "T" 3 Black) "G" [] board5
+let board6 = add_tile (make_t "T" 3 Black) "G" board5
 
 let add_tile_test
     (name : string)
@@ -117,7 +117,7 @@ let add_tile_test
     (board : b)
     (expected_output : b) =
   name >:: fun _ ->
-  assert_equal expected_output (add_tile tile row [] board)
+  assert_equal expected_output (add_tile tile row board)
 
 let remove_tile_test
     (name : string)
@@ -126,7 +126,7 @@ let remove_tile_test
     (board : b)
     (expected_output : b) =
   name >:: fun _ ->
-  assert_equal expected_output (remove_tile tile row [] board)
+  assert_equal expected_output (remove_tile tile row board)
 
 (*Testing for validity of groups and runs*)
 let valid_board_test
