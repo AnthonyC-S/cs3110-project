@@ -2,8 +2,8 @@ type s = {
   current_turn : int;
   current_board : Board.b;
   players : Player.p list;
-  past_boards : Board.b list;
   t_stack : Tile.t Stack.t;
+  past_state : s list;
 }
 
 exception HaveNotPlayedMeld
@@ -28,6 +28,8 @@ val move_from_board : s -> string -> int -> string -> s
 
 val multiple_moves_from_board : (string * int) list -> string -> s -> s
 
+val move : Command.move_phrase -> s -> s
+
 val draw : s -> s
 
 val move_from_rack : s -> int -> string -> s
@@ -39,5 +41,3 @@ val sort_rack_by_color : s -> s
 val sort_rack_by_num : s -> s
 
 val end_turn : s -> s
-
-val debug : s -> unit

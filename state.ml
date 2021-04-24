@@ -1,6 +1,7 @@
 open Player
 open Board
 open Tile
+open Command
 
 (** Need State Module Description *)
 
@@ -8,8 +9,8 @@ type s = {
   current_turn : int;
   current_board : b;
   players : p list;
-  past_boards : b list;
   t_stack : Tile.t Stack.t;
+  past_state : s list;
 }
 
 let init_state player_lst =
@@ -18,8 +19,8 @@ let init_state player_lst =
     current_turn = 1;
     current_board = init_board ();
     players = make_players [] stack player_lst;
-    past_boards = [];
     t_stack = stack;
+    past_state = [];
   }
 
 exception HaveNotPlayedMeld
@@ -28,31 +29,25 @@ exception InvalidBoardSets
 
 exception InvalidMeld
 
-let update_past_boards st = st.past_boards @ [ st.current_board ]
-
 let get_current_player st = current_player st.current_turn st.players
 
 let get_other_players st =
   List.filter (fun x -> x <> get_current_player st) st.players
 
 let undo_move st =
-  let cur_player = get_current_player st in
-  let last_b = get_fst_ele (List.rev st.past_boards) in
+  if st.past_state = [] then st
+  else
+    { (List.hd st.past_state) with past_state = List.tl st.past_state }
 
-  let new_player =
-    {
-      cur_player with
-      rack = get_fst_ele cur_player.past_racks;
-      past_racks = remove_fst_ele cur_player.past_racks;
-      meld_count = remove_fst_ele cur_player.meld_count;
-    }
-  in
-  {
-    st with
-    current_board = last_b;
-    past_boards = List.filter (fun x -> x <> last_b) st.past_boards;
-    players = new_player :: get_other_players st;
-  }
+(* let cur_player = get_current_player st in let last_b = get_fst_ele
+   (List.rev st.past_boards) in
+
+   let new_player = { cur_player with rack = get_fst_ele
+   cur_player.past_racks; past_racks = remove_fst_ele
+   cur_player.past_racks; meld_count = remove_fst_ele
+   cur_player.meld_count; } in { st with current_board = last_b;
+   past_boards = List.filter (fun x -> x <> last_b) st.past_boards;
+   players = new_player :: get_other_players st; } *)
 
 (* [reset_turn st] is the initial game state of [st] at the start of the
    current player's turn. Sets the fields [past_boards] to empty, the
@@ -60,38 +55,28 @@ let undo_move st =
    players rack to the tiles at the start of the turn. Need to also
    reset player rack. *)
 let reset_turn st =
-  let cur_player = get_current_player st in
-  let new_player =
-    {
-      cur_player with
-      rack = get_fst_ele cur_player.past_racks;
-      past_racks = [];
-      meld_count = [];
-    }
-  in
-  {
-    st with
-    current_board = get_fst_ele st.past_boards;
-    past_boards = [];
-    players = new_player :: get_other_players st;
-  }
+  if st.past_state = [] then st
+  else { (List.rev st.past_state |> List.hd) with past_state = [] }
+
+(* let cur_player = get_current_player st in let new_player = {
+   cur_player with rack = get_fst_ele cur_player.past_racks; past_racks
+   = []; meld_count = []; } in { st with current_board = get_fst_ele
+   st.past_boards; past_boards = []; players = new_player ::
+   get_other_players st; } *)
 
 let move_from_rack st (index : int) row =
   let cur_player = get_current_player st in
   let rack = cur_player.rack in
-  (* let rack_len = List.length rack in *)
   let tile_to_move = get_tile_of_index "" index rack in
   let new_player =
     {
       cur_player with
       meld_count = tile_to_move :: cur_player.meld_count;
     }
-    |> update_past_rack
   in
   {
     st with
     current_board = add_tile tile_to_move row st.current_board;
-    past_boards = update_past_boards st;
     players =
       new_player :: get_other_players st
       |> remove_from_rack st.current_turn index;
@@ -136,8 +121,7 @@ let move_from_board st from_row index to_row =
     {
       st with
       current_board = new_board;
-      past_boards = update_past_boards st;
-      players = update_past_rack cur_player :: get_other_players st;
+      players = cur_player :: get_other_players st;
     }
 
 (* Note, [multiple_moves_from_board] needs to have the board tiles to
@@ -149,6 +133,15 @@ let rec multiple_moves_from_board from_lst to_row st =
       { st with current_board = sort_board_by_num [] st.current_board }
   | (r, i) :: t ->
       multiple_moves_from_board t to_row (move_from_board st r i to_row)
+
+let add_past_state start_state current_st =
+  { current_st with past_state = start_state :: current_st.past_state }
+
+let move (moves : move_phrase) st =
+  let start_st = st in
+  multiple_moves_from_board moves.from_board moves.to_row st
+  |> multiple_moves_from_rack moves.from_rack moves.to_row
+  |> add_past_state start_st
 
 (* Note, main.ml needs to check if there are any tiles for all moves
    from the board and assign jokers tiles if they are included. If there
@@ -208,22 +201,8 @@ let end_turn (st : s) : s =
   else
     {
       st with
-      past_boards = [];
       players =
-        (empty_past_rack cur_player |> update_played_valid_meld)
-        :: get_other_players st;
+        (cur_player |> update_played_valid_meld) :: get_other_players st;
       current_turn = update_current_turn st;
+      past_state = [];
     }
-
-let debug st =
-  let cur_player = get_current_player st in
-
-  print_string
-    ("Player's Name          : " ^ cur_player.name ^ "\n"
-   ^ "Meld Count Length      : "
-    ^ string_of_int (List.length cur_player.meld_count)
-    ^ "\n" ^ "Past Racks Length      : "
-    ^ string_of_int (List.length cur_player.past_racks)
-    ^ "\n" ^ "Past Boards Length     : "
-    ^ string_of_int (List.length st.past_boards)
-    ^ "\n")

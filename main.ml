@@ -133,11 +133,17 @@ let quit_game () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
 
-let reset_st st = if st.past_boards = [] then st else reset_turn st
+let reset_st st = if st.past_state = [] then st else reset_turn st
 
 let reset_msg st =
-  if st.past_boards = [] then "  No moves to go back to.\n"
+  if st.past_state = [] then "  No moves to go back to.\n"
   else reset_msg
+
+let undo_st st = if st.past_state = [] then st else undo_move st
+
+let undo_msg st =
+  if st.past_state = [] then "  No moves to go back to.\n"
+  else "  Went back one move.\n"
 
 let get_exception_msg = function
   | EmptyMove -> empty_move_msg
@@ -173,15 +179,8 @@ and commands command st =
   try
     match command with
     | Quit -> quit_game ()
-    | Undo ->
-        if get_past_racks st.current_turn st.players = [] then
-          play_turn st "  No moves to go back to.\n"
-        else play_turn (undo_move st) "  Went back one move.\n"
-    | Move m ->
-        play_turn
-          (multiple_moves_from_board m.from_board m.to_row st
-          |> multiple_moves_from_rack m.from_rack m.to_row)
-          "  Completed move, what next?\n"
+    | Undo -> play_turn (undo_st st) (undo_msg st)
+    | Move m -> play_turn (move m st) "  Completed move, what next?\n"
     | Reset -> play_turn (reset_st st) (reset_msg st)
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg

@@ -10,7 +10,6 @@ type p = {
   played_valid_meld : bool;
   meld_count : t list;
   rack : rack;
-  past_racks : rack list;
   score : int;
 }
 
@@ -30,20 +29,10 @@ let rec make_players acc stack = function
            played_valid_meld = false;
            meld_count = [];
            rack = make_tile_rack stack;
-           past_racks = [];
            score = 0;
          }
         :: acc)
         stack t
-
-(** [empty_past_rack p] is player [p] with the past_racks field set to
-    an empty list of racks. *)
-let empty_past_rack p = { p with past_racks = [] }
-
-(** [update_past_rack p] is player [p] with the current rack [r] of [p]
-    appended at the end of past_racks list. *)
-let update_past_rack p =
-  { p with past_racks = [ p.rack ] @ p.past_racks }
 
 (** [get_fst_ele lst] is the first element of [lst]. It raises the
     EmptryRack exception if [lst] is empty. *)
@@ -56,13 +45,6 @@ let remove_fst_ele = function
   | [] -> raise EmptyList
   | [ h ] -> []
   | h :: t -> t
-
-(** [reset_current_turn_rack p] is player [p] with rack configuration
-    set to the initial configuration from the start of its turn and the
-    past_rack emptied out. *)
-let reset_current_turn_rack player =
-  let fst_rack = get_fst_ele player.past_racks in
-  { (empty_past_rack player) with rack = fst_rack }
 
 (* Helper for [add_to_rack] and [remove_from_rack]. *)
 let player_to_update turn player_lst =
@@ -94,9 +76,6 @@ let get_current_meld_status turn player_lst =
 
 let get_current_rack turn player_lst =
   (current_player turn player_lst).rack
-
-let get_past_racks turn player_lst =
-  (current_player turn player_lst).past_racks
 
 let get_current_score turn player_lst =
   (current_player turn player_lst).score

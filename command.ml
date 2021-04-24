@@ -24,8 +24,6 @@ exception DuplicateMoveFrom of string list
 
 exception MultipleMoveTo of string list
 
-(* type move_phrase = string list *)
-
 type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
@@ -107,37 +105,10 @@ let rec split_board acc = function
           :: acc)
           t
       else
-        (*if String.length h = 3 then *)
         split_board
           ((String.make 1 h.[0], int_of_string (String.sub h 1 2))
           :: acc)
           t
-
-(* else raise Malformed *)
-
-(* let valid_from_rack_lst str_lst = List.filter (fun s ->
-   Str.string_match (Str.regexp "[0-9]") s 0 && (String.length s = 1 ||
-   String.length s = 2)) str_lst
-
-   let malformed_from from_board from_rack str_lst = List.filter (fun s
-   -> not (List.mem s (from_board @ from_rack))) str_lst *)
-
-(* let parse_rack_and_board before_to_str_lst = let from_board =
-   List.filter valid_from_board_syntax before_to_str_lst in let
-   from_rack = List.filter valid_from_rack_syntax before_to_str_lst in
-   let errors = List.map (fun x -> raise ) List.filter (fun x -> not
-   (List.mem x (from_board @ from_rack))) before_to_str_lst in
-   {from_board = split_board [] from_board; from_rack = List.map
-   int_of_string from_board; to_row = []; errors = errors} *)
-
-(* let parse_move_from_board str_lst = let board = List.filter (fun x ->
-   Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) x 0 &&
-   (String.length x = 2 || String.length x = 3)) str_lst in split_board
-   [] board
-
-   let parse_move_from_rack str_lst = List.filter (fun x ->
-   Str.string_match (Str.regexp "[0-9]") x 0 && (String.length x = 1 ||
-   String.length x = 2)) str_lst |> List.map (fun x -> int_of_string x) *)
 
 let valid_board_syntax s =
   Str.string_match (Str.regexp {|[a-zA-Z!@#\$%\^&\?][1-9]|}) s 0
