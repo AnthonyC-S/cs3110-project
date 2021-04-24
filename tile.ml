@@ -23,6 +23,8 @@ exception NotAJoker
 
 exception InvalidTile
 
+exception InvalidIndex of (string * int)
+
 (** [n_lst] is a list of the numbers used in Rummikub, 1..13. *)
 let n_lst = List.init 13 (( + ) 1)
 
@@ -215,7 +217,7 @@ let rec tiles_of_string_lst acc = function
       let new_acc = tile_of_string h :: acc in
       tiles_of_string_lst new_acc t
 
-let get_tile_of_index index t_lst =
+let get_tile_of_index (row : string) index t_lst =
   match List.filteri (fun i _ -> i = index - 1) t_lst with
   | h :: t -> h
-  | [] -> raise InvalidTile
+  | [] -> raise (InvalidIndex (row, index))

@@ -23,6 +23,22 @@ exception NameTooLong
 
 exception NotUniqueNames
 
+exception InvalidMoveMissingTo
+
+exception EmptyMove
+
+exception EmptyMoveFrom
+
+exception InvalidMoveFrom of string list
+
+exception DuplicateMoveFrom of string list
+
+exception InvalidMoveTo of string list
+
+exception MultipleMoveTo of string list
+
+exception EmptyMoveTo
+
 val parse : string -> command
 
 val parse_start : string -> (int * string) list

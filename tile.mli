@@ -38,6 +38,8 @@ exception NotAJoker
 (** Raised when a tile is not a valid tile. *)
 exception InvalidTile
 
+exception InvalidIndex of (string * int)
+
 (** [make_t n c t] is a tile with [n] for the tile number, [c] for the
     tile color, and [t] or either "T" for Tile or "J" for Joker type.
     Requires: [t] is either "T" or "J" [n] is 0 .. 13 [c] is a valid
@@ -76,4 +78,4 @@ val sort_by_number : t list -> t list
 
 val tiles_of_string_lst : string list -> t list -> string list
 
-val get_tile_of_index : int -> 'a list -> 'a
+val get_tile_of_index : string -> int -> 'a list -> 'a
