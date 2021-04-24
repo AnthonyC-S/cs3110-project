@@ -54,7 +54,7 @@ let rec find_color ts =
 (* Has the Tile.NotAJoker if out of bounds *)
 let rec find_num fst tile ts = 
   match ts with
-  | [] -> get_tile_number tile
+  | [] -> 13
   | [ h ] ->  if (get_tile_number h) >= 13 then fst - 1 else get_tile_number h + 1
   | [h; h2] -> if get_tile_number h2 - get_tile_number h = 1 then
     if (get_tile_number h2) >= 13 then fst - 1 else get_tile_number h2 + 1
@@ -63,7 +63,7 @@ let rec find_num fst tile ts =
 
   (* assumes that it is a valid move. If not, it will still be caught by checking valid_board*)
 let new_joker tile ts = 
-  let set = (List.filter (fun x -> x <> tile) ts)@[Joker { number = 1; color = None}] in
+  let set = (List.filter (fun x -> x <> tile) ts) in
   let fst = get_tile_number (List.hd set) in
   match set with
   | [] -> tile
@@ -76,7 +76,9 @@ let new_joker tile ts =
 let rec check_joker acc st orig = 
   match st with 
   | [] -> List.rev acc
-  | Joker t:: tail -> check_joker ((new_joker (Joker t) orig)::acc) tail orig
+  | Joker t:: tail -> 
+    let new_value = new_joker (Joker t) orig in 
+    let new_orig = (List.filter(fun x -> x <> (Joker t)) orig) in check_joker (new_value::acc) tail new_orig
   | Tile t :: tail -> check_joker ((Tile t):: acc) tail orig
 let updated_row st =
   let joker_row = sort_by_number st.tiles in 
@@ -89,7 +91,7 @@ let rec add_tile tile row_letter acc = function
       if r = row_letter && List.length ts == 13 then
         raise RowAlreadyFull
       else if r = row_letter && List.length ts < 13 then
-        acc @ ({ row = row_letter; tiles = tile :: ts } :: t)
+        List.map updated_row (acc @ ({ row = row_letter; tiles = tile :: ts } :: t))
       else
         add_tile tile row_letter (acc @ [ { row = r; tiles = ts } ]) t
 
