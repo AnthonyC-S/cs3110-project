@@ -13,6 +13,12 @@ type s = {
   past_state : s list;
 }
 
+exception HaveNotPlayedMeld
+
+exception InvalidBoardSets
+
+exception InvalidMeld
+
 let init_state player_lst =
   let stack = Tile.make_tile_stack () in
   {
@@ -22,12 +28,6 @@ let init_state player_lst =
     t_stack = stack;
     past_state = [];
   }
-
-exception HaveNotPlayedMeld
-
-exception InvalidBoardSets
-
-exception InvalidMeld
 
 let get_current_player st = current_player st.current_turn st.players
 

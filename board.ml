@@ -70,17 +70,16 @@ let valid_group lst =
   && numbers_of_t [] lst |> List.sort_uniq compare |> List.length = 1
   && colors_of_t [] lst |> List.sort_uniq compare |> List.length = len
 
-let rec valid_run_aux acc = function
-  | [ h ] -> acc
-  | [ h; h2 ] -> h + 1 = h2 && acc
-  | h :: h2 :: t -> valid_run_aux (h + 1 = h2 && acc) t
-  | [] -> acc
+let rec valid_run_aux = function
+  | [ h ] -> true
+  | h :: t -> if h + 1 <> List.hd t then false else valid_run_aux t
+  | [] -> failwith "Should never be empty."
 
 let valid_run lst =
   let len = List.length lst in
   len >= 3
   && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
-  && valid_run_aux true (List.sort compare (numbers_of_t [] lst))
+  && valid_run_aux (List.sort compare (numbers_of_t [] lst))
 
 let rec tiles_of_board board =
   match board with [] -> [] | h :: t -> h.tiles :: tiles_of_board t
@@ -96,8 +95,6 @@ let rec valid_rows acc tile_rows =
 let valid_board board =
   let tile_rows = tiles_of_board board in
   valid_rows true tile_rows
-
-exception EmptyBoard
 
 let rec sort_board_by_num acc = function
   | [] -> acc
