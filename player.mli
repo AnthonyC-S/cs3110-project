@@ -9,8 +9,6 @@ type p = {
   score : int;
 }
 
-exception NotAValidIndex
-
 exception EmptyList
 
 val make_players :
