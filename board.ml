@@ -26,6 +26,57 @@ let rec init_board_aux (acc : b_row list) (rows : string list) =
 
 let init_board () = List.rev (init_board_aux [] rows)
 
+let rec color_filter acc lst = 
+  match lst with
+  | [] -> acc
+  | h :: t -> if ((List.find_opt (fun x -> x ==h) acc) != None )
+    then color_filter (List.filter (fun x -> x <> h ) acc) t
+    else color_filter acc t
+
+let find_color ts = 
+  let colorlst = colors_of_t [] ts in
+  let colors = [ Black; Red; Blue; Orange ] in 
+  let result = color_filter colors colorlst in
+  match result with
+  | [] -> None
+  | h :: t -> h
+
+let rec find_num fst tile ts = 
+  match ts with
+  | [] -> 13
+  | [ h ] -> if get_tile_number h >= 13 then fst -1 else get_tile_number h + 1
+  | [h; h2] -> if get_tile_number h2 - get_tile_number h = 1 then 
+    if get_tile_number h2 >= 13 then fst - 1 else get_tile_number h2 + 1
+    else get_tile_number h + 1
+  | h :: h2 :: t -> if get_tile_number h2 - get_tile_number h = 1 then
+    find_num fst tile (h2::t) else get_tile_number h + 1
+
+let new_joker tile ts = 
+  let set = (List.filter (fun x -> x <> tile) (sort_by_number ts)) in
+  let fst = get_tile_number (List.hd set) in
+  match set with
+  | [] -> tile
+  | [ h ] -> update_joker (find_num fst tile set) (get_tile_color h) tile
+  | [h; h2] -> if get_tile_color h = get_tile_color h2 then 
+    update_joker (find_num fst tile set) (get_tile_color h) tile else
+    update_joker fst (find_color set) tile
+  | h :: h2 :: t -> if get_tile_color h = get_tile_color h2 then 
+    update_joker (find_num fst tile set) (get_tile_color h) tile else
+    update_joker fst (find_color set) tile
+let rec check_joker acc st orig = 
+  match st with 
+  | [] -> List.rev acc
+  | Joker t :: tail -> 
+    let new_value = new_joker (Joker t) orig in
+    let new_orig = (List.filter (fun x -> x <> (Joker t)) orig)@[new_value] in
+    check_joker (new_value::acc) tail new_orig
+  | Tile t :: tail -> check_joker ((Tile t) :: acc) tail orig
+
+let updated_row st = 
+  let joker_row = st.tiles in
+  let new_tiles = sort_by_number (check_joker [] joker_row joker_row) in
+  {row = st.row; tiles = new_tiles}
+
 let add_tile tile rl b =
   List.map
     (fun x ->
