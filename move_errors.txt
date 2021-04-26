@@ -26,3 +26,11 @@ InvalidIndex [s] -> Valid syntax but invalid Index - in either from_rack or from
 Exceptions caught in Board.ml
 
 RowAlreadyFull s -> Already 13 tiles on the board row .
+
+
+
+Notes for color sort:
+
+let get_tile_rec = function | Tile t -> t | Joker t -> t
+
+let color_compare c1 c2 = compare (get_tile_rec c1).color (get_tile_rec c2).color
