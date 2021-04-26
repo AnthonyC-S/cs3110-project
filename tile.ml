@@ -1,9 +1,3 @@
-(** Need Tile Module Description *)
-
-(** [color] type represents the types of color of the tiles. The only
-    valid colors are [Blue], [Orange], [Red], and [Black]. [None] is for
-    first initializing the Joker tiles since the color of a Joker tile
-    is set when the user uses the tile. *)
 type color =
   | Blue
   | Orange
@@ -11,32 +5,21 @@ type color =
   | Black
   | None
 
-(** [t_rec] is all the information a tile should hold. This includes the
-    [number] integer the tile holds and the [color] of the tile. *)
 type t_rec = {
   number : int;
   color : color;
 }
 
-(** [t] represents tiles which has two types normal [Tile] and [Joker]. *)
 type t =
   | Tile of t_rec
   | Joker of t_rec
 
-(** The exception [NotEnoughTiles] is thrown when there aren't enough
-    tile to pick from. *)
 exception NotEnoughTiles
 
-(** The exception [NotAJoker] is thrown when the tile is not a valid
-    [Joker] type tile. *)
 exception NotAJoker
 
-(** The exception [InvalidTile] is thrown when the tile being searched
-    doesn't not exist. *)
 exception InvalidTile
 
-(** The exception [InvalidIndex (k, v)] is thrown when the there doesn't
-    exist an element on index [i] in the row named [k]. *)
 exception InvalidIndex of (string * int)
 
 (** [n_lst] is a list of the numbers used in Rummikub, 1..13. *)
@@ -46,25 +29,16 @@ let n_lst = List.init 13 (( + ) 1)
     tiles. *)
 let c_lst = [ Blue; Orange; Red; Black ]
 
-(** [make_t t_str n c] is a Tile type tile [t] with number [n] and color
-    [c] if [t_str] is ["T"]. If [t_str] is ["J"], this is a Joker tile
-    [t] with number [n] and color [c]. If some other string is passed,
-    the raises a [Failure]. *)
 let make_t t n c =
   match t with
   | "T" -> Tile { number = n; color = c }
   | "J" -> Joker { number = n; color = c }
-  | _ -> failwith "Not a Tile or Joker"
+  | _ -> raise InvalidTile
 
 (** [joker] is a Joker tile [t] with number [100] and color [None] for
     initializing an unset Joker tile. *)
 let joker = make_t "J" 100 None
 
-(** [update_joker n c t] is a Joker tile [t'] with the number updated to
-    [n] and color updated to [c]. If [n] is not a valid integer value of
-    the game (more than 13, less than 1), then [NotAJoker] exception is
-    thrown. If [t] is not a Joker type tile, [NotAJoker] exception is
-    thrown. *)
 let update_joker n c = function
   | Joker t ->
       if n < 1 || n > 13 then raise NotAJoker else make_t "J" n c
@@ -95,17 +69,12 @@ let shuffle_tile_lst (t_lst : t list) =
   let sorted_int_lst = List.sort compare random_int_lst in
   List.map snd sorted_int_lst
 
-(** [make_tile_stack ()] is a Stack [s] of randomly shuffled entire tile
-    list of 106 tiles. *)
 let make_tile_stack () =
   make_tile_lst () |> shuffle_tile_lst |> List.to_seq |> Stack.of_seq
 
-(** [draw_tile s] is a tile [t] popped from stack of tiles [s]. If there
-    aren't any tiles left in [s], [NotEnoughTiles] exception is thrown. *)
 let draw_tile (stack : t Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
 
-(** [tile_stakc_size s] is the number of tiles in the stack [s]. *)
 let tile_stack_size (stack : t Stack.t) = Stack.length stack
 
 (* [make_rack_aux s acc n] is a tile list [t_lst] with [n] number of
@@ -115,24 +84,15 @@ let rec make_rack_aux stack acc = function
   | 0 -> acc
   | i -> make_rack_aux stack (draw_tile stack :: acc) (i - 1)
 
-(** [make_tile_rack s] is a tile list [t_lst] with 14 tiles drawn from
-    stavk [s]. If [s] does not have enough tiles to make a 14 tile list,
-    [NotEnoughTiles] exception is thrown. *)
 let make_tile_rack stack =
   if Stack.length stack >= 14 then make_rack_aux stack [] 14
   else raise NotEnoughTiles
 
-(** [numbers_of_t acc t_lst] is an integer list [int_lst] such that each
-    integer is the number of the tile in [t_lst]. The numbers are
-    ordered in the same order as the tiles in [t_lst]. *)
 let rec numbers_of_t acc = function
   | [] -> List.rev acc
   | Tile t :: tail -> numbers_of_t (t.number :: acc) tail
   | Joker t :: tail -> numbers_of_t (t.number :: acc) tail
 
-(** [colors_of_t acc t_lst] is color list [c_lst] such that each color
-    type is that of the tile in [t_lst]. The color types are ordered in
-    the same order as the tiles in [t_lst]. *)
 let rec colors_of_t acc = function
   | [] -> List.rev acc
   | Tile t :: tail -> colors_of_t (t.color :: acc) tail
@@ -187,10 +147,6 @@ let rec sort_by_color_aux tlst colors acc =
       tlst |> group_by_color h [] |> num_sort |> ( @ ) acc
       |> sort_by_color_aux tlst t
 
-(** [sort_by_color tlst] is tile list [tlst'] with the tiles in [tlst]
-    sorted by colors in the order Black, Red, Blue, Orange, None
-    respectively. Each group of color-sorted tiles is then sorted by
-    incrementing number order with unset Joker tile coming last. *)
 let sort_by_color tlst = sort_by_color_aux tlst color_hier []
 
 (** [color_compare x y] is 0 if the color of tile [x] is the same as
@@ -231,44 +187,10 @@ let rec sort_by_number_aux tlst nlst acc =
       |> ( @ ) acc
       |> sort_by_number_aux tlst t
 
-(** [sort_by_number tlst] is tile list [tlst'] with the tiles inside
-    sorted by incrementing number order with Joker coming last. Then,
-    tiles of same number are sorted by the color order Black, Red, Blue,
-    Orange, None. *)
 let sort_by_number tlst =
   let nums = List.sort_uniq compare (numbers_of_t [] tlst) in
   sort_by_number_aux (num_sort tlst) nums []
 
-(** [tiles_of_string t] is a string representation of tile [t]. If [t]
-    is a Tile type tile, the number field of [t] is stringified. If [t]
-    is a Joker tile, "J" is returned. *)
-let tile_of_string = function
-  | Tile t -> string_of_int t.number
-  | Joker t -> "J"
-
-(** [string_lst_13 slst] is a list of string [slst'] with exactly 13
-    string elements. If [slst] has less than 9 elements, a string with 3
-    empty spaces is added to the end of [slst]. If [slst] has more than
-    or equal to 9 elements but less than 13 elements, a string with 4
-    spaces is added to the end of [slst]. *)
-let rec string_lst_13 slst =
-  if List.length slst < 9 then string_lst_13 (slst @ [ "   " ])
-  else if List.length slst < 13 then string_lst_13 (slst @ [ "    " ])
-  else slst
-
-(** [tiles_of_string_lst acc tlst] is a string representation of tile
-    list [tlst] [slst]. Whitespaces strings are appended at the end of
-    [slst] to always make the length of [slst] to be 13. *)
-let rec tiles_of_string_lst acc = function
-  | [] -> string_lst_13 (List.rev acc)
-  | h :: t ->
-      let new_acc = tile_of_string h :: acc in
-      tiles_of_string_lst new_acc t
-
-(** [get_tile_of_index i t_lst] is element [e] of [t_lst] where the
-    index of [e] matches [i - 1] because [i] is 1-based index value. If
-    there are no elements in [t_lst] that matches the index value [i],
-    [InvalidIndex] exception is raised. *)
 let get_tile_of_index (row : string) index t_lst =
   match List.filteri (fun i _ -> i = index - 1) t_lst with
   | h :: t -> h

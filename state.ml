@@ -14,7 +14,7 @@ type s = {
 }
 
 let init_state player_lst =
-  let stack = Tile.make_tile_stack () in
+  let stack = make_tile_stack () in
   {
     current_turn = 1;
     board = init_board ();
