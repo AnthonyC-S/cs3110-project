@@ -1,3 +1,5 @@
+(** Add command module description. *)
+
 (** [move_phrase] type represents the sturcture of the [Move] command.
     The from_board field is (k, v) list [blst] where [k] is the row name
     and [v] is the index where the tile is located on the board. The
