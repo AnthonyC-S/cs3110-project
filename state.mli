@@ -37,13 +37,6 @@ val undo_move : s -> s
     and the current players rack to the tiles at the start of the turn. *)
 val reset_turn : s -> s
 
-(** [assign_joker_in_rack st n c idx] is the new state with a joker in
-    the current player's rack at index [idx] has the new tile color [c]
-    and tile number [n]. Used to help determine if a runs and groups
-    played to the board are valid by allowing the player to set the
-    Joker's color and number. *)
-val assign_joker_in_rack : s -> int -> Tile.color -> int -> s
-
 (** [move cp s] is the state after completing a tile(s) move consisting
     of the parsed move commands in [cp] for the current game state [st].
     Moves can be either from the rack or on the board, if player has a

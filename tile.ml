@@ -56,6 +56,14 @@ let rec make_tile_aux acc n_lst c =
   | [] -> acc
   | n :: ns -> make_tile_aux (make_t "T" n c :: acc) ns c
 
+let make_joker_options () =
+  let rec make_jokers acc n_lst c =
+    match n_lst with
+    | [] -> acc
+    | n :: ns -> make_jokers (make_t "J" n c :: acc) ns c
+  in
+  List.concat_map (make_jokers [] n_lst) c_lst
+
 (** [make_tile_lst] is the 106 ordered tiles representing a full
     Rummikub pile. Ordered as with two jokers at the head and then sets
     of numbers 1..13 in the following color order: Blue, Orange, Red,
@@ -194,38 +202,12 @@ let sort_by_number tlst =
   let nums = List.sort_uniq compare (numbers_of_t [] tlst) in
   sort_by_number_aux (num_sort tlst) nums []
 
-(** [tiles_of_string t] is a string representation of tile [t]. If the
-    [t] is a normal tile, the number field of [t] is stringified. If [t]
-    is a Joker tile, "J" is returned. *)
-let tile_of_string = function
-  | Tile t -> string_of_int t.number
-  | Joker t -> "J"
-
-(** [string_lst_13 slst] is a list of string [slst] with exactly 13
-    string elements. If [slst] has less than 13 elements, a string with
-    3 empty spaces is added to the end of [slst]. *)
-let rec string_lst_13 slst =
-  if List.length slst < 9 then string_lst_13 (slst @ [ "   " ])
-  else if List.length slst < 13 then string_lst_13 (slst @ [ "    " ])
-  else slst
-
-(** [tiles_of_string_lst acc tlst] is a string representation of list of
-    tiles [tlst]. *)
-let rec tiles_of_string_lst acc = function
-  | [] -> string_lst_13 (List.rev acc)
-  | h :: t ->
-      let new_acc = tile_of_string h :: acc in
-      tiles_of_string_lst new_acc t
-
 let get_tile_of_index (row : string) index t_lst =
   match List.filteri (fun i _ -> i = index - 1) t_lst with
   | h :: t -> h
   | [] -> raise (InvalidIndex (row, index))
 
 let get_tile_rec = function Tile t -> t | Joker t -> t
-
-let color_compare c1 c2 =
-  compare (get_tile_rec c1).color (get_tile_rec c2).color
 
 let color_sort t_lst =
   let rec sort k r b o j = function

@@ -13,6 +13,8 @@ exception InvalidBoardRow of string
 
 exception RowAlreadyFull of string
 
+exception EmptyBoard
+
 let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
@@ -25,44 +27,6 @@ let rec init_board_aux (acc : b_row list) (rows : string list) =
   | str :: t -> init_board_aux ({ row = str; tiles = [] } :: acc) t
 
 let init_board () = List.rev (init_board_aux [] rows)
-
-let add_tile tile rl b =
-  List.map
-    (fun x ->
-      if x.row = rl && List.length x.tiles == 13 then
-        raise (RowAlreadyFull rl)
-      else if x.row = rl then { row = x.row; tiles = tile :: x.tiles }
-      else x)
-    b
-
-(* Note, most board manipulation methods can be simplified with List.map
-   where the map function checks if the row of a certain b_row matches
-   row_letter and returning a different b_row if so.*)
-let rec replace_tile_by_index tile row_letter acc index = function
-  | [] -> raise (InvalidBoardRow row_letter)
-  | { row = r; tiles = ts } :: t ->
-      if r = row_letter then
-        acc
-        @ {
-            row = row_letter;
-            tiles =
-              List.filteri (fun i _ -> i < index - 1) ts
-              @ [ tile ]
-              @ List.filteri (fun i _ -> i >= index - 1) ts;
-          }
-          :: t
-      else add_tile tile row_letter t
-
-let remove_tile tile rl b =
-  List.map
-    (fun x ->
-      if x.row = rl then
-        {
-          row = x.row;
-          tiles = List.filter (fun t -> t <> tile) x.tiles;
-        }
-      else x)
-    b
 
 let valid_group lst =
   let len = List.length lst in
@@ -102,3 +66,73 @@ let rec sort_board_by_num acc = function
       sort_board_by_num
         (acc @ [ { h with tiles = sort_by_number h.tiles } ])
         t
+
+(** [assign_jokers b_row] is the new board row with two Joker tile
+    assigned to a numbers and colors that result in a valid run or
+    group. If it is not possible to form a valid run or group with the
+    given tiles, the unaltered board row is returned. *)
+let assign_jokers b_row =
+  let tile_lst_no_jokers = List.tl b_row.tiles |> List.tl in
+  let rec assign_first_joker = function
+    | [] -> b_row
+    | joker_one :: t1 ->
+        let one_joker_lst = joker_one :: tile_lst_no_jokers in
+        assign_second_joker one_joker_lst t1 (make_joker_options ())
+  and assign_second_joker one_joker_lst t1 = function
+    | [] -> assign_first_joker t1
+    | joker_two :: t2 ->
+        let two_joker_lst = joker_two :: one_joker_lst in
+        if valid_run two_joker_lst || valid_group two_joker_lst then
+          { b_row with tiles = two_joker_lst }
+        else assign_second_joker one_joker_lst t1 t2
+  in
+  assign_first_joker (make_joker_options ())
+
+(** [assign_joker b_row] is the new board row with a single Joker tile
+    assigned to a number and color that results in a valid run or group.
+    If it is not possible to form a valid run/group with the given
+    tiles, the unaltered board row is returned. *)
+let assign_joker b_row =
+  let tile_lst_no_joker = List.tl b_row.tiles in
+  let rec find_valid_joker = function
+    | [] -> b_row
+    | joker :: t ->
+        let r = joker :: tile_lst_no_joker in
+        if valid_run r || valid_group r then { b_row with tiles = r }
+        else find_valid_joker t
+  in
+  find_valid_joker (make_joker_options ())
+
+(** [count_jokers b_row] is the altered board row with jokers (either or
+    or two) assigned to colors and numbers that form valid runs or
+    groups. If a valid run or group is not possible, the unaltered board
+    row is returned. *)
+let count_jokers b_row =
+  let tiles = b_row.tiles |> List.sort compare |> List.rev in
+  match tiles with
+  | [ Joker _ ] -> assign_joker { b_row with tiles }
+  | Joker _ :: Tile _ :: tail -> assign_joker { b_row with tiles }
+  | Joker _ :: Joker _ :: tail -> assign_jokers { b_row with tiles }
+  | _ -> b_row
+
+let add_tile tile rl b =
+  List.map
+    (fun x ->
+      if x.row = rl && List.length x.tiles == 13 then
+        raise (RowAlreadyFull rl)
+      else if x.row = rl then
+        count_jokers { x with tiles = tile :: x.tiles }
+      else x)
+    b
+
+let remove_tile tile rl b =
+  List.map
+    (fun x ->
+      if x.row = rl then
+        count_jokers
+          {
+            row = x.row;
+            tiles = List.filter (fun t -> t <> tile) x.tiles;
+          }
+      else x)
+    b
