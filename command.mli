@@ -81,17 +81,18 @@ exception MultipleMoveTo of string list
 exception EmptyMoveTo
 
 (** [parse s] is a [Command] type. Let [slst] be the list of words in
-    [s]. If [slst] is equivalent to [["quit"]], [Quit] is returned. If
-    [slst]] is equivalent to [["move"]], [EmptyMove] is raised. If
+    [s]. If [slst] is equivalent to [\["quit"\]], [Quit] is returned. If
+    [slst] is equivalent to [\["move"\]], [EmptyMove] is raised. If
     [slst] is equivalent to ["move" :: t], [t] is parsed as a [Move i]
-    command. if [slst] is equivalent to [["undo"]], [Undo] is returned.
-    If [slst] is equivalent to [["reset"]], [Reset] is returned. If
-    [slst] is equivalent to [["color"; "sort"]], [SortByColor] is
-    returned. If [slst] is equivalent to [["number"; "sort"]],
-    [SortByNumber] is returned. If [slst] is equivalent to [["draw"]],
-    [Draw] is returned. If [slst] is equivalent to [["end"; "turn"]],
-    [EndTurn] is returned. If [slst] is equivalent to [["help"]], [Help]
-    is returned. In all other cases, [Malformed] exception is raised. *)
+    command. if [slst] is equivalent to [\["undo"\]], [Undo] is
+    returned. If [slst] is equivalent to [\["reset"\]], [Reset] is
+    returned. If [slst] is equivalent to [\["color"; "sort"\]],
+    [SortByColor] is returned. If [slst] is equivalent to
+    [\["number"; "sort"\]], [SortByNumber] is returned. If [slst] is
+    equivalent to [\["draw"\]], [Draw] is returned. If [slst] is
+    equivalent to [\["end"; "turn"\]], [EndTurn] is returned. If [slst]
+    is equivalent to [\["help"\]], [Help] is returned. In all other
+    cases, [Malformed] exception is raised. *)
 val parse : string -> command
 
 (** [parse_start s] is string list [slst] . If [s] contains information
