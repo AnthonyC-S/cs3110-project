@@ -45,6 +45,8 @@ val move : Command.move_phrase -> s -> s
 
 val draw : s -> s
 
+(** [get_current_player st] is the player that is playing in the current
+    turn in the state [st]. *)
 val get_current_player : s -> Player.p
 
 val sort_rack_by_color : s -> s

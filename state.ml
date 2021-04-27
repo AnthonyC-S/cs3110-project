@@ -19,6 +19,7 @@ exception InvalidBoardSets
 
 exception InvalidMeld
 
+(* Spec is in signature. *)
 let init_state player_lst =
   let stack = Tile.make_tile_stack () in
   {
@@ -29,16 +30,21 @@ let init_state player_lst =
     past_state = [];
   }
 
+(* Spec is in signature. *)
 let get_current_player st = current_player st.current_turn st.players
 
+(** [get_other_player st] is the player list of the other 1 or 3 players
+    who are not currently in their turn in the state [st]. *)
 let get_other_players st =
   List.filter (fun x -> x <> get_current_player st) st.players
 
+(* Spec is in signature. *)
 let undo_move st =
   if st.past_state = [] then st
   else
     { (List.hd st.past_state) with past_state = List.tl st.past_state }
 
+(* Spec is in signature. *)
 let reset_turn st =
   if st.past_state = [] then st
   else { (List.rev st.past_state |> List.hd) with past_state = [] }
@@ -98,6 +104,7 @@ let rec multiple_moves_from_board from_lst to_row st =
 let add_past_state start_turn_state st =
   { st with past_state = start_turn_state :: st.past_state }
 
+(* Spec is in signature. *)
 let move moves st =
   let start_st = st in
   multiple_moves_from_board moves.from_board moves.to_row st

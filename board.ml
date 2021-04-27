@@ -103,10 +103,10 @@ let assign_joker b_row =
   in
   find_valid_joker (make_joker_options ())
 
-(** [count_jokers b_row] is the altered board row with jokers (either or
-    or two) assigned to colors and numbers that form valid runs or
-    groups. If a valid run or group is not possible, the unaltered board
-    row is returned. *)
+(** [count_jokers b_row] is the altered board row with jokers (either
+    one or or two) assigned to colors and numbers that form valid runs
+    or groups. If a valid run or group is not possible, the unaltered
+    board row is returned. *)
 let count_jokers b_row =
   let tiles = b_row.tiles |> List.sort compare |> List.rev in
   match tiles with
