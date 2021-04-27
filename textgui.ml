@@ -70,9 +70,9 @@ let bottom_row = " |" ^ String.make 103 '_' ^ "|\n\n"
 (* [rack_index_r t_lst] gives the rack index string that is equal in
    length to size of rack [t_lst]. Accounts for spacing needed between
    numbers single digit numbers vs. double digit numbers. *)
-let rec rack_index_r t_lst =
+let rec rack_index_r t_lst idx =
   g "  Index:  "
-  ^ (List.init (List.length t_lst) (( + ) 1)
+  ^ (List.init (List.length t_lst) (( + ) idx)
     |> List.map (fun i -> string_of_int i ^ "  ")
     |> String.concat "")
   ^ "\n"
@@ -138,6 +138,27 @@ let rec string_of_tiles acc idx_count tiles =
         (acc ^ string_of_tile idx_count h)
         (idx_count + 1) t
 
+let rack_row t_lst =
+  let rec build_rack_rows acc final_acc count t_lst =
+    match t_lst with
+    | [] ->
+        List.mapi
+          (fun i x ->
+            rack_index_r x ((i * 25) + 1)
+            ^ g "   Rack:  "
+            ^ string_of_tiles "" (if i = 0 then 1 else 10) x)
+          (final_acc @ [ acc ])
+        |> String.concat "\n"
+    | h :: t ->
+        if count mod 25 = 0 then
+          build_rack_rows [] (final_acc @ [ acc @ [ h ] ]) (count + 1) t
+        else build_rack_rows (acc @ [ h ]) final_acc (count + 1) t
+  in
+  build_rack_rows [] [] 1 t_lst
+
+(* | [] -> List.concat List.map (fun x -> rack_index_r x ^ g " Rack: " ^
+   string_of_tiles "" 1 x) final_acc *)
+
 (** [get_spaces t_lst] is the number of spaces needed to give a total
     string length of 43 for each row of the board. Note tile indexes < 9
     use 3 characters each and indexes > 9 use 4 characters each, i.e.
@@ -171,6 +192,4 @@ let build_board st msg =
   let cur_rack = get_current_rack st.current_turn st.players in
   top_row ^ turn_row ^ meld_row ^ pile_row ^ dash_row ^ top_index_r
   ^ string_of_board_rows "" st.board
-  ^ bottom_row ^ rack_index_r cur_rack ^ g "   Rack:  "
-  ^ string_of_tiles "" 1 cur_rack
-  ^ "\n\n" ^ msg ^ ip
+  ^ bottom_row ^ rack_row cur_rack ^ "\n\n" ^ msg ^ ip
