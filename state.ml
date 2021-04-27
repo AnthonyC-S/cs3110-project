@@ -13,6 +13,12 @@ type s = {
   past_state : s list;
 }
 
+exception HaveNotPlayedMeld
+
+exception InvalidBoardSets
+
+exception InvalidMeld
+
 let init_state player_lst =
   let stack = Tile.make_tile_stack () in
   {
@@ -22,12 +28,6 @@ let init_state player_lst =
     t_stack = stack;
     past_state = [];
   }
-
-exception HaveNotPlayedMeld
-
-exception InvalidBoardSets
-
-exception InvalidMeld
 
 let get_current_player st = current_player st.current_turn st.players
 
@@ -69,21 +69,6 @@ let rec multiple_moves_from_rack index_lst row st =
   | [] -> { st with board = sort_board_by_num [] st.board }
   | h :: t -> multiple_moves_from_rack t row (move_from_rack st h row)
 
-(* Note, main.ml needs to check if there are any tiles for all moves
-   from rack and assign jokers tiles if they are included. If there are
-   jokers in the rack then this function needs to be called before the
-   [multiple_moves_from_rack]*)
-let assign_joker_in_rack st n c index =
-  let cur_player = get_current_player st in
-  let rack = cur_player.rack in
-  let new_rack =
-    List.filteri (fun i _ -> i < index - 1) rack
-    @ [ update_joker n c (get_tile_of_index "" index rack) ]
-    @ List.filteri (fun i _ -> i > index - 1) rack
-  in
-  let new_player = { cur_player with rack = new_rack } in
-  { st with players = new_player :: get_other_players st }
-
 let move_from_board st from_row index to_row =
   let cur_player = get_current_player st in
   if cur_player.played_valid_meld = false then raise HaveNotPlayedMeld
@@ -118,24 +103,6 @@ let move moves st =
   multiple_moves_from_board moves.from_board moves.to_row st
   |> multiple_moves_from_rack moves.from_rack moves.to_row
   |> add_past_state start_st
-
-(* Note, main.ml needs to check if there are any tiles for all moves
-   from the board and assign jokers tiles if they are included. If there
-   are jokers being moved from the board then this function needs to be
-   called before the [multiple_moves_from_board]. Also, [from] is given
-   as (row string, index int). *)
-let assign_joker_from_board st n c from =
-  let tile_to_update =
-    get_tile_of_index (fst from) (snd from)
-      (List.find (fun { row = x } -> x = fst from) st.board).tiles
-  in
-  let new_board =
-    remove_tile tile_to_update (fst from) st.board
-    |> replace_tile_by_index
-         (update_joker n c tile_to_update)
-         (fst from) [] (snd from)
-  in
-  { st with board = new_board }
 
 (* Note, I did not update the [past_state] list since this will be
    automatically followed by [reset_turn] and then [end_turn] via

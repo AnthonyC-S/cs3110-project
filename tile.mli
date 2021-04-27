@@ -76,10 +76,17 @@ val sort_by_color : t list -> t list
 
 val sort_by_number : t list -> t list
 
-val tiles_of_string_lst : string list -> t list -> string list
-
 val get_tile_of_index : string -> int -> 'a list -> 'a
 
 val get_tile_color : t -> color
 
 val get_tile_number : t -> int
+
+(** [make_joker_options] is the 52 Joker list of the numbers 1..13 in
+    Blue, Orange, Red, or Black. Used to assign jokers to make valid
+    board rows. *)
+val make_joker_options : unit -> t list
+
+(** [get_tile_rec t] is the extraction of tile record of the tile [t],
+    ie the number of color of either a Tile or Joker. *)
+val get_tile_rec : t -> t_rec

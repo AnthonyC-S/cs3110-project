@@ -107,10 +107,10 @@ let clear_board () =
    100, but "J" is only a length of 1. *)
 let digit_len i = if i = 10 || i = 11 || i = 12 || i = 13 then 2 else 1
 
-(*[space i idx_count] gives the correct number of spaces of the tile
-  number when priting the board rows and rack. Takes into account the
-  length of the tile number [i] and the index position of where the tile
-  is being printed to with [idx_count].*)
+(** [space i idx_count] gives the correct number of spaces of the tile
+    number when priting the board rows and rack. Takes into account the
+    length of the tile number [i] and the index position of where the
+    tile is being printed to with [idx_count].*)
 let space i idx_count =
   let digit_len = digit_len i in
   if digit_len = 1 && idx_count > 9 then "   "
@@ -128,7 +128,7 @@ let string_of_tile idx_count tile =
   | Tile { number = i; color = Black } ->
       kw (string_of_int i) ^ space i idx_count
   | Tile { number = i; color = None } -> ""
-  | Joker { number = i } -> kw "J" ^ space i idx_count
+  | Joker { number = i } -> kw "J" ^ space 1 idx_count
 
 let rec string_of_tiles acc idx_count tiles =
   match tiles with
@@ -138,10 +138,10 @@ let rec string_of_tiles acc idx_count tiles =
         (acc ^ string_of_tile idx_count h)
         (idx_count + 1) t
 
-(* [get_spaces t_lst] is the number of spaces needed to give a total
-   string length of 43 for each row of the board. Note tile indexes < 9
-   use 3 characters each and indexes > 9 use 4 characters each, i.e. 9*3
-   + 4*4 = 43. *)
+(** [get_spaces t_lst] is the number of spaces needed to give a total
+    string length of 43 for each row of the board. Note tile indexes < 9
+    use 3 characters each and indexes > 9 use 4 characters each, i.e.
+    9*3 + 4*4 = 43. *)
 let get_spaces t_lst : int =
   let lst_len = List.length t_lst in
   if lst_len < 10 then 43 - (lst_len * 3)
