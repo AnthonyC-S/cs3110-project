@@ -78,8 +78,7 @@ let assign_jokers b_row =
     | joker_one :: t1 ->
         let one_joker_lst = joker_one :: tile_lst_no_jokers in
         assign_second_joker one_joker_lst t1 (make_joker_options ())
-  and assign_second_joker one_joker_lst t1 t2 =
-    match t2 with
+  and assign_second_joker one_joker_lst t1 = function
     | [] -> assign_first_joker t1
     | joker_two :: t2 ->
         let two_joker_lst = joker_two :: one_joker_lst in
