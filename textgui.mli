@@ -7,3 +7,5 @@ val welcome_board : string
 val g : string -> string
 
 val ip : string
+
+val win_board : string -> string

@@ -50,20 +50,17 @@ val add_to_rack : int -> p list -> Tile.t -> p list
     indexing. This is called when the player moves a tile to the board. *)
 val remove_from_rack : int -> int -> p list -> p list
 
+(** [current_player turn plst] is a player [p] with number [turn] in
+    player list [plst]. [p] is the player playing the game currently. *)
 val current_player : int -> p list -> p
 
-val get_current_name : int -> p list -> string
+(** [meld_sum p] is the sum of all the numbers of the tiles that the
+    player [p] used to meet its initial meld condition. *)
+val meld_sum : p -> int
 
-val get_current_meld_status : int -> p list -> bool
-
-val get_current_rack : int -> p list -> rack
-
-val get_current_score : int -> p list -> int
-
-val check_for_valid_meld : p -> bool
-
+(** [update_played_valid_meld p] is player [p'] same as [p] but with
+    played_valid_meld field set to true if the initial meld condition
+    that [p] didn't meet before is now met. The draw_current_turn field
+    is always set to false since this function is called to update [p]'s
+    record when [p] ends turn. *)
 val update_played_valid_meld : p -> p
-
-val get_fst_ele : 'a list -> 'a
-
-val remove_fst_ele : 'a list -> 'a list

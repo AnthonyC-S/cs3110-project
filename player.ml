@@ -34,7 +34,7 @@ let rec make_players acc stack = function
     [EmptyList] exception if [lst] is empty. *)
 let get_fst_ele = function [] -> raise EmptyList | h :: t -> h
 
-(** [remove_fst_elm lst] is [lst] with the first element of [lst]
+(** [remove_fst_ele lst] is [lst] with the first element of [lst]
     removed or an empty list if [lst] has one element. Raises
     [EmptyList] if [lst] is empty.*)
 let remove_fst_ele = function
@@ -64,27 +64,11 @@ let remove_from_rack turn index player_lst =
   }
   :: List.filter (fun x -> x <> update_player) player_lst
 
-(* Helper for the get_current_... functions below. *)
 let current_player turn player_lst =
   List.find (fun { number = x } -> x = turn) player_lst
 
-let get_current_name turn player_lst =
-  (current_player turn player_lst).name
-
-let get_current_meld_status turn player_lst =
-  (current_player turn player_lst).played_valid_meld
-
-let get_current_rack turn player_lst =
-  (current_player turn player_lst).rack
-
-let get_current_score turn player_lst =
-  (current_player turn player_lst).score
-
 let meld_sum player =
   List.fold_left ( + ) 0 (numbers_of_t [] player.meld_count)
-
-let check_for_valid_meld (player : p) : bool =
-  meld_sum player >= 30 || meld_sum player = 0
 
 (* Note, requires that the board is valid and this is called at
    [end_turn]. *)

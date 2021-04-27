@@ -121,7 +121,20 @@ let multiple_move_to_msg str_lst =
 
 let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
-let end_turn_msg = "  Starting next players turn.\n"
+let end_turn_st st =
+  let cp = get_current_player st in
+  if (not cp.drawn_current_turn) && st.past_state = [] then st
+  else if check_valid st cp then end_turn_new_st st
+  else raise InvalidBoardSets
+
+let end_turn_msg st =
+  if
+    (not (get_current_player st).drawn_current_turn)
+    && st.past_state = []
+  then
+    "  You cannot end turn without making any move. Type \"help\" to \
+     see commands.\n"
+  else "  Starting next players turn.\n"
 
 let sort_num_msg = "  Sorted by number.\n"
 
@@ -153,6 +166,8 @@ let already_moved_msg =
   "  You have already made a move. Reset all moves to draw.\n"
 
 let get_exception_msg = function
+  | AlreadyDrawn s -> already_drawn_msg s
+  | AlreadyMoved -> already_moved_msg
   | EmptyMove -> empty_move_msg
   | EmptyMoveFrom -> empty_move_from_msg
   | EmptyMoveTo -> empty_move_to_msg
@@ -169,8 +184,6 @@ let get_exception_msg = function
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s
-  | AlreadyDrawn s -> already_drawn_msg s
-  | AlreadyMoved -> already_moved_msg
   | Malformed | BlankInput | _ -> malformed_msg
 
 let rec play_turn st msg =
@@ -184,6 +197,12 @@ let rec play_turn st msg =
         commands command st
       with e -> play_turn st (get_exception_msg e))
 
+and handle_end_turn st =
+  let curr_p = get_current_player st in
+  if curr_p.rack = [] && check_valid st curr_p then
+    print_string (win_board curr_p.name)
+  else play_turn (end_turn_st st) (end_turn_msg st)
+
 and commands command st =
   try
     match command with
@@ -194,7 +213,7 @@ and commands command st =
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
     | Draw -> play_turn (draw st) draw_msg
-    | EndTurn -> play_turn (end_turn st) end_turn_msg
+    | EndTurn -> handle_end_turn st
     | Help -> play_turn st game_commands
   with e -> play_turn st (get_exception_msg e)
 

@@ -65,4 +65,6 @@ val sort_rack_by_color : s -> s
 
 val sort_rack_by_num : s -> s
 
-val end_turn : s -> s
+val check_valid : s -> Player.p -> bool
+
+val end_turn_new_st : s -> s

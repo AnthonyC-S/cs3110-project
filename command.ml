@@ -161,9 +161,7 @@ let parse_rack_and_board before_to_lst after_to_lst =
       }
 
 let rec parse_move acc = function
-  | "to" :: t ->
-      parse_rack_and_board (List.rev acc)
-        (List.map (fun s -> String.uppercase_ascii s) t)
+  | "to" :: t | "TO" :: t -> parse_rack_and_board (List.rev acc) t
   | h :: t -> parse_move (h :: acc) t
   | [] -> raise InvalidMoveMissingTo
 
@@ -176,7 +174,7 @@ let parse str =
       | [ "move" ] | [ "mv" ] | [ "m" ] | [ "play" ] | [ "add" ] ->
           raise EmptyMove
       | "move" :: t | "mv" :: t | "m" :: t | "play" :: t | "add" :: t ->
-          parse_move [] t
+          parse_move [] (List.map (fun s -> String.uppercase_ascii s) t)
       | [ "undo" ] | [ "u" ] -> Undo
       | [ "reset" ] | [ "r" ] -> Reset
       | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->

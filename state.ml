@@ -181,18 +181,18 @@ let check_valid_board st = valid_board st.board
 let update_current_turn st =
   (st.current_turn mod List.length st.players) + 1
 
-let end_turn st =
-  let cur_player = get_current_player st in
+let check_valid st cp =
   if not (check_valid_board st) then raise InvalidBoardSets
-  else if
-    (not (check_for_valid_meld cur_player))
-    && cur_player.played_valid_meld = false
-  then raise InvalidMeld
-  else
-    {
-      st with
-      players =
-        (cur_player |> update_played_valid_meld) :: get_other_players st;
-      current_turn = update_current_turn st;
-      past_state = [];
-    }
+  else if (not (meld_sum cp >= 30)) && cp.played_valid_meld = false then
+    raise InvalidMeld
+  else true
+
+let end_turn_new_st st =
+  let cur_player = get_current_player st in
+  {
+    st with
+    players =
+      (cur_player |> update_played_valid_meld) :: get_other_players st;
+    current_turn = update_current_turn st;
+    past_state = [];
+  }
