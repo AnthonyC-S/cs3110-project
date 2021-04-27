@@ -183,9 +183,8 @@ let update_current_turn st =
 
 let check_valid st cp =
   if not (check_valid_board st) then raise InvalidBoardSets
-  else if (not (meld_sum cp >= 30)) && cp.played_valid_meld = false then
-    raise InvalidMeld
-  else true
+  else if check_for_valid_meld cp || cp.played_valid_meld then true
+  else raise InvalidMeld
 
 let end_turn_new_st st =
   let cur_player = get_current_player st in

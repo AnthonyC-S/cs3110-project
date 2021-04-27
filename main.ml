@@ -34,8 +34,8 @@ let invalid_board_row_msg s =
      commands.\n"
 
 let invalid_meld_msg =
-  "  Can not end turn since since you do not have a valid meld, i.e. \
-   30 points or higher.\n\n\
+  "  Cannot end turn since since you do not have a valid meld, i.e. 30 \
+   points or higher.\n\n\
   \  You can either play more tiles to make a meld or undo the tiles \
    and draw to end your turn.\n"
 
@@ -45,8 +45,8 @@ let not_enough_tiles_msg =
 
 let row_already_full_msg s =
   "  Board row " ^ s
-  ^ " can not have more than 13 tiles. Try adding fewer tiles or \
-     adding to a new row.\n"
+  ^ " cannot have more than 13 tiles. Try adding fewer tiles or adding \
+     to a new row.\n"
 
 let game_commands =
   g "  Game Commands:\n\n"
@@ -108,7 +108,7 @@ let duplicate_move_from_msg str_lst =
   ^ (if List.length str_lst = 1 then " at position "
     else "s at positions ")
   ^ str_lst_syntax str_lst
-  ^ " twice.\n\
+  ^ " multiple times.\n\
     \  Each tile you move must have a unique location. Type \"help\" \
      to see commands.\n"
 

@@ -67,11 +67,15 @@ let remove_from_rack turn index player_lst =
 let current_player turn player_lst =
   List.find (fun { number = x } -> x = turn) player_lst
 
+let get_current_rack turn player_lst =
+  (current_player turn player_lst).rack
+
 let meld_sum player =
   List.fold_left ( + ) 0 (numbers_of_t [] player.meld_count)
 
-(* Note, requires that the board is valid and this is called at
-   [end_turn]. *)
+let check_for_valid_meld (player : p) : bool =
+  meld_sum player >= 30 || meld_sum player = 0
+
 let update_played_valid_meld player : p =
   if (not player.played_valid_meld) && meld_sum player >= 30 then
     { player with played_valid_meld = true; drawn_current_turn = false }

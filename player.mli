@@ -54,9 +54,19 @@ val remove_from_rack : int -> int -> p list -> p list
     player list [plst]. [p] is the player playing the game currently. *)
 val current_player : int -> p list -> p
 
+(** [get_current_rack turn plst] is rack [r] of current player [p] with
+    number [turn]. *)
+val get_current_rack : int -> p list -> rack
+
 (** [meld_sum p] is the sum of all the numbers of the tiles that the
     player [p] used to meet its initial meld condition. *)
 val meld_sum : p -> int
+
+(** [check_for_valid_meld p] is true if the sum of the tile numbers
+    player [p] used to meet the initial meld condition is more than or
+    equal to 30 or is 0. Meld sum of 0 also results in true to account
+    for when [p] chose to draw without making any moves. *)
+val check_for_valid_meld : p -> bool
 
 (** [update_played_valid_meld p] is player [p'] same as [p] but with
     played_valid_meld field set to true if the initial meld condition
