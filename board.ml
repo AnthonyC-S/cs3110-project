@@ -13,6 +13,8 @@ exception InvalidBoardRow of string
 
 exception RowAlreadyFull of string
 
+exception EmptyBoard
+
 let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
@@ -58,8 +60,6 @@ let valid_board board =
   let tile_rows = tiles_of_board board in
   valid_rows true tile_rows
 
-exception EmptyBoard
-
 let rec sort_board_by_num acc = function
   | [] -> acc
   | h :: t ->
@@ -67,6 +67,10 @@ let rec sort_board_by_num acc = function
         (acc @ [ { h with tiles = sort_by_number h.tiles } ])
         t
 
+(** [assign_jokers b_row] is the new board row with two Joker tile
+    assigned to a numbers and colors that result in a valid run or
+    group. If it is not possible to form a valid run or group with the
+    given tiles, the unaltered board row is returned. *)
 let assign_jokers b_row =
   let tile_lst_no_jokers = List.tl b_row.tiles |> List.tl in
   let rec assign_first_joker = function
@@ -85,6 +89,10 @@ let assign_jokers b_row =
   in
   assign_first_joker (make_joker_options ())
 
+(** [assign_joker b_row] is the new board row with a single Joker tile
+    assigned to a number and color that results in a valid run or group.
+    If it is not possible to form a valid run/group with the given
+    tiles, the unaltered board row is returned. *)
 let assign_joker b_row =
   let tile_lst_no_joker = List.tl b_row.tiles in
   let rec find_valid_joker = function
@@ -96,6 +104,10 @@ let assign_joker b_row =
   in
   find_valid_joker (make_joker_options ())
 
+(** [count_jokers b_row] is the altered board row with jokers (either or
+    or two) assigned to colors and numbers that form valid runs or
+    groups. If a valid run or group is not possible, the unaltered board
+    row is returned. *)
 let count_jokers b_row =
   let tiles = b_row.tiles |> List.sort compare |> List.rev in
   match tiles with
