@@ -29,18 +29,26 @@ exception InvalidBoardSets
 
 exception InvalidMeld
 
+exception AlreadyDrawn of string
+
+exception AlreadyMoved
+
 let get_current_player st = current_player st.current_turn st.players
 
 let get_other_players st =
   List.filter (fun x -> x <> get_current_player st) st.players
 
 let undo_move st =
-  if st.past_state = [] then st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "undo")
+  else if st.past_state = [] then st
   else
     { (List.hd st.past_state) with past_state = List.tl st.past_state }
 
 let reset_turn st =
-  if st.past_state = [] then st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "reset")
+  else if st.past_state = [] then st
   else { (List.rev st.past_state |> List.hd) with past_state = [] }
 
 let move_from_rack st index row =
@@ -114,10 +122,13 @@ let add_past_state start_turn_state st =
   { st with past_state = start_turn_state :: st.past_state }
 
 let move moves st =
-  let start_st = st in
-  multiple_moves_from_board moves.from_board moves.to_row st
-  |> multiple_moves_from_rack moves.from_rack moves.to_row
-  |> add_past_state start_st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "move after drawn")
+  else
+    let start_st = st in
+    multiple_moves_from_board moves.from_board moves.to_row st
+    |> multiple_moves_from_rack moves.from_rack moves.to_row
+    |> add_past_state start_st
 
 (* Note, main.ml needs to check if there are any tiles for all moves
    from the board and assign jokers tiles if they are included. If there
@@ -141,11 +152,15 @@ let assign_joker_from_board st n c from =
    automatically followed by [reset_turn] and then [end_turn] via
    main.ml. *)
 let draw st =
-  {
-    st with
-    players =
-      add_to_rack st.current_turn st.players (draw_tile st.t_stack);
-  }
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "draw again")
+  else if st.past_state = [] then
+    {
+      st with
+      players =
+        add_to_rack st.current_turn st.players (draw_tile st.t_stack);
+    }
+  else raise AlreadyMoved
 
 let sort_rack_by_color st =
   let cur_player = get_current_player st in

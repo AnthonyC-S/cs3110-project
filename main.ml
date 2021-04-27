@@ -123,8 +123,6 @@ let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
 let end_turn_msg = "  Starting next players turn.\n"
 
-let reset_msg = "  Board and rack have been reset.\n"
-
 let sort_num_msg = "  Sorted by number.\n"
 
 let sort_col_msg = "  Sorted by color.\n"
@@ -133,17 +131,26 @@ let quit_game () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
 
-let reset_st st = if st.past_state = [] then st else reset_turn st
-
 let reset_msg st =
   if st.past_state = [] then "  No moves to go back to.\n"
-  else reset_msg
-
-let undo_st st = if st.past_state = [] then st else undo_move st
+  else "  Board and rack have been reset.\n"
 
 let undo_msg st =
   if st.past_state = [] then "  No moves to go back to.\n"
   else "  Went back one move.\n"
+
+let already_drawn_msg = function
+  | "undo" -> "  Tile already drawn. Cannot undo. Type \"end turn\".\n"
+  | "reset" ->
+      "  Tile already drawn. Cannot reset. Type \"end turn\".\n"
+  | "move after drawn" ->
+      "  Tile already drawn. Cannot move any tiles. Type \"end turn\".\n"
+  | "draw again" ->
+      "  Tile already drawn. Cannot draw again. Type \"end turn\".\n"
+  | _ -> failwith "Invalid AlreadyDrawn exception"
+
+let already_moved_msg =
+  "  You have already made a move. Reset all moves to draw.\n"
 
 let get_exception_msg = function
   | EmptyMove -> empty_move_msg
@@ -162,6 +169,8 @@ let get_exception_msg = function
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s
+  | AlreadyDrawn s -> already_drawn_msg s
+  | AlreadyMoved -> already_moved_msg
   | Malformed | BlankInput | _ -> malformed_msg
 
 let rec play_turn st msg =
@@ -179,9 +188,9 @@ and commands command st =
   try
     match command with
     | Quit -> quit_game ()
-    | Undo -> play_turn (undo_st st) (undo_msg st)
+    | Undo -> play_turn (undo_move st) (undo_msg st)
     | Move m -> play_turn (move m st) "  Completed move, what next?\n"
-    | Reset -> play_turn (reset_st st) (reset_msg st)
+    | Reset -> play_turn (reset_turn st) (reset_msg st)
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
     | Draw -> play_turn (draw st) draw_msg

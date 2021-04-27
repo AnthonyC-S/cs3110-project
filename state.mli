@@ -16,10 +16,17 @@ exception HaveNotPlayedMeld
     invalid runs or groups on the board. *)
 exception InvalidBoardSets
 
-(** Raied when a player attempts to end their turn and they have either
+(** Raised when a player attempts to end their turn and they have either
     not already completed a successful meld previously or the
     runs/groups played on the board do sum to 30 or more points. *)
 exception InvalidMeld
+
+(** Raised when the current player [p] has already drawn from the stack. *)
+exception AlreadyDrawn of string
+
+(** Raised when the current player [p] already made a move but tried to
+    draw a tile. *)
+exception AlreadyMoved
 
 (** [init_state pl] is the initial game state for a new game of Camlcub.
     [pl] contains the number of players, either 1-2 or 1-4 and the
