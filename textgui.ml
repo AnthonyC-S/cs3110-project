@@ -194,14 +194,14 @@ let build_board st msg =
   ^ string_of_board_rows "" st.board
   ^ bottom_row ^ rack_row cur_rack ^ "\n\n" ^ msg ^ ip
 
-let front_blank n = if n < 11 then 28 else 22
+let front_blank n = (104 - (48 + n)) / 2
 
 let win_msg s =
   let s_l = String.length s in
   let f_b = front_blank s_l in
-  let blank_length = 105 - (f_b + 48 + s_l) in
+  let blank_length = 104 - (f_b + 45 + s_l) in
   "\027[48;5;0;1m" ^ String.make f_b ' ' ^ "🎉  Congratulations " ^ s
-  ^ "! You have won the game 🎉"
+  ^ "! You won the round!  🎉"
   ^ String.make blank_length ' '
   ^ "\027[0m"
 

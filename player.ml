@@ -80,3 +80,15 @@ let update_played_valid_meld player : p =
   if (not player.played_valid_meld) && meld_sum player >= 30 then
     { player with played_valid_meld = true; drawn_current_turn = false }
   else { player with drawn_current_turn = false }
+
+let calculate_rack_score t_lst =
+  let rec get_score acc = function
+    | Joker t1 :: Joker t2 :: tail -> get_score (acc - 60) tail
+    | Joker t1 :: tail -> get_score (acc - 30) tail
+    | Tile h :: tail -> get_score (acc - h.number) tail
+    | [] -> acc
+  in
+  get_score 0 t_lst
+
+(* *)
+let add_end_game_scores turn player_lst = failwith "TODO"
