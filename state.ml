@@ -19,9 +19,13 @@ exception InvalidBoardSets
 
 exception InvalidMeld
 
+exception AlreadyDrawn of string
+
+exception AlreadyMoved
+
 (* Spec is in signature. *)
 let init_state player_lst =
-  let stack = Tile.make_tile_stack () in
+  let stack = make_tile_stack () in
   {
     current_turn = 1;
     board = init_board ();
@@ -30,7 +34,6 @@ let init_state player_lst =
     past_state = [];
   }
 
-(* Spec is in signature. *)
 let get_current_player st = current_player st.current_turn st.players
 
 (** [get_other_player st] is the player list of the other 1 or 3 players
@@ -40,13 +43,17 @@ let get_other_players st =
 
 (* Spec is in signature. *)
 let undo_move st =
-  if st.past_state = [] then st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "undo")
+  else if st.past_state = [] then st
   else
     { (List.hd st.past_state) with past_state = List.tl st.past_state }
 
 (* Spec is in signature. *)
 let reset_turn st =
-  if st.past_state = [] then st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "reset")
+  else if st.past_state = [] then st
   else { (List.rev st.past_state |> List.hd) with past_state = [] }
 
 let move_from_rack st index row =
@@ -106,18 +113,25 @@ let add_past_state start_turn_state st =
 
 (* Spec is in signature. *)
 let move moves st =
-  let start_st = st in
-  multiple_moves_from_board moves.from_board moves.to_row st
-  |> multiple_moves_from_rack moves.from_rack moves.to_row
-  |> add_past_state start_st
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "move after drawn")
+  else
+    let start_st = st in
+    multiple_moves_from_board moves.from_board moves.to_row st
+    |> multiple_moves_from_rack moves.from_rack moves.to_row
+    |> add_past_state start_st
 
 (* Spec is in signature. *)
 let draw st =
-  {
-    st with
-    players =
-      add_to_rack st.current_turn st.players (draw_tile st.t_stack);
-  }
+  if (get_current_player st).drawn_current_turn then
+    raise (AlreadyDrawn "draw again")
+  else if st.past_state = [] then
+    {
+      st with
+      players =
+        add_to_rack st.current_turn st.players (draw_tile st.t_stack);
+    }
+  else raise AlreadyMoved
 
 (* Spec is in signature. *)
 let sort_rack_by_color st =
@@ -140,18 +154,17 @@ let check_valid_board st = valid_board st.board
 let update_current_turn st =
   (st.current_turn mod List.length st.players) + 1
 
-let end_turn st =
-  let cur_player = get_current_player st in
+let check_valid st cp =
   if not (check_valid_board st) then raise InvalidBoardSets
-  else if
-    (not (check_for_valid_meld cur_player))
-    && cur_player.played_valid_meld = false
-  then raise InvalidMeld
-  else
-    {
-      st with
-      players =
-        (cur_player |> update_played_valid_meld) :: get_other_players st;
-      current_turn = update_current_turn st;
-      past_state = [];
-    }
+  else if check_for_valid_meld cp || cp.played_valid_meld then true
+  else raise InvalidMeld
+
+let end_turn_new_st st =
+  let cur_player = get_current_player st in
+  {
+    st with
+    players =
+      (cur_player |> update_played_valid_meld) :: get_other_players st;
+    current_turn = update_current_turn st;
+    past_state = [];
+  }

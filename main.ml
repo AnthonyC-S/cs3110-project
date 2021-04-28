@@ -34,8 +34,8 @@ let invalid_board_row_msg s =
      commands.\n"
 
 let invalid_meld_msg =
-  "  Can not end turn since since you do not have a valid meld, i.e. \
-   30 points or higher.\n\n\
+  "  Cannot end turn since since you do not have a valid meld, i.e. 30 \
+   points or higher.\n\n\
   \  You can either play more tiles to make a meld or undo the tiles \
    and draw to end your turn.\n"
 
@@ -45,8 +45,8 @@ let not_enough_tiles_msg =
 
 let row_already_full_msg s =
   "  Board row " ^ s
-  ^ " can not have more than 13 tiles. Try adding fewer tiles or \
-     adding to a new row.\n"
+  ^ " cannot have more than 13 tiles. Try adding fewer tiles or adding \
+     to a new row.\n"
 
 let game_commands =
   g "  Game Commands:\n\n"
@@ -108,7 +108,7 @@ let duplicate_move_from_msg str_lst =
   ^ (if List.length str_lst = 1 then " at position "
     else "s at positions ")
   ^ str_lst_syntax str_lst
-  ^ " twice.\n\
+  ^ " multiple times.\n\
     \  Each tile you move must have a unique location. Type \"help\" \
      to see commands.\n"
 
@@ -121,9 +121,20 @@ let multiple_move_to_msg str_lst =
 
 let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
-let end_turn_msg = "  Starting next players turn.\n"
+let end_turn_st st =
+  let cp = get_current_player st in
+  if (not cp.drawn_current_turn) && st.past_state = [] then st
+  else if check_valid st cp then end_turn_new_st st
+  else raise InvalidBoardSets
 
-let reset_msg = "  Board and rack have been reset.\n"
+let end_turn_msg st =
+  if
+    (not (get_current_player st).drawn_current_turn)
+    && st.past_state = []
+  then
+    "  You cannot end turn without making any move. Type \"help\" to \
+     see commands.\n"
+  else "  Starting next players turn.\n"
 
 let sort_num_msg = "  Sorted by number.\n"
 
@@ -133,19 +144,30 @@ let quit_game () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
 
-let reset_st st = if st.past_state = [] then st else reset_turn st
-
 let reset_msg st =
   if st.past_state = [] then "  No moves to go back to.\n"
-  else reset_msg
-
-let undo_st st = if st.past_state = [] then st else undo_move st
+  else "  Board and rack have been reset.\n"
 
 let undo_msg st =
   if st.past_state = [] then "  No moves to go back to.\n"
   else "  Went back one move.\n"
 
+let already_drawn_msg = function
+  | "undo" -> "  Tile already drawn. Cannot undo. Type \"end turn\".\n"
+  | "reset" ->
+      "  Tile already drawn. Cannot reset. Type \"end turn\".\n"
+  | "move after drawn" ->
+      "  Tile already drawn. Cannot move any tiles. Type \"end turn\".\n"
+  | "draw again" ->
+      "  Tile already drawn. Cannot draw again. Type \"end turn\".\n"
+  | _ -> failwith "Invalid AlreadyDrawn exception"
+
+let already_moved_msg =
+  "  You have already made a move. Reset all moves to draw.\n"
+
 let get_exception_msg = function
+  | AlreadyDrawn s -> already_drawn_msg s
+  | AlreadyMoved -> already_moved_msg
   | EmptyMove -> empty_move_msg
   | EmptyMoveFrom -> empty_move_from_msg
   | EmptyMoveTo -> empty_move_to_msg
@@ -175,17 +197,23 @@ let rec play_turn st msg =
         commands command st
       with e -> play_turn st (get_exception_msg e))
 
+and handle_end_turn st =
+  let curr_p = get_current_player st in
+  if curr_p.rack = [] && check_valid st curr_p then
+    print_string (win_board curr_p.name)
+  else play_turn (end_turn_st st) (end_turn_msg st)
+
 and commands command st =
   try
     match command with
     | Quit -> quit_game ()
-    | Undo -> play_turn (undo_st st) (undo_msg st)
+    | Undo -> play_turn (undo_move st) (undo_msg st)
     | Move m -> play_turn (move m st) "  Completed move, what next?\n"
-    | Reset -> play_turn (reset_st st) (reset_msg st)
+    | Reset -> play_turn (reset_turn st) (reset_msg st)
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
     | Draw -> play_turn (draw st) draw_msg
-    | EndTurn -> play_turn (end_turn st) end_turn_msg
+    | EndTurn -> handle_end_turn st
     | Help -> play_turn st game_commands
   with e -> play_turn st (get_exception_msg e)
 
