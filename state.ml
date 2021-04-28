@@ -111,9 +111,7 @@ let move moves st =
   |> multiple_moves_from_rack moves.from_rack moves.to_row
   |> add_past_state start_st
 
-(* Note, I did not update the [past_state] list since this will be
-   automatically followed by [reset_turn] and then [end_turn] via
-   main.ml. *)
+(* Spec is in signature. *)
 let draw st =
   {
     st with
@@ -121,6 +119,7 @@ let draw st =
       add_to_rack st.current_turn st.players (draw_tile st.t_stack);
   }
 
+(* Spec is in signature. *)
 let sort_rack_by_color st =
   let cur_player = get_current_player st in
   let new_player =
@@ -128,6 +127,7 @@ let sort_rack_by_color st =
   in
   { st with players = new_player :: get_other_players st }
 
+(* Spec is in signature. *)
 let sort_rack_by_num st =
   let cur_player = get_current_player st in
   let new_player =
