@@ -34,7 +34,26 @@ let init_state player_lst =
     past_state = [];
   }
 
-let init_new_round (st : s) : s = failwith "TODO"
+let add_prev_scores scores players =
+  let rec aux acc = function
+    | [] -> acc
+    | h :: t ->
+        aux ({ h with score = List.assoc h.p_number scores } :: acc) t
+  in
+  aux [] players
+
+let init_new_round st =
+  let player_lst =
+    List.map (fun x -> (x.p_number, x.name)) st.players
+  in
+  let player_scores =
+    List.map (fun x -> (x.p_number, x.score)) st.players
+  in
+  let new_state = init_state player_lst in
+  {
+    new_state with
+    players = add_prev_scores player_scores new_state.players;
+  }
 
 let get_current_player st = player_to_update st.current_turn st.players
 

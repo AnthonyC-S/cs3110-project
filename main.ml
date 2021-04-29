@@ -170,7 +170,7 @@ let string_of_scores player_lst =
              (fun x ->
                let s = string_of_int x in
                s ^ spaces_scores (String.length s))
-             cur_player.score
+             (List.rev cur_player.score)
           |> String.concat "")
         ^ string_of_int (List.fold_left ( + ) 0 cur_player.score)
         ^ "\n")
@@ -185,14 +185,14 @@ let score_msg player_lst =
     ^ spaces_name player_lst 6
     ^ g "  Game "
     ^ g
-        (String.concat " Game "
+        (String.concat "    Game "
            (List.map string_of_int (List.init num_games (( + ) 1))))
     ^ g "    Total\n"
   in
   if num_games = 0 then
     "  Scores are calculated at the end of each game.\n\
     \  You need to finish your first game before seeing your score.\n"
-  else num_games_row ^ string_of_scores player_lst ^ "\n\n"
+  else num_games_row ^ string_of_scores player_lst ^ "\n"
 
 let help_msg =
   g "  Game Commands:\n\n"
@@ -255,7 +255,7 @@ and handle_end_turn st =
     print_string (win_board new_st (score_msg new_st.players));
     match read_line () with
     | "Y" | "y" | "yes" ->
-        play_turn (init_new_round st)
+        play_turn (init_new_round new_st)
           ("  Starting round "
           ^ string_of_int
               (List.length (get_current_player new_st).score + 1)
@@ -267,9 +267,8 @@ and handle_end_turn st =
 and commands command st =
   try
     match command with
-    | Quit -> quit_msg ()
-    | Undo -> play_turn (undo_move st) (undo_msg st)
     | Move m -> play_turn (move m st) move_msg
+    | Undo -> play_turn (undo_move st) (undo_msg st)
     | Reset -> play_turn (reset_turn st) (reset_msg st)
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
@@ -277,6 +276,7 @@ and commands command st =
     | EndTurn -> handle_end_turn st
     | Score -> play_turn st (score_msg st.players)
     | Help -> play_turn st help_msg
+    | Quit -> quit_msg ()
   with e -> play_turn st (get_exception_msg e)
 
 let rec welcome st msg =

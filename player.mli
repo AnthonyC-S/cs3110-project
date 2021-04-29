@@ -4,16 +4,17 @@
 type rack = Tile.t list
 
 (** [p] represents a player with string name [name], player number
-    integer [number]. [played_valid_meld] is a bool showing whether the
-    player [p]'s moves in a turn was all valid. [meld_count] is a tile
-    list that keeps track of the tiles the [p] moved to make pass the
-    initial meld rule. [rack] is the tile list that [p] currently holds.
-    [score] is the integer score(s) of [p] games with the last element
-    being the most recent game score. [drawn_current_turn] is a bool
-    that reflects whether or not [p] drawed a tile in the current turn. *)
+    integer [p_number]. [played_valid_meld] is a bool showing whether
+    the player [p]'s moves in a turn was all valid. [meld_count] is a
+    tile list that keeps track of the tiles the [p] moved to make pass
+    the initial meld rule. [rack] is the tile list that [p] currently
+    holds. [score] is the integer score(s) of [p] games with the last
+    element being the most recent game score. [drawn_current_turn] is a
+    bool that reflects whether or not [p] drawed a tile in the current
+    turn. *)
 type p = {
   name : string;
-  number : int;
+  p_number : int;
   played_valid_meld : bool;
   meld_count : Tile.t list;
   rack : rack;

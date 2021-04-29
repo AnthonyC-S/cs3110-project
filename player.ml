@@ -4,7 +4,7 @@ type rack = Tile.t list
 
 type p = {
   name : string;
-  number : int;
+  p_number : int;
   played_valid_meld : bool;
   meld_count : t list;
   rack : rack;
@@ -16,11 +16,11 @@ exception EmptyList
 
 let rec make_players acc stack = function
   | [] -> List.rev acc
-  | (number, name) :: t ->
+  | (p_number, name) :: t ->
       make_players
         ({
            name;
-           number;
+           p_number;
            played_valid_meld = false;
            meld_count = [];
            rack = make_tile_rack stack;
@@ -45,7 +45,7 @@ let remove_fst_ele = function
 (** [player_to_update turn player_lst] is player [p] in [player_lst]
     that has the player numer [turn]. *)
 let player_to_update turn player_lst =
-  List.find (fun { number = x } -> x = turn) player_lst
+  List.find (fun { p_number = x } -> x = turn) player_lst
 
 let add_to_rack turn player_lst tile =
   let update_player = player_to_update turn player_lst in
