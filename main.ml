@@ -256,7 +256,10 @@ and handle_end_turn st =
     match read_line () with
     | "Y" | "y" | "yes" ->
         play_turn (init_new_round st)
-          "  Starting a new round. Enter your command to play.\n"
+          ("  Starting round "
+          ^ string_of_int
+              (List.length (get_current_player new_st).score + 1)
+          ^ ". Enter your command to play.\n")
     | "N" | "n" | "no" | "quit" | "q" -> quit_msg ()
     | _ -> handle_end_turn st)
   else play_turn (end_turn_st st) (end_turn_msg st)
