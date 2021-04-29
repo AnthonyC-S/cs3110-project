@@ -83,6 +83,9 @@ val numbers_of_t : int list -> t list -> int list
     the same order as the tiles in [t_lst]. *)
 val colors_of_t : color list -> t list -> color list
 
+(** [get_tile_number t] is the number of tile [t]. *)
+val get_tile_number : t -> int
+
 (** [sort_by_color tlst] is tile list [tlst'] with the tiles in [tlst]
     sorted by colors in the order Black, Red, Blue, Orange, None
     respectively. Each group of color-sorted tiles is then sorted by
@@ -109,3 +112,7 @@ val make_joker_options : unit -> t list
 (** [get_tile_rec t] is the extraction of tile record of the tile [t],
     ie the number of color of either a Tile or Joker. *)
 val get_tile_rec : t -> t_rec
+
+(** [p_order_tile_stack] is a stack of tiles with single digit numbers
+    that will be used for setting the random start order. *)
+val p_order_tile_stack : unit -> t Stack.t

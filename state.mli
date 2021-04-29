@@ -33,6 +33,12 @@ exception AlreadyMoved
     player's assigned or default names. *)
 val init_state : (int * string) list -> s
 
+(** [reset_players_turns st pinfo_lst] is a new state [st'] with the
+    number of the players in [st]'s players field reset to the numbers
+    in [(k, v)] pair list [pinfo_lst] where [k] is the new number and
+    [v] is the name of a player. *)
+val reset_players_turns : s -> (int * string) list -> s
+
 (** [undo_move st] is game state prior to the most recent successful
     [move] command. Otherwise, it is the current state ff there are no
     previous states to go back to. *)

@@ -64,8 +64,7 @@ let tile_tests =
       (make_t "J" 100 None) NotAJoker;
     update_joker_exception "Not a Joker exception" 1 Red
       (make_t "T" 5 Black) NotAJoker;
-    make_t_exception "Not a Tile or Joker" "C" 10 Red
-      (Failure "Not a Tile or Joker");
+    make_t_exception "Not a Tile or Joker" "C" 10 Red InvalidTile;
     stack_size_test "Size of new tile stack is 106" new_tile_stack 106;
     stack_size_test "Draw one tile, stack size is 105"
       draw_one_tile_stack 105;

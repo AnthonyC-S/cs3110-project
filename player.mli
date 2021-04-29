@@ -74,3 +74,7 @@ val check_for_valid_meld : p -> bool
     is always set to false since this function is called to update [p]'s
     record when [p] ends turn. *)
 val update_played_valid_meld : p -> p
+
+(** [reset_player_turn plst n newn] is player list [plst'] with number
+    of the player [p] with the name [n] set to [newn]. *)
+val reset_player_turn : p list -> string -> int -> p list

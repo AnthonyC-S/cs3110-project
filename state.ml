@@ -26,13 +26,21 @@ exception AlreadyMoved
 (* Spec is in signature. *)
 let init_state player_lst =
   let stack = make_tile_stack () in
+  let plst = make_players [] stack player_lst in
   {
-    current_turn = 1;
+    current_turn = (List.hd plst).number;
     board = init_board ();
-    players = make_players [] stack player_lst;
+    players = plst;
     t_stack = stack;
     past_state = [];
   }
+
+let rec reset_players_turns st = function
+  | [] -> st
+  | (newn, name) :: t ->
+      let new_ps = reset_player_turn st.players name newn in
+      let new_st = { st with players = new_ps } in
+      reset_players_turns new_st t
 
 let get_current_player st = current_player st.current_turn st.players
 
@@ -160,11 +168,11 @@ let check_valid st cp =
   else raise InvalidMeld
 
 let end_turn_new_st st =
-  let cur_player = get_current_player st in
+  let cur_player = get_current_player st
+  and other_ps = get_other_players st in
   {
     st with
-    players =
-      (cur_player |> update_played_valid_meld) :: get_other_players st;
-    current_turn = update_current_turn st;
+    players = other_ps @ [ cur_player |> update_played_valid_meld ];
+    current_turn = (List.hd other_ps).number;
     past_state = [];
   }

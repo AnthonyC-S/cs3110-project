@@ -80,3 +80,8 @@ let update_played_valid_meld player : p =
   if (not player.played_valid_meld) && meld_sum player >= 30 then
     { player with played_valid_meld = true; drawn_current_turn = false }
   else { player with drawn_current_turn = false }
+
+let reset_player_turn plst n newn =
+  let p = List.find (fun { name = x } -> x = n) plst
+  and t = List.filter (fun { name = x } -> x <> n) plst in
+  { p with number = newn } :: t

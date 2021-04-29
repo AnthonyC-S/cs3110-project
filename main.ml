@@ -232,6 +232,64 @@ let rec welcome st msg =
       else if input = "quit" then quit_game ()
       else welcome st game_commands
 
+let compare_player_num px py = Stdlib.compare px.number py.number
+
+let rec random_order_round_draw stack name =
+  match read_line () with
+  | input ->
+      if input = "draw" || input = "d" then (
+        let tile = draw_tile stack in
+        print_string
+          (g "\n  " ^ name ^ " has drawn " ^ string_of_tile 1 tile
+         ^ "\n\n");
+        (get_tile_number tile, name))
+      else if input = "quit" then quit_game ()
+      else (
+        print_string
+          ("  The command was not entered correctly. Retry.\n" ^ ip);
+        random_order_round_draw stack name)
+
+let rec wait_start () =
+  print_string ("  Enter 'start' to start the game!\n" ^ ip);
+  match read_line () with
+  | input ->
+      if input = "start" then print_string ""
+      else if input = "quit" then quit_game ()
+      else (
+        print_string
+          ("  The command was not entered correctly. Retry.\n" ^ ip);
+        wait_start ())
+
+let rec random_order_round_aux stack acc = function
+  | [] ->
+      wait_start ();
+      acc
+  | p :: t ->
+      print_string
+        ("  " ^ p.name
+       ^ ", please enter 'd' or 'draw' to draw a tile.\n" ^ ip);
+      let new_acc = random_order_round_draw stack p.name :: acc in
+      random_order_round_aux stack new_acc t
+
+let random_order_round st =
+  print_string
+    (g
+       "\n\n\
+       \  Starting initial order setting round. Each player will draw \
+        a tile.\n\
+       \  The player with the highest number will go first.\n\n");
+  let order_stack = p_order_tile_stack () in
+  let new_st =
+    random_order_round_aux order_stack [] st.players
+    |> reset_players_turns st
+  in
+  let order_ps = List.sort compare_player_num new_st.players in
+  {
+    new_st with
+    current_turn = (List.hd order_ps).number;
+    players = order_ps;
+  }
+
 let repeat_init_game_aux () =
   print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
   match read_line () with
@@ -241,7 +299,10 @@ let repeat_init_game_aux () =
 (* [game_start] attempts to initilize state using entered number of
    players and player names. *)
 let rec game_start str =
-  try welcome (init_state (parse_start str)) game_commands with
+  try
+    let state = init_state (parse_start str) |> random_order_round in
+    welcome state game_commands
+  with
   | NameTooLong ->
       print_string
         (g "\n  Player names must be shorter than 20 characters.\n");
