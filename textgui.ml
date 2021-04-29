@@ -194,18 +194,20 @@ let build_board st msg =
   ^ string_of_board_rows "" st.board
   ^ bottom_row ^ rack_row cur_rack ^ "\n\n" ^ msg ^ ip
 
-let front_blank n = (104 - (48 + n)) / 2
-
-let win_msg s =
-  let s_l = String.length s in
-  let f_b = front_blank s_l in
+let win_msg st =
+  let winner_name = (get_current_player st).name in
+  let s_l = String.length winner_name in
+  let f_b = (104 - (48 + s_l)) / 2 in
   let blank_length = 104 - (f_b + 45 + s_l) in
-  "\027[48;5;0;1m" ^ String.make f_b ' ' ^ "🎉  Congratulations " ^ s
-  ^ "! You won the round!  🎉"
+  "\027[48;5;0;1m" ^ String.make f_b ' ' ^ "🎉  Congratulations "
+  ^ winner_name ^ "! You won the round!  🎉"
   ^ String.make blank_length ' '
   ^ "\027[0m"
 
-let win_board s =
+let win_board st msg =
+  clear_board ();
   top_row ^ rp "" empty_row 7 ^ " |"
-  ^ ig (win_msg s)
-  ^ "|\n" ^ rp "" empty_row 10 ^ bottom_row
+  ^ ig (win_msg st)
+  ^ "|\n" ^ rp "" empty_row 10 ^ bottom_row ^ msg
+  ^ g "  Would you like to play another round? Y or N\n"
+  ^ ip

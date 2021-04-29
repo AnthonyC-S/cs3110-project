@@ -8,7 +8,7 @@ type p = {
   played_valid_meld : bool;
   meld_count : t list;
   rack : rack;
-  score : int;
+  score : int list;
   drawn_current_turn : bool;
 }
 
@@ -24,7 +24,7 @@ let rec make_players acc stack = function
            played_valid_meld = false;
            meld_count = [];
            rack = make_tile_rack stack;
-           score = 0;
+           score = [];
            drawn_current_turn = false;
          }
         :: acc)
@@ -64,11 +64,8 @@ let remove_from_rack turn index player_lst =
   }
   :: List.filter (fun x -> x <> update_player) player_lst
 
-let current_player turn player_lst =
-  List.find (fun { number = x } -> x = turn) player_lst
-
 let get_current_rack turn player_lst =
-  (current_player turn player_lst).rack
+  (player_to_update turn player_lst).rack
 
 let meld_sum player =
   List.fold_left ( + ) 0 (numbers_of_t [] player.meld_count)
@@ -81,14 +78,38 @@ let update_played_valid_meld player : p =
     { player with played_valid_meld = true; drawn_current_turn = false }
   else { player with drawn_current_turn = false }
 
-let calculate_rack_score t_lst =
-  let rec get_score acc = function
-    | Joker t1 :: Joker t2 :: tail -> get_score (acc - 60) tail
-    | Joker t1 :: tail -> get_score (acc - 30) tail
-    | Tile h :: tail -> get_score (acc - h.number) tail
+(** [get_score_from_rack t_lst] is the negative integer score for a
+    losing player at the end of the game. Score is calculated by summing
+    their remaining tile rack [t_lst]. Jokers are each worth -30 points
+    tiles are worth their negative tile number. *)
+let get_score_from_rack t_lst =
+  let rec aux acc = function
+    | Joker t1 :: tail -> aux (acc - 30) tail
+    | Tile h :: tail -> aux (acc - h.number) tail
     | [] -> acc
   in
-  get_score 0 t_lst
+  aux 0 t_lst
 
-(* *)
-let add_end_game_scores turn player_lst = failwith "TODO"
+(** [get scores losing_players] is an updated player list with their
+    scores of the [losing_players] at the end of a game. *)
+let get_scores losing_players =
+  let rec aux acc = function
+    | [] -> acc
+    | h :: t ->
+        aux
+          ({ h with score = get_score_from_rack h.rack :: h.score }
+          :: acc)
+          t
+  in
+  aux [] losing_players
+
+let add_scores turn player_lst =
+  let winner = player_to_update turn player_lst in
+  let losing_players = List.filter (fun x -> x <> winner) player_lst in
+  let losing_players_new_scores = get_scores losing_players in
+  let winning_score =
+    List.map (fun x -> -List.hd x.score) losing_players_new_scores
+    |> List.fold_left ( + ) 0
+  in
+  { winner with score = winning_score :: winner.score }
+  :: losing_players_new_scores

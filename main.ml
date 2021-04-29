@@ -7,7 +7,23 @@ open Board
 
 (** Need Main Module Description *)
 
-(* Following messages are for caught exceptions. *)
+(***********************************************************************)
+(* Following functions provide a message are for caught exceptions.    *)
+(***********************************************************************)
+
+let already_drawn_msg = function
+  | "undo" -> "  Tile already drawn. Cannot undo. Type \"end turn\".\n"
+  | "reset" ->
+      "  Tile already drawn. Cannot reset. Type \"end turn\".\n"
+  | "move after drawn" ->
+      "  Tile already drawn. Cannot move any tiles. Type \"end turn\".\n"
+  | "draw again" ->
+      "  Tile already drawn. Cannot draw again. Type \"end turn\".\n"
+  | _ -> failwith "Invalid AlreadyDrawn exception"
+
+let already_moved_msg =
+  "  You have already made a move. Reset all moves to draw.\n"
+
 let have_not_played_meld_msg =
   "  You cannot move board tiles until you have played a 30 point meld.\n"
 
@@ -34,8 +50,8 @@ let invalid_board_row_msg s =
      commands.\n"
 
 let invalid_meld_msg =
-  "  Cannot end turn since since you do not have a valid meld, i.e. 30 \
-   points or higher.\n\n\
+  "  Cannot end turn since you do not have a valid meld of 30 tile \
+   points or higher.\n\
   \  You can either play more tiles to make a meld or undo the tiles \
    and draw to end your turn.\n"
 
@@ -47,20 +63,6 @@ let row_already_full_msg s =
   "  Board row " ^ s
   ^ " cannot have more than 13 tiles. Try adding fewer tiles or adding \
      to a new row.\n"
-
-let game_commands =
-  g "  Game Commands:\n\n"
-  ^ ip ^ "move t to r       Moves the tile(s) [t] to board row [r].\n"
-  ^ g "  For Example:\n" ^ ip
-  ^ "move 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board \
-     row A tile at index 3, to row B.\n" ^ ip
-  ^ "undo              Undo most recent move.\n" ^ ip
-  ^ "reset             Resets board and rack to start of turn.\n" ^ ip
-  ^ "color sort        Sorts rack by tile color.\n" ^ ip
-  ^ "number sort       Sorts rack by tile number.\n" ^ ip
-  ^ "draw              Draws a new tile and ends turn.\n" ^ ip
-  ^ "end turn          Checks for a valid board and ends turn.\n" ^ ip
-  ^ "help              Display game play commands.\n\n"
 
 let malformed_msg =
   "  Did you enter the command correctly? Type \"help\" for commands.\n"
@@ -119,13 +121,24 @@ let multiple_move_to_msg str_lst =
     \  But you can only move to a single row. Type \"help\" to see \
      commands.\n"
 
-let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
+(***********************************************************************)
+(* Following functions provide a message for executed commands.        *)
+(***********************************************************************)
+let move_msg = "  Completed move, what next?\n"
 
-let end_turn_st st =
-  let cp = get_current_player st in
-  if (not cp.drawn_current_turn) && st.past_state = [] then st
-  else if check_valid st cp then end_turn_new_st st
-  else raise InvalidBoardSets
+let undo_msg st =
+  if st.past_state = [] then "  No moves to go back to.\n"
+  else "  Went back one move.\n"
+
+let reset_msg st =
+  if st.past_state = [] then "  No moves to go back to.\n"
+  else "  Board and rack have been reset.\n"
+
+let sort_col_msg = "  Sorted by color.\n"
+
+let sort_num_msg = "  Sorted by number.\n"
+
+let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
 let end_turn_msg st =
   if
@@ -136,34 +149,71 @@ let end_turn_msg st =
      see commands.\n"
   else "  Starting next players turn.\n"
 
-let sort_num_msg = "  Sorted by number.\n"
+let spaces_scores n = String.make (10 - n) ' '
 
-let sort_col_msg = "  Sorted by color.\n"
+let spaces_name player_lst n =
+  let max_name_len =
+    List.map (fun x -> String.length x.name) player_lst
+    |> List.fold_left max 0
+  in
+  String.make (6 + max_name_len - n) ' '
 
-let quit_game () =
+let string_of_scores player_lst =
+  let rec aux acc i player_num =
+    if i = player_num + 1 then acc
+    else
+      let cur_player = player_to_update i player_lst in
+      aux
+        (acc ^ "  " ^ cur_player.name
+        ^ spaces_name player_lst (String.length cur_player.name)
+        ^ (List.map
+             (fun x ->
+               let s = string_of_int x in
+               s ^ spaces_scores (String.length s))
+             cur_player.score
+          |> String.concat "")
+        ^ string_of_int (List.fold_left ( + ) 0 cur_player.score)
+        ^ "\n")
+        (i + 1) player_num
+  in
+  aux "" 1 (List.length player_lst)
+
+let score_msg player_lst =
+  let num_games = List.length (List.hd player_lst).score in
+  let num_games_row =
+    g "  Name"
+    ^ spaces_name player_lst 6
+    ^ g "  Game "
+    ^ g
+        (String.concat " Game "
+           (List.map string_of_int (List.init num_games (( + ) 1))))
+    ^ g "    Total\n"
+  in
+  if num_games = 0 then
+    "  Scores are calculated at the end of each game.\n\
+    \  You need to finish your first game before seeing your score.\n"
+  else num_games_row ^ string_of_scores player_lst ^ "\n\n"
+
+let help_msg =
+  g "  Game Commands:\n\n"
+  ^ ip ^ "move t to r       Moves the tile(s) [t] to board row [r].\n"
+  ^ g "  For Example:\n" ^ ip
+  ^ "move 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board \
+     row A tile at index 3, to row B.\n" ^ ip
+  ^ "undo              Undo most recent move.\n" ^ ip
+  ^ "reset             Resets board and rack to start of turn.\n" ^ ip
+  ^ "sort color        Sorts rack by tile color.\n" ^ ip
+  ^ "sort number       Sorts rack by tile number.\n" ^ ip
+  ^ "draw              Draws a new tile and ends turn.\n" ^ ip
+  ^ "end turn          Checks for a valid board and ends turn.\n" ^ ip
+  ^ "score             Score of previous games.\n" ^ ip
+  ^ "help              Display game play commands.\n\n\
+    \  The following shortcut commands can be also used:\n\
+    \  m, u, r, sc, sn, d, e, s, h.\n\n"
+
+let quit_msg () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
-
-let reset_msg st =
-  if st.past_state = [] then "  No moves to go back to.\n"
-  else "  Board and rack have been reset.\n"
-
-let undo_msg st =
-  if st.past_state = [] then "  No moves to go back to.\n"
-  else "  Went back one move.\n"
-
-let already_drawn_msg = function
-  | "undo" -> "  Tile already drawn. Cannot undo. Type \"end turn\".\n"
-  | "reset" ->
-      "  Tile already drawn. Cannot reset. Type \"end turn\".\n"
-  | "move after drawn" ->
-      "  Tile already drawn. Cannot move any tiles. Type \"end turn\".\n"
-  | "draw again" ->
-      "  Tile already drawn. Cannot draw again. Type \"end turn\".\n"
-  | _ -> failwith "Invalid AlreadyDrawn exception"
-
-let already_moved_msg =
-  "  You have already made a move. Reset all moves to draw.\n"
 
 let get_exception_msg = function
   | AlreadyDrawn s -> already_drawn_msg s
@@ -199,22 +249,31 @@ let rec play_turn st msg =
 
 and handle_end_turn st =
   let curr_p = get_current_player st in
-  if curr_p.rack = [] && check_valid st curr_p then
-    print_string (win_board curr_p.name)
+  if true then (
+    (* if curr_p.rack = [] && check_valid st curr_p then *)
+    let new_st = update_end_game_scores st in
+    print_string (win_board new_st (score_msg new_st.players));
+    match read_line () with
+    | "Y" | "y" | "yes" ->
+        play_turn (init_new_round st)
+          "  Starting a new round. Enter your command to play.\n"
+    | "N" | "n" | "no" | "quit" | "q" -> quit_msg ()
+    | _ -> handle_end_turn st)
   else play_turn (end_turn_st st) (end_turn_msg st)
 
 and commands command st =
   try
     match command with
-    | Quit -> quit_game ()
+    | Quit -> quit_msg ()
     | Undo -> play_turn (undo_move st) (undo_msg st)
-    | Move m -> play_turn (move m st) "  Completed move, what next?\n"
+    | Move m -> play_turn (move m st) move_msg
     | Reset -> play_turn (reset_turn st) (reset_msg st)
     | SortByColor -> play_turn (sort_rack_by_color st) sort_col_msg
     | SortByNumber -> play_turn (sort_rack_by_num st) sort_num_msg
     | Draw -> play_turn (draw st) draw_msg
     | EndTurn -> handle_end_turn st
-    | Help -> play_turn st game_commands
+    | Score -> play_turn st (score_msg st.players)
+    | Help -> play_turn st help_msg
   with e -> play_turn st (get_exception_msg e)
 
 let rec welcome st msg =
@@ -229,19 +288,19 @@ let rec welcome st msg =
   | input ->
       if input = "play" || input = "p" then
         play_turn st "  Enter your command to play.\n"
-      else if input = "quit" then quit_game ()
-      else welcome st game_commands
+      else if input = "quit" || input = "q" then quit_msg ()
+      else welcome st help_msg
 
 let repeat_init_game_aux () =
   print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
   match read_line () with
-  | "quit" -> quit_game ()
+  | "quit" | "q" -> quit_msg ()
   | init_game -> init_game
 
 (* [game_start] attempts to initilize state using entered number of
    players and player names. *)
 let rec game_start str =
-  try welcome (init_state (parse_start str)) game_commands with
+  try welcome (init_state (parse_start str)) help_msg with
   | NameTooLong ->
       print_string
         (g "\n  Player names must be shorter than 20 characters.\n");

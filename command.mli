@@ -23,6 +23,7 @@ type command =
   | SortByColor
   | Draw
   | EndTurn
+  | Score
   | Help
   | Quit
 

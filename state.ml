@@ -34,7 +34,9 @@ let init_state player_lst =
     past_state = [];
   }
 
-let get_current_player st = current_player st.current_turn st.players
+let init_new_round (st : s) : s = failwith "TODO"
+
+let get_current_player st = player_to_update st.current_turn st.players
 
 (** [get_other_player st] is the player list of the other 1 or 3 players
     who are not currently in their turn in the state [st]. *)
@@ -168,3 +170,12 @@ let end_turn_new_st st =
     current_turn = update_current_turn st;
     past_state = [];
   }
+
+let end_turn_st st =
+  let cp = get_current_player st in
+  if (not cp.drawn_current_turn) && st.past_state = [] then st
+  else if check_valid st cp then end_turn_new_st st
+  else raise InvalidBoardSets
+
+let update_end_game_scores st =
+  { st with players = add_scores st.current_turn st.players }

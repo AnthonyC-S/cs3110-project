@@ -33,6 +33,12 @@ exception AlreadyMoved
     player's assigned or default names. *)
 val init_state : (int * string) list -> s
 
+(** [init_new_round st] is the initial state for a new round of a just
+    completed game. The names of the players in [st] and their current
+    scores will be retained. All other fields will be reset and a new
+    tile stack will be created. *)
+val init_new_round : s -> s
+
 (** [undo_move st] is game state prior to the most recent successful
     [move] command. Otherwise, it is the current state ff there are no
     previous states to go back to. *)
@@ -79,3 +85,9 @@ val sort_rack_by_num : s -> s
 val check_valid : s -> Player.p -> bool
 
 val end_turn_new_st : s -> s
+
+val end_turn_st : s -> s
+
+(** [update_end_game_scores st] is new state with the player list
+    updated with each player's score at the end of the game. *)
+val update_end_game_scores : s -> s

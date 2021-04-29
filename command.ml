@@ -38,6 +38,7 @@ type command =
   | SortByColor
   | Draw
   | EndTurn
+  | Score
   | Help
   | Quit
 
@@ -235,7 +236,8 @@ let parse str =
       | [ "number"; "sort" ] | [ "sort"; "number" ] | [ "sn" ] ->
           SortByNumber
       | [ "draw" ] | [ "d" ] -> Draw
-      | [ "end"; "turn" ] | [ "et" ] -> EndTurn
+      | [ "end"; "turn" ] | [ "e" ] -> EndTurn
+      | [ "score" ] | [ "s" ] -> Score
       | [ "help" ] | [ "h" ] -> Help
       | _ -> raise Malformed
     in

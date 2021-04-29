@@ -11,4 +11,4 @@ val g : string -> string
 
 val ip : string
 
-val win_board : string -> string
+val win_board : State.s -> string -> string

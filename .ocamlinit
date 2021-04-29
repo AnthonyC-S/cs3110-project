@@ -7,8 +7,13 @@
 #load "board.cmo";;
 #load "player.cmo";;
 #load "state.cmo";;
-#load "str.cma"
+#load "textgui.cmo";;
+#load "command.cmo";;
+#load "str.cma";;
+
 open Tile
 open Board
 open Player
 open State
+open Textgui
+open Command

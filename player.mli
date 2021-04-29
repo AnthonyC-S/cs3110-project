@@ -8,16 +8,16 @@ type rack = Tile.t list
     player [p]'s moves in a turn was all valid. [meld_count] is a tile
     list that keeps track of the tiles the [p] moved to make pass the
     initial meld rule. [rack] is the tile list that [p] currently holds.
-    [score] is the current integer score of [p]. [drawn_current_turn] is
-    a bool that reflects whether or not [p] drawed a tile in the current
-    turn. *)
+    [score] is the integer score(s) of [p] games with the last element
+    being the most recent game score. [drawn_current_turn] is a bool
+    that reflects whether or not [p] drawed a tile in the current turn. *)
 type p = {
   name : string;
   number : int;
   played_valid_meld : bool;
   meld_count : Tile.t list;
   rack : rack;
-  score : int;
+  score : int list;
   drawn_current_turn : bool;
 }
 
@@ -50,9 +50,9 @@ val add_to_rack : int -> p list -> Tile.t -> p list
     indexing. This is called when the player moves a tile to the board. *)
 val remove_from_rack : int -> int -> p list -> p list
 
-(** [current_player turn plst] is a player [p] with number [turn] in
+(** [player_to_update turn plst] is a player [p] with number [turn] in
     player list [plst]. [p] is the player playing the game currently. *)
-val current_player : int -> p list -> p
+val player_to_update : int -> p list -> p
 
 (** [get_current_rack turn plst] is rack [r] of current player [p] with
     number [turn]. *)
@@ -74,3 +74,12 @@ val check_for_valid_meld : p -> bool
     is always set to false since this function is called to update [p]'s
     record when [p] ends turn. *)
 val update_played_valid_meld : p -> p
+
+(** [add_score turn pl] is an updated player's list with new scores
+    added for each player at the end of a game. The winning player in
+    the player list [pl], determiend by the current [turn], is awared
+    the positive sum of the losing players tile rack sum, with jokers
+    counting for 30 points. The losing players get the negative sum of
+    the tile numbers for tiles remaining in their own rack, with Jokers
+    counting for -30. *)
+val add_scores : int -> p list -> p list
