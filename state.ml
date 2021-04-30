@@ -26,10 +26,11 @@ exception AlreadyMoved
 (* Spec is in signature. *)
 let init_state player_lst =
   let stack = make_tile_stack () in
+  let plst = make_players [] stack player_lst in
   {
     current_turn = 1;
     board = init_board ();
-    players = make_players [] stack player_lst;
+    players = plst;
     t_stack = stack;
     past_state = [];
   }

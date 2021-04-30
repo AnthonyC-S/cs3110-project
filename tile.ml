@@ -80,6 +80,13 @@ let shuffle_tile_lst (t_lst : t list) =
 let make_tile_stack () =
   make_tile_lst () |> shuffle_tile_lst |> List.to_seq |> Stack.of_seq
 
+let p_order_tile_stack () =
+  make_tile_aux [] [ 1; 5; 9 ] Blue
+  @ make_tile_aux [] [ 2; 6 ] Orange
+  @ make_tile_aux [] [ 3; 7 ] Red
+  @ make_tile_aux [] [ 4; 8 ] Black
+  |> shuffle_tile_lst |> List.to_seq |> Stack.of_seq
+
 let draw_tile (stack : t Stack.t) =
   try Stack.pop stack with Stack.Empty -> raise NotEnoughTiles
 

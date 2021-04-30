@@ -12,3 +12,5 @@ val g : string -> string
 val ip : string
 
 val win_board : State.s -> string -> string
+
+val string_of_tile : int -> Tile.t -> string
