@@ -232,7 +232,7 @@ let rec welcome st msg =
       else if input = "quit" then quit_game ()
       else welcome st game_commands
 
-let compare_player_num px py = Stdlib.compare px.number py.number
+let compare_player_num px py = -Stdlib.compare px.number py.number
 
 let rec random_order_round_draw stack name =
   match read_line () with
