@@ -168,11 +168,15 @@ let check_valid st cp =
   else raise InvalidMeld
 
 let end_turn_new_st st =
-  let cur_player = get_current_player st
-  and other_ps = get_other_players st in
+  let cur_player = get_current_player st in
   {
     st with
-    players = other_ps @ [ cur_player |> update_played_valid_meld ];
-    current_turn = (List.hd other_ps).number;
+    players =
+      (cur_player |> update_played_valid_meld) :: get_other_players st;
+    current_turn = update_current_turn st;
     past_state = [];
   }
+
+(* and other_ps = get_other_players st in { st with players = other_ps @
+   [ cur_player |> update_played_valid_meld ]; current_turn = (List.hd
+   other_ps).number; past_state = []; } *)

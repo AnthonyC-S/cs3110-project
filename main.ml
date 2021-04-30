@@ -279,16 +279,15 @@ let random_order_round st =
         a tile.\n\
        \  The player with the highest number will go first.\n\n");
   let order_stack = p_order_tile_stack () in
-  let new_st =
+  let first_p_name =
     random_order_round_aux order_stack [] st.players
-    |> reset_players_turns st
+    |> List.sort Stdlib.compare
+    |> List.rev |> List.hd |> snd
   in
-  let order_ps = List.sort compare_player_num new_st.players in
-  {
-    new_st with
-    current_turn = (List.hd order_ps).number;
-    players = order_ps;
-  }
+  let first_p =
+    List.filter (fun p -> p.name = first_p_name) st.players |> List.hd
+  in
+  { st with current_turn = first_p.number }
 
 let repeat_init_game_aux () =
   print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
