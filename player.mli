@@ -84,3 +84,5 @@ val update_played_valid_meld : p -> p
     the tile numbers for tiles remaining in their own rack, with Jokers
     counting for -30. *)
 val add_scores : int -> p list -> p list
+
+val compare_player_number : p -> p -> int

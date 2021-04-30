@@ -236,6 +236,62 @@ let get_exception_msg = function
   | RowAlreadyFull s -> row_already_full_msg s
   | Malformed | BlankInput | _ -> malformed_msg
 
+let rec random_order_round_draw stack name =
+  match read_line () with
+  | input ->
+      if input = "draw" || input = "d" then (
+        let tile = draw_tile stack in
+        print_string
+          (g "  " ^ name ^ " has drawn " ^ string_of_tile 1 tile
+         ^ "\n\n");
+        (get_tile_number tile, name))
+      else if input = "quit" then quit_msg ()
+      else (
+        print_string
+          ("  The command was not entered correctly. Retry.\n" ^ ip);
+        random_order_round_draw stack name)
+
+let rec wait_start () =
+  print_string ("  Enter 'start' to start the game!\n" ^ ip);
+  match read_line () with
+  | input ->
+      if input = "start" then print_string ""
+      else if input = "quit" then quit_msg ()
+      else (
+        print_string
+          ("  The command was not entered correctly. Retry.\n" ^ ip);
+        wait_start ())
+
+let rec random_order_round_aux stack acc = function
+  | [] ->
+      wait_start ();
+      acc
+  | p :: t ->
+      print_string
+        ("  " ^ p.name
+       ^ ", please enter 'd' or 'draw' to draw a tile.\n" ^ ip);
+      let new_acc = random_order_round_draw stack p.name :: acc in
+      random_order_round_aux stack new_acc t
+
+let random_order_round st =
+  print_string
+    (g
+       "\n\
+       \  Starting initial order setting round. Each player will draw \
+        a tile.\n\
+       \  The player with the highest number will go first.\n\n");
+  let order_stack = p_order_tile_stack () in
+  let first_p_name =
+    random_order_round_aux order_stack []
+      (List.sort compare_player_number st.players)
+    |> List.sort Stdlib.compare
+    |> List.rev |> List.hd |> snd
+  in
+  let first_p =
+    List.filter (fun p -> p.name = first_p_name) st.players |> List.hd
+  in
+  { st with current_turn = first_p.p_number }
+
 let rec play_turn st msg =
   clear_board ();
   print_string (build_board st msg);
@@ -250,11 +306,14 @@ let rec play_turn st msg =
 and handle_end_turn st =
   let curr_p = get_current_player st in
   if curr_p.rack = [] && check_valid st curr_p then (
+    (* if true then ( *)
     let new_st = update_end_game_scores st in
     print_string (win_board new_st (score_msg new_st.players));
     match read_line () with
     | "Y" | "y" | "yes" ->
-        play_turn (init_new_round new_st)
+        let reorder_st = random_order_round new_st in
+        play_turn
+          (init_new_round reorder_st)
           ("  Starting round "
           ^ string_of_int
               (List.length (get_current_player new_st).score + 1)
@@ -292,61 +351,6 @@ let rec welcome st msg =
         play_turn st "  Enter your command to play.\n"
       else if input = "quit" || input = "q" then quit_msg ()
       else welcome st help_msg
-
-let rec random_order_round_draw stack name =
-  match read_line () with
-  | input ->
-      if input = "draw" || input = "d" then (
-        let tile = draw_tile stack in
-        print_string
-          (g "\n  " ^ name ^ " has drawn " ^ string_of_tile 1 tile
-         ^ "\n\n");
-        (get_tile_number tile, name))
-      else if input = "quit" then quit_msg ()
-      else (
-        print_string
-          ("  The command was not entered correctly. Retry.\n" ^ ip);
-        random_order_round_draw stack name)
-
-let rec wait_start () =
-  print_string ("  Enter 'start' to start the game!\n" ^ ip);
-  match read_line () with
-  | input ->
-      if input = "start" then print_string ""
-      else if input = "quit" then quit_msg ()
-      else (
-        print_string
-          ("  The command was not entered correctly. Retry.\n" ^ ip);
-        wait_start ())
-
-let rec random_order_round_aux stack acc = function
-  | [] ->
-      wait_start ();
-      acc
-  | p :: t ->
-      print_string
-        ("  " ^ p.name
-       ^ ", please enter 'd' or 'draw' to draw a tile.\n" ^ ip);
-      let new_acc = random_order_round_draw stack p.name :: acc in
-      random_order_round_aux stack new_acc t
-
-let random_order_round st =
-  print_string
-    (g
-       "\n\n\
-       \  Starting initial order setting round. Each player will draw \
-        a tile.\n\
-       \  The player with the highest number will go first.\n\n");
-  let order_stack = p_order_tile_stack () in
-  let first_p_name =
-    random_order_round_aux order_stack [] st.players
-    |> List.sort Stdlib.compare
-    |> List.rev |> List.hd |> snd
-  in
-  let first_p =
-    List.filter (fun p -> p.name = first_p_name) st.players |> List.hd
-  in
-  { st with current_turn = first_p.p_number }
 
 let repeat_init_game_aux () =
   print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);

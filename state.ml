@@ -54,6 +54,7 @@ let init_new_round st =
   {
     new_state with
     players = add_prev_scores player_scores new_state.players;
+    current_turn = st.current_turn;
   }
 
 let get_current_player st = player_to_update st.current_turn st.players

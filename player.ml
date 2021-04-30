@@ -113,3 +113,5 @@ let add_scores turn player_lst =
   in
   { winner with score = winning_score :: winner.score }
   :: losing_players_new_scores
+
+let compare_player_number x y = Stdlib.compare x.p_number y.p_number
