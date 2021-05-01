@@ -33,9 +33,9 @@ let invalid_board_sets_msg =
 
 let invalid_index_msg i =
   "  Could not find the tile on "
-  ^ (if fst i = "" then "rack" else "row " ^ fst i)
-  ^ ", index "
-  ^ string_of_int (snd i)
+  ^ g (if fst i = "" then "rack" else "row " ^ fst i)
+  ^ g ", index "
+  ^ g (string_of_int (snd i))
   ^ ". Check if the tile has the correct\n\
     \  index and/or row. Type \"help\" to see commands.\n"
 
@@ -304,9 +304,9 @@ let rec play_turn st msg =
       with e -> play_turn st (get_exception_msg e))
 
 and handle_end_turn st =
-  let curr_p = get_current_player st in
-  if curr_p.rack = [] && check_valid st curr_p then (
-    (* if true then ( *)
+  (* let curr_p = get_current_player st in if curr_p.rack = [] &&
+     check_valid st curr_p then ( *)
+  if true then (
     let new_st = update_end_game_scores st in
     print_string (win_board new_st (score_msg new_st.players));
     match read_line () with
