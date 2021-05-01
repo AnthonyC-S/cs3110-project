@@ -304,9 +304,9 @@ let rec play_turn st msg =
       with e -> play_turn st (get_exception_msg e))
 
 and handle_end_turn st =
-  (* let curr_p = get_current_player st in if curr_p.rack = [] &&
-     check_valid st curr_p then ( *)
-  if true then (
+  let curr_p = get_current_player st in
+  if curr_p.rack = [] && check_valid st curr_p then (
+    (* if true then ( *)
     let new_st = update_end_game_scores st in
     print_string (win_board new_st (score_msg new_st.players));
     match read_line () with
