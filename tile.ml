@@ -80,6 +80,9 @@ let shuffle_tile_lst (t_lst : t list) =
 let make_tile_stack () =
   make_tile_lst () |> shuffle_tile_lst |> List.to_seq |> Stack.of_seq
 
+let make_ordered_tile_stack () =
+  make_tile_lst () |> List.to_seq |> Stack.of_seq
+
 let p_order_tile_stack () =
   make_tile_aux [] [ 1; 5; 9 ] Blue
   @ make_tile_aux [] [ 2; 6 ] Orange

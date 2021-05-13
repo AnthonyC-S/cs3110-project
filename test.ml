@@ -20,6 +20,11 @@ open Command
   *****************************************************************)
 
 (*****************************************************************)
+(* Test Helper Functions                                         *)
+(*****************************************************************)
+let new_players_lst = [ (1, "A"); (2, "B") ]
+
+(*****************************************************************)
 (* Start of Tile Module Tests                                    *)
 (*****************************************************************)
 
@@ -87,11 +92,24 @@ let tile_tests =
       NotEnoughTiles;
   ]
 
+let stack_size_test name stack expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (tile_stack_size stack)
+
 (*****************************************************************)
 (* Start of Player Module Tests                                  *)
 (*****************************************************************)
+let make_players_test name acc stack players_lst expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (List.hd (make_players acc stack players_lst)).name
 
-let player_tests = []
+let player_tests =
+  [
+    make_players_test "player one's name is A" []
+      (make_ordered_tile_stack ())
+      new_players_lst "A";
+  ]
 
 (*****************************************************************)
 (* Start of Board Module Tests                                   *)
@@ -162,7 +180,7 @@ let suite =
   >::: List.flatten
          [
            tile_tests;
-           (* player_tests; *)
+           player_tests;
            board_tests;
            (* state_tests; command_tests; *)
          ]
