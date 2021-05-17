@@ -12,8 +12,6 @@ type p = {
   drawn_current_turn : bool;
 }
 
-exception EmptyList
-
 let rec make_players acc stack = function
   | [] -> List.rev acc
   | (p_number, name) :: t ->
@@ -29,18 +27,6 @@ let rec make_players acc stack = function
          }
         :: acc)
         stack t
-
-(** [get_fst_ele lst] is the first element of [lst]. It raises the
-    [EmptyList] exception if [lst] is empty. *)
-let get_fst_ele = function [] -> raise EmptyList | h :: t -> h
-
-(** [remove_fst_ele lst] is [lst] with the first element of [lst]
-    removed or an empty list if [lst] has one element. Raises
-    [EmptyList] if [lst] is empty.*)
-let remove_fst_ele = function
-  | [] -> raise EmptyList
-  | [ h ] -> []
-  | h :: t -> t
 
 (** [player_to_update turn player_lst] is player [p] in [player_lst]
     that has the player numer [turn]. *)
@@ -70,10 +56,10 @@ let get_current_rack turn player_lst =
 let meld_sum player =
   List.fold_left ( + ) 0 (numbers_of_t [] player.meld_count)
 
-let check_for_valid_meld (player : p) : bool =
+let check_for_valid_meld player =
   meld_sum player >= 30 || meld_sum player = 0
 
-let update_played_valid_meld player : p =
+let update_played_valid_meld player =
   if (not player.played_valid_meld) && meld_sum player >= 30 then
     { player with played_valid_meld = true; drawn_current_turn = false }
   else { player with drawn_current_turn = false }

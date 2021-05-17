@@ -22,10 +22,6 @@ type p = {
   drawn_current_turn : bool;
 }
 
-(** The exception [EmptyList] is raised when a list being operated on is
-    empty. *)
-exception EmptyList
-
 (** [make_players acc stack pinfo_lst] is player list [p_lst] with each
     player number and name from (number, name) associative list
     [pinfo_lst]. The players in [p_lst] are ordered the same as in

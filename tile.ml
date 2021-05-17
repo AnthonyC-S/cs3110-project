@@ -213,20 +213,3 @@ let get_tile_of_index (row : string) index t_lst =
   match List.filteri (fun i _ -> i = index - 1) t_lst with
   | h :: t -> h
   | [] -> raise (InvalidIndex (row, index))
-
-let get_tile_rec = function Tile t -> t | Joker t -> t
-
-let color_sort t_lst =
-  let rec sort k r b o j = function
-    | [] ->
-        List.flatten
-          (List.map (fun x -> List.sort compare x) [ k; r; b; o; j ])
-    | h :: t -> (
-        match (get_tile_rec h).color with
-        | Black -> sort (h :: k) r b o j t
-        | Red -> sort k (h :: r) b o j t
-        | Blue -> sort k r (h :: b) o j t
-        | Orange -> sort k r b (h :: o) j t
-        | None -> sort k r b o (h :: j) t)
-  in
-  sort [] [] [] [] [] t_lst

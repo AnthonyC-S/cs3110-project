@@ -82,7 +82,7 @@ val sort_rack_by_num : s -> s
     InvalidMeld if the previous player had not yet played a successful
     meld and they played tiles to the board that do not sum to at least
     30. *)
-val check_valid : s -> Player.p -> bool
+val check_valid : Player.p -> s -> bool
 
 val end_turn_new_st : s -> s
 

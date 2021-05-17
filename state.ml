@@ -177,7 +177,7 @@ let check_valid_board st = valid_board st.board
 let update_current_turn st =
   (st.current_turn mod List.length st.players) + 1
 
-let check_valid st cp =
+let check_valid cp st =
   if not (check_valid_board st) then raise InvalidBoardSets
   else if check_for_valid_meld cp || cp.played_valid_meld then true
   else raise InvalidMeld
@@ -195,7 +195,9 @@ let end_turn_new_st st =
 let end_turn_st st =
   let cp = get_current_player st in
   if (not cp.drawn_current_turn) && st.past_state = [] then st
-  else if check_valid st cp then end_turn_new_st st
+  else if check_valid cp st then end_turn_new_st st
+    (* Note, this exn should never be reached, should always be raised
+       in [check_valid] first. *)
   else raise InvalidBoardSets
 
 let update_end_game_scores st =

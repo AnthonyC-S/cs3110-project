@@ -5,7 +5,40 @@ open Board
 open State
 open Command
 
-(***************************************************************** Test
+(********************************************************************
+  Testing Plan:
+
+  The following units were automatically tested by unit testing / bisect
+  testing: Tile, Player, Board, State, and Command. Bisect coverage
+  greater than 90% was the achieved in these modules. 100% coverage was
+  not possible as some pattern matching cases should be impossible to
+  reach based on specifications - those matching cases were included to
+  allow the pattern match to be exhaustive.
+
+  All unit test cases were created using glass box methods with the goal
+  of covering edge cases. Higher order modules/functions were
+  prioritized as they would call several or many sub-functions and
+  therefore, be tested as well. For example, almost every function in
+  the State module was unit tested directly, and thus tested many of the
+  sub-functions that the State module called. This allowed high bisected
+  coverage without testing every smaller and simple function in the core
+  Modules, such as Tile, Player and Board.
+
+  The Main module and Textgui were tested through playing the game and
+  testing for edge cases and using Utop and viewing the resulting state
+  type. The Main module was mostly not conducive to unit testing as many
+  of its functions returned the unit type. All three group members
+  contributed to testing and trying to discover unusual game setups that
+  could cause any errors.
+
+  While this testing strategy cannot guarantee complete correctness of
+  the system, it does meet the standards needed for an initial release.
+  A game such as Rummikub can generate an extremely high number of tile
+  combinations on the board and it would be nearly impossible to test
+  all cases. However, many of these cases can be broken into smaller
+  groups of similar structure and we aimed to tested against these more
+  generalized groups.
+
   Plan - Need to Add
 
   Test Plan Rubric [4 points] The test plan should be located in a
@@ -63,8 +96,8 @@ let new_test_state () =
     past_state = [];
   }
 
-(* this helper state has a Red 1 on row A and played_valid_meld set to
-   true for player 1.*)
+(* State with Black 1 on row A and played_valid_meld set to true for
+   player 1.*)
 let valid_meld_state () =
   let st = new_test_state () in
   let player_one = List.hd st.players in
@@ -76,7 +109,7 @@ let valid_meld_state () =
         :: List.tl st.players;
     }
   in
-  move { from_board = []; from_rack = [ 1 ]; to_row = "A" } new_st
+  move { from_board = []; from_rack = [ 14 ]; to_row = "A" } new_st
 
 (*****************************************************************)
 (* Start of Tile Module Tests                                    *)
@@ -158,11 +191,17 @@ let make_players_test name acc stack players_lst expected_output =
   OUnit2.assert_equal expected_output
     (List.hd (make_players acc stack players_lst))
 
+let get_current_rack_test name turn player_lst expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (get_current_rack turn player_lst)
+
 let player_tests =
   [
     make_players_test "player one's record" []
       (make_ordered_tile_stack ())
       new_players_lst new_player_rec;
+    get_current_rack_test "player one's rack" 1
+      (new_test_state ()).players new_starting_rack;
   ]
 
 (*****************************************************************)
@@ -181,37 +220,52 @@ let board5 = add_tile (make_t "T" 1 Black) "B" board4
 
 let board6 = add_tile (make_t "T" 3 Black) "G" board5
 
-let add_tile_test
-    (name : string)
-    (tile : t)
-    (row : string)
-    (board : b)
-    (expected_output : b) =
-  name >:: fun _ ->
-  assert_equal expected_output (add_tile tile row board)
+let board7 = add_tile (make_t "T" 2 Red) "B" board2
 
-let remove_tile_test
-    (name : string)
-    (tile : t)
-    (row : string)
-    (board : b)
-    (expected_output : b) =
+let add_tile_test name tile row board expected_output =
+  name >:: fun _ ->
+  assert_equal expected_output
+    (List.find (fun x -> x.row = row) (add_tile tile row board))
+
+let remove_tile_test name tile row board expected_output =
   name >:: fun _ ->
   assert_equal expected_output (remove_tile tile row board)
 
-(*Testing for validity of groups and runs*)
-let valid_board_test
-    (name : string)
-    (board : b)
-    (expected_output : bool) =
+let valid_board_test name board expected_output =
   name >:: fun _ -> assert_equal expected_output (valid_board board)
-
-(*Testing adding/removing tiles from board*)
 
 let board_tests =
   [
     add_tile_test "Add Red 1 tile to empty board" (make_t "T" 1 Red) "B"
-      board board2;
+      board
+      { row = "B"; tiles = [ Tile { number = 1; color = Red } ] };
+    add_tile_test "add joker to Red 1 and Red 2" (make_t "J" 100 None)
+      "B" board7
+      {
+        row = "B";
+        tiles =
+          [
+            Joker { number = 3; color = Red };
+            Tile { number = 2; color = Red };
+            Tile { number = 1; color = Red };
+          ];
+      };
+    add_tile_test "add two jokers to Red 1 and Red 2"
+      (make_t "J" 100 None) "B"
+      (add_tile (make_t "J" 100 None) "B" board7)
+      {
+        row = "B";
+        tiles =
+          [
+            Joker { number = 3; color = Red };
+            Joker { number = 4; color = Red };
+            Tile { number = 2; color = Red };
+            Tile { number = 1; color = Red };
+          ];
+      };
+    add_tile_test "add joker to empty board" (make_t "J" 100 None) "B"
+      board
+      { row = "B"; tiles = [ Joker { number = 100; color = None } ] };
     remove_tile_test "Remove Red 1 tile" (make_t "T" 1 Red) "B" board2
       board;
     valid_board_test "Valid board with one group" board5 true;
@@ -222,9 +276,23 @@ let board_tests =
 (*****************************************************************)
 (* Start of State Module Tests                                   *)
 (*****************************************************************)
-let get_current_player_test name st expected_output =
+
+(* To reduce code duplication, the State module function being tested is
+   a parameter. *)
+let general_state_function_test name func st expected_output =
+  name >:: fun _ -> OUnit2.assert_equal expected_output (func st)
+
+let init_state_test name player_lst expected_output =
   name >:: fun _ ->
-  OUnit2.assert_equal expected_output (get_current_player st)
+  OUnit2.assert_equal expected_output
+    (Stack.length (init_state player_lst).t_stack)
+
+let init_new_round_test name st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (List.hd
+       (List.find (fun x -> x.name = "A") (init_new_round st).players)
+         .score)
 
 let move_from_rack_test_check_rack name moves st expected_output =
   name >:: fun _ ->
@@ -259,32 +327,44 @@ let draw_after_draw_test name st expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun _ -> draw st |> draw)
 
-let undo_move_test name st expected_output =
-  name >:: fun _ -> OUnit2.assert_equal expected_output (undo_move st)
-
 let undo_move_already_drawn_test name st expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun _ -> draw st |> undo_move)
-
-let reset_turn_test name st expected_output =
-  name >:: fun _ -> OUnit2.assert_equal expected_output (reset_turn st)
 
 let reset_turn_already_drawn_test name st expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun _ -> draw st |> reset_turn)
 
-let sort_rack_by_color_test name st expected_output =
+let check_valid_test name st cp expected_output =
   name >:: fun _ ->
-  OUnit2.assert_equal expected_output (sort_rack_by_color st)
+  OUnit2.assert_equal expected_output (check_valid st cp)
 
-let sort_rack_by_num_test name st expected_output =
+let check_valid_raises_exn_test name st expected_output =
   name >:: fun _ ->
-  OUnit2.assert_equal expected_output (sort_rack_by_num st)
+  OUnit2.assert_raises expected_output (fun _ ->
+      check_valid (get_current_player st) st)
+
+let end_turn_test name st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (end_turn_st st).current_turn
+
+let end_turn_raises_exn_test name st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun _ ->
+      (end_turn_st st).current_turn)
+
+let update_end_game_scores_test name st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (List.hd (List.hd (update_end_game_scores st).players).score)
 
 let state_tests =
   [
-    get_current_player_test "current player should be A"
-      (new_test_state ())
+    init_state_test "init new state with 4 players, checks stack size"
+      [ (1, "A"); (2, "B"); (3, "C"); (4, "D") ]
+      50;
+    general_state_function_test "current player should be A"
+      get_current_player (new_test_state ())
       (List.hd (new_test_state ()).players);
     move_from_rack_test_check_rack "rack should be missing Red 1"
       { from_board = []; from_rack = [ 1 ]; to_row = "A" }
@@ -302,10 +382,10 @@ let state_tests =
       { from_board = [ ("A", 1) ]; from_rack = []; to_row = "B" }
       (valid_meld_state ())
       { row = "A"; tiles = [] };
-    move_from_board_test_check_to_row "board row B should have Red 1"
+    move_from_board_test_check_to_row "board row B should have Black 1"
       { from_board = [ ("A", 1) ]; from_rack = []; to_row = "B" }
       (valid_meld_state ())
-      { row = "B"; tiles = [ make_t "T" 1 Red ] };
+      { row = "B"; tiles = [ make_t "T" 1 Black ] };
     move_after_draw_test
       "raises exception for moving after already drawing"
       { from_board = []; from_rack = [ 1 ]; to_row = "A" }
@@ -317,9 +397,10 @@ let state_tests =
     draw_after_draw_test
       "raises exception for drawing after already drawing"
       (new_test_state ()) (AlreadyDrawn "draw again");
-    undo_move_test "undo move of state with no moves"
-      (new_test_state ()) (new_test_state ());
-    undo_move_test "undo move of state with one move"
+    general_state_function_test "undo move of state with no moves"
+      undo_move (new_test_state ()) (new_test_state ());
+    general_state_function_test "undo move of state with one move"
+      undo_move
       (move
          { from_board = []; from_rack = [ 1 ]; to_row = "A" }
          (new_test_state ()))
@@ -327,18 +408,20 @@ let state_tests =
     undo_move_already_drawn_test
       "undo move for player with drawn_current_turn = true"
       (new_test_state ()) (AlreadyDrawn "undo");
-    reset_turn_test "reset turn of state with one move"
+    general_state_function_test "reset turn of state with one move"
+      reset_turn
       (move
          { from_board = []; from_rack = [ 1 ]; to_row = "A" }
          (new_test_state ()))
       (new_test_state ());
-    reset_turn_test "reset turn of state with no moves"
-      (new_test_state ()) (new_test_state ());
+    general_state_function_test "reset turn of state with no moves"
+      reset_turn (new_test_state ()) (new_test_state ());
     reset_turn_already_drawn_test
       "reset turn for player with drawn_current_turn = true"
       (new_test_state ()) (AlreadyDrawn "reset");
     (let player_lst = (new_test_state ()).players in
-     sort_rack_by_color_test "sorts rack by color" (new_test_state ())
+     general_state_function_test "sorts rack by color"
+       sort_rack_by_color (new_test_state ())
        {
          (new_test_state ()) with
          players =
@@ -349,7 +432,8 @@ let state_tests =
            :: List.tl player_lst;
        });
     (let player_lst = (new_test_state ()).players in
-     sort_rack_by_num_test "sorts rack by number" (new_test_state ())
+     general_state_function_test "sorts rack by number" sort_rack_by_num
+       (new_test_state ())
        {
          (new_test_state ()) with
          players =
@@ -359,6 +443,39 @@ let state_tests =
            }
            :: List.tl player_lst;
        });
+    (let cp = get_current_player (new_test_state ()) in
+     check_valid_test "check valid board on empty board" cp
+       (new_test_state ()) true);
+    (let cp = get_current_player (valid_meld_state ()) in
+     check_valid_test
+       "check valid board after legal moves and previously met meld" cp
+       (valid_meld_state ()
+       |> move { from_board = []; from_rack = [ 12; 13 ]; to_row = "A" }
+       )
+       true);
+    check_valid_raises_exn_test
+      "check valid board after one invalid move"
+      (new_test_state ()
+      |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
+      InvalidBoardSets;
+    check_valid_raises_exn_test
+      "check valid board after valid moves but meld not met"
+      (new_test_state ()
+      |> move
+           { from_board = []; from_rack = [ 12; 13; 14 ]; to_row = "A" }
+      )
+      InvalidMeld;
+    end_turn_test "end turn after drawing" (new_test_state () |> draw) 2;
+    end_turn_test "end turn without drawing" (new_test_state ()) 1;
+    end_turn_raises_exn_test "end turn with invalid board sets"
+      (new_test_state ()
+      |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
+      InvalidBoardSets;
+    update_end_game_scores_test "correct score for player one"
+      (new_test_state ()) 93;
+    init_new_round_test "start new round, score is carried over"
+      (new_test_state () |> update_end_game_scores)
+      93;
   ]
 
 (*****************************************************************)

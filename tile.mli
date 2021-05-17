@@ -115,10 +115,6 @@ val get_tile_of_index : string -> int -> 'a list -> 'a
     board rows. *)
 val make_joker_options : unit -> t list
 
-(** [get_tile_rec t] is the extraction of tile record of the tile [t],
-    ie the number of color of either a Tile or Joker. *)
-val get_tile_rec : t -> t_rec
-
 (** [p_order_tile_stack] is a stack of tiles with single digit numbers
     that will be used for setting the random start order. *)
 val p_order_tile_stack : unit -> t Stack.t
