@@ -1,4 +1,10 @@
-(** Add command module description. *)
+(** Representation of commands accepted in the game.
+
+    This module represents the commands used in the game and manages how
+    user input is parsed and connected to a meaningful value within the
+    game. The module also takes care of initializing the player objects
+    according to the number of players playing the game that was passed
+    in as user input when first initializing the game. *)
 
 (** [move_phrase] type represents the sturcture of the [Move] command.
     The from_board field is (k, v) list [blst] where [k] is the row name

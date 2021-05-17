@@ -1,3 +1,5 @@
+(** Need Board Module Description *)
+
 type b_row = {
   row : string;
   tiles : Tile.t list;

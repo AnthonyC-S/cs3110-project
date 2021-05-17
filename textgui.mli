@@ -1,3 +1,5 @@
+(** Textgui module description needed *)
+
 (** [clear_board] is a terminal window that has been reset, meaning the
     text has been cleared from the screen, the window size has been
     reset, and the cursor position is set to the top left. *)

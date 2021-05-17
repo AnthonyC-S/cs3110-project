@@ -1,4 +1,9 @@
-(** Need Player Module Description *)
+(** Representation of each player.
+
+    This module represents a player playing in the game with their
+    information, such as rack, score, name, initial meld requirement
+    kept track. The module includes the initilizing of new players and
+    managing their rack, score, and initial meld. *)
 
 (** [rack] represents the tile list [t_lst] that the player holds. *)
 type rack = Tile.t list
@@ -81,4 +86,7 @@ val update_played_valid_meld : p -> p
     counting for -30. *)
 val add_scores : int -> p list -> p list
 
+(** [compare_player_number p1 p2] is integer [i] Stdlib.compare is
+    applied to the player number of both players [i1] and [i2]
+    respectively. (i.e. [Stdlib.compare i1 i2]) *)
 val compare_player_number : p -> p -> int
