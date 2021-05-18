@@ -64,29 +64,6 @@ let draw_one_tile_stack =
   ignore (draw_tile s);
   s
 
-(* Helpers used in Player Tests*)
-let player_lst_with_jokers =
-  [
-    {
-      name = "A";
-      p_number = 1;
-      played_valid_meld = false;
-      meld_count = [];
-      rack = [];
-      score = [];
-      drawn_current_turn = false;
-    };
-    {
-      name = "B";
-      p_number = 2;
-      played_valid_meld = false;
-      meld_count = [];
-      rack = [ make_t "J" 100 None; make_t "J" 100 None ];
-      score = [];
-      drawn_current_turn = false;
-    };
-  ]
-
 (* Helpers used in State Tests *)
 let new_players_lst = [ (1, "A"); (2, "B") ]
 
@@ -143,6 +120,36 @@ let valid_meld_state () =
     }
   in
   move { from_board = []; from_rack = [ 14 ]; to_row = "A" } new_st
+
+(* Helpers used in Player Tests*)
+let player_lst_with_jokers =
+  [
+    {
+      name = "A";
+      p_number = 1;
+      played_valid_meld = false;
+      meld_count = [];
+      rack = [];
+      score = [];
+      drawn_current_turn = false;
+    };
+    {
+      name = "B";
+      p_number = 2;
+      played_valid_meld = false;
+      meld_count = [];
+      rack = [ make_t "J" 100 None; make_t "J" 100 None ];
+      score = [];
+      drawn_current_turn = false;
+    };
+  ]
+
+let update_valid_meld_player =
+  List.hd
+    (new_test_state ()
+    |> move
+         { from_board = []; from_rack = [ 2; 3; 4; 5 ]; to_row = "A" })
+      .players
 
 (*****************************************************************)
 (* Start of Tile Module Tests                                    *)
@@ -251,11 +258,17 @@ let get_current_rack_test name turn player_lst expected_output =
   name >:: fun _ ->
   OUnit2.assert_equal expected_output (get_current_rack turn player_lst)
 
-let add_scores_test name player_lst expected_output =
+let add_scores_test name player_lst (expected_output : int) =
   name >:: fun _ ->
   OUnit2.assert_equal expected_output
     (List.hd
-       (List.find (fun x -> x.name = "B") (add_scores player_lst)).score)
+       (List.find (fun x -> x.name = "B") (add_scores 1 player_lst))
+         .score)
+
+let update_played_valid_meld_test name player expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (update_played_valid_meld player).played_valid_meld
 
 let player_tests =
   [
@@ -264,7 +277,11 @@ let player_tests =
       new_players_lst new_player_rec;
     get_current_rack_test "player one's rack" 1
       (new_test_state ()).players new_starting_rack;
-    add_scores_test "checks that jokers are scored correctly";
+    add_scores_test "checks that jokers are scored correctly"
+      player_lst_with_jokers (-60);
+    update_played_valid_meld_test
+      "updates a player after playing valid meld"
+      update_valid_meld_player true;
   ]
 
 (*****************************************************************)
@@ -555,6 +572,17 @@ let state_tests =
     (let cp = get_current_player (new_test_state ()) in
      check_valid_test "check valid board on empty board" cp
        (new_test_state ()) true);
+    (let new_st =
+       new_test_state ()
+       |> move
+            { from_board = []; from_rack = [ 2; 3; 4 ]; to_row = "A" }
+     in
+     let cp = get_current_player new_st in
+     check_valid_test "check valid board on after meeting meld > 30" cp
+       (new_test_state ()
+       |> move
+            { from_board = []; from_rack = [ 2; 3; 4 ]; to_row = "A" })
+       true);
     (let cp = get_current_player (valid_meld_state ()) in
      check_valid_test
        "check valid board after legal moves and previously met meld" cp
