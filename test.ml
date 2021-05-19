@@ -55,6 +55,16 @@ open Command
 (*****************************************************************)
 (* Test Helper Functions                                         *)
 (*****************************************************************)
+
+(* Helpers Used in Tile Tests *)
+let new_tile_stack = make_tile_stack ()
+
+let draw_one_tile_stack =
+  let s = make_tile_stack () in
+  ignore (draw_tile s);
+  s
+
+(* Helpers used in State Tests *)
 let new_players_lst = [ (1, "A"); (2, "B") ]
 
 (* Makes a tile list/rack consisting of Red 1, Black 13 .. Black 1*)
@@ -111,6 +121,36 @@ let valid_meld_state () =
   in
   move { from_board = []; from_rack = [ 14 ]; to_row = "A" } new_st
 
+(* Helpers used in Player Tests*)
+let player_lst_with_jokers =
+  [
+    {
+      name = "A";
+      p_number = 1;
+      played_valid_meld = false;
+      meld_count = [];
+      rack = [];
+      score = [];
+      drawn_current_turn = false;
+    };
+    {
+      name = "B";
+      p_number = 2;
+      played_valid_meld = false;
+      meld_count = [];
+      rack = [ make_t "J" 100 None; make_t "J" 100 None ];
+      score = [];
+      drawn_current_turn = false;
+    };
+  ]
+
+let update_valid_meld_player =
+  List.hd
+    (new_test_state ()
+    |> move
+         { from_board = []; from_rack = [ 2; 3; 4; 5 ]; to_row = "A" })
+      .players
+
 (*****************************************************************)
 (* Start of Tile Module Tests                                    *)
 (*****************************************************************)
@@ -131,6 +171,12 @@ let stack_size_test name stack expected_output =
   OUnit2.assert_equal expected_output (tile_stack_size stack)
     ~printer:string_of_int
 
+let p_order_tile_stack_size_test name expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (tile_stack_size (p_order_tile_stack ()))
+    ~printer:string_of_int
+
 let draw_tile_exception name stack expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun () -> draw_tile stack)
@@ -139,44 +185,61 @@ let make_rack_exception name stack expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun () -> make_tile_rack stack)
 
-let new_tile_stack = make_tile_stack ()
+let get_tile_num_test name tile expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (get_tile_number tile)
 
-let draw_one_tile_stack =
-  let s = make_tile_stack () in
-  ignore (draw_tile s);
-  s
+let sort_by_num_test name tile_lst expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (sort_by_number tile_lst)
+
+let get_tile_of_index_exception name row index tile_lst expected_output
+    =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun () ->
+      get_tile_of_index row index tile_lst)
 
 let tile_tests =
   [
-    update_joker_test "Joker is now 1 Red" 1 Red (make_t "J" 0 None)
+    update_joker_test "joker is now 1 Red" 1 Red (make_t "J" 0 None)
       (make_t "J" 1 Red);
-    update_joker_exception "Not a Joker exception" 0 Red
+    update_joker_exception "not a Joker exception" 0 Red
       (make_t "J" 100 None) NotAJoker;
-    update_joker_exception "Not a Joker exception" 14 Red
+    update_joker_exception "not a Joker exception" 14 Red
       (make_t "J" 100 None) NotAJoker;
-    update_joker_exception "Not a Joker exception" 1 Red
+    update_joker_exception "not a Joker exception" 1 Red
       (make_t "T" 5 Black) NotAJoker;
-    make_t_exception "Not a Tile or Joker" "C" 10 Red InvalidTile;
-    stack_size_test "Size of new tile stack is 106" new_tile_stack 106;
-    stack_size_test "Draw one tile, stack size is 105"
+    make_t_exception "not a Tile or Joker" "C" 10 Red InvalidTile;
+    stack_size_test "size of new tile stack is 106" new_tile_stack 106;
+    stack_size_test "draw one tile, stack size is 105"
       draw_one_tile_stack 105;
     draw_tile_exception
-      "Empty stack raises NotEnoughTiles when drawing tile"
+      "empty stack raises NotEnoughTiles when drawing tile"
       (let s = make_tile_stack () in
        Stack.clear s;
        s)
       NotEnoughTiles;
-    stack_size_test "Making a tile rack removes 14 tiles from stack"
+    stack_size_test "making a tile rack removes 14 tiles from stack"
       (let s = make_tile_stack () in
        ignore (make_tile_rack s);
        s)
       92;
+    p_order_tile_stack_size_test
+      "draw stack for determining order has a size of 9" 9;
     make_rack_exception
-      "Empty stack raises NotEnoughTiles when making rack"
+      "empty stack raises NotEnoughTiles when making rack"
       (let s = make_tile_stack () in
        Stack.clear s;
        s)
       NotEnoughTiles;
+    get_tile_num_test "checks tile number of a joker"
+      (make_t "J" 100 None) 100;
+    sort_by_num_test "checks if joker is correctly sorted"
+      [ make_t "T" 2 Orange; make_t "J" 2 Blue ]
+      [ make_t "J" 2 Blue; make_t "T" 2 Orange ];
+    get_tile_of_index_exception "raises InvalidIndex exn" "A" 2
+      [ make_t "T" 2 Orange ]
+      (InvalidIndex ("A", 2));
   ]
 
 let stack_size_test name stack expected_output =
@@ -195,6 +258,18 @@ let get_current_rack_test name turn player_lst expected_output =
   name >:: fun _ ->
   OUnit2.assert_equal expected_output (get_current_rack turn player_lst)
 
+let add_scores_test name player_lst (expected_output : int) =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (List.hd
+       (List.find (fun x -> x.name = "B") (add_scores 1 player_lst))
+         .score)
+
+let update_played_valid_meld_test name player expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (update_played_valid_meld player).played_valid_meld
+
 let player_tests =
   [
     make_players_test "player one's record" []
@@ -202,6 +277,11 @@ let player_tests =
       new_players_lst new_player_rec;
     get_current_rack_test "player one's rack" 1
       (new_test_state ()).players new_starting_rack;
+    add_scores_test "checks that jokers are scored correctly"
+      player_lst_with_jokers (-60);
+    update_played_valid_meld_test
+      "updates a player after playing valid meld"
+      update_valid_meld_player true;
   ]
 
 (*****************************************************************)
@@ -221,6 +301,8 @@ let board5 = add_tile (make_t "T" 1 Black) "B" board4
 let board6 = add_tile (make_t "T" 3 Black) "G" board5
 
 let board7 = add_tile (make_t "T" 2 Red) "B" board2
+
+let board8 = add_tile (make_t "J" 100 None) "B" board3
 
 let add_tile_test name tile row board expected_output =
   name >:: fun _ ->
@@ -266,6 +348,39 @@ let board_tests =
     add_tile_test "add joker to empty board" (make_t "J" 100 None) "B"
       board
       { row = "B"; tiles = [ Joker { number = 100; color = None } ] };
+    add_tile_test "add joker to a group of 2" (make_t "J" 100 None) "B"
+      board3
+      {
+        row = "B";
+        tiles =
+          [
+            Joker { number = 1; color = Blue };
+            Tile { number = 1; color = Red };
+            Tile { number = 1; color = Orange };
+          ];
+      };
+    add_tile_test "add two jokers to a group of 2" (make_t "J" 100 None)
+      "B" board8
+      {
+        row = "B";
+        tiles =
+          [
+            Joker { number = 1; color = Black };
+            Joker { number = 1; color = Blue };
+            Tile { number = 1; color = Red };
+            Tile { number = 1; color = Orange };
+          ];
+      };
+    add_tile_test "add two jokers empty board" (make_t "J" 100 None) "B"
+      (add_tile (make_t "J" 100 None) "B" board)
+      {
+        row = "B";
+        tiles =
+          [
+            Joker { number = 100; color = None };
+            Joker { number = 100; color = None };
+          ];
+      };
     remove_tile_test "Remove Red 1 tile" (make_t "T" 1 Red) "B" board2
       board;
     valid_board_test "Valid board with one group" board5 true;
@@ -318,6 +433,10 @@ let move_from_board_test_check_to_row name moves st expected_output =
 let move_after_draw_test name moves st expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun _ -> draw st |> move moves)
+
+let move_row_full_exn_test name moves_1 st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun _ -> move moves_1 st)
 
 let draw_after_move_test name moves st expected_output =
   name >:: fun _ ->
@@ -386,6 +505,13 @@ let state_tests =
       { from_board = [ ("A", 1) ]; from_rack = []; to_row = "B" }
       (valid_meld_state ())
       { row = "B"; tiles = [ make_t "T" 1 Black ] };
+    move_row_full_exn_test "move to a row that already has 13 tiles exn"
+      {
+        from_board = [];
+        from_rack = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14 ];
+        to_row = "B";
+      }
+      (new_test_state ()) (RowAlreadyFull "B");
     move_after_draw_test
       "raises exception for moving after already drawing"
       { from_board = []; from_rack = [ 1 ]; to_row = "A" }
@@ -446,6 +572,17 @@ let state_tests =
     (let cp = get_current_player (new_test_state ()) in
      check_valid_test "check valid board on empty board" cp
        (new_test_state ()) true);
+    (let new_st =
+       new_test_state ()
+       |> move
+            { from_board = []; from_rack = [ 2; 3; 4 ]; to_row = "A" }
+     in
+     let cp = get_current_player new_st in
+     check_valid_test "check valid board on after meeting meld > 30" cp
+       (new_test_state ()
+       |> move
+            { from_board = []; from_rack = [ 2; 3; 4 ]; to_row = "A" })
+       true);
     (let cp = get_current_player (valid_meld_state ()) in
      check_valid_test
        "check valid board after legal moves and previously met meld" cp

@@ -211,6 +211,12 @@ let help_msg =
     \  The following shortcut commands can be also used:\n\
     \  m, u, r, sc, sn, d, e, s, h.\n\n"
 
+let start_game_msg =
+  g
+    "  Enter the number of players (2, 3, or 4) and, optionally, the \
+     player names. For example:\n"
+  ^ ip ^ "4 Clarkson Gries Dijkstra Turing\n" ^ ip
+
 let quit_msg () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
   Stdlib.exit 0
@@ -252,40 +258,46 @@ let rec random_order_round_draw stack name =
         random_order_round_draw stack name)
 
 let rec wait_start () =
-  print_string ("  Enter 'start' to start the game!\n" ^ ip);
+  print_string (g "  Press enter to start the game!\n" ^ ip);
   match read_line () with
-  | input ->
-      if input = "start" then print_string ""
-      else if input = "quit" then quit_msg ()
-      else (
-        print_string
-          ("  The command was not entered correctly. Retry.\n" ^ ip);
-        wait_start ())
+  | input -> (
+      match input with
+      | "q" | "quit" -> quit_msg ()
+      | _ -> print_string "")
 
 let rec random_order_round_aux stack acc = function
   | [] ->
-      wait_start ();
-      acc
-  | p :: t ->
+      let first_p_name =
+        List.sort Stdlib.compare acc |> List.rev |> List.hd |> snd
+      in
       print_string
-        ("  " ^ p.name
-       ^ ", please enter 'd' or 'draw' to draw a tile.\n" ^ ip);
-      let new_acc = random_order_round_draw stack p.name :: acc in
-      random_order_round_aux stack new_acc t
+        ("  " ^ first_p_name
+       ^ " drew the highest tile number and will start first.\n\n");
+      wait_start ();
+      first_p_name
+  | p :: t -> (
+      print_string
+        ("  " ^ p.name ^ ", press enter to draw a tile.  " ^ ip);
+      match read_line () with
+      | "q" | "quit" -> quit_msg ()
+      | _ ->
+          let tile = draw_tile stack in
+          print_string
+            (g "  " ^ p.name ^ " has drawn " ^ string_of_tile 1 tile
+           ^ "\n\n");
+          let new_acc = (get_tile_number tile, p.name) :: acc in
+          random_order_round_aux stack new_acc t)
 
 let random_order_round st =
   print_string
     (g
        "\n\
-       \  Starting initial order setting round. Each player will draw \
-        a tile.\n\
-       \  The player with the highest number will go first.\n\n");
+       \  Players will draw tiles to determine starting order. The \
+        player with the highest number will go first.\n");
   let order_stack = p_order_tile_stack () in
   let first_p_name =
     random_order_round_aux order_stack []
       (List.sort compare_player_number st.players)
-    |> List.sort Stdlib.compare
-    |> List.rev |> List.hd |> snd
   in
   let first_p =
     List.filter (fun p -> p.name = first_p_name) st.players |> List.hd
@@ -306,6 +318,8 @@ let rec play_turn st msg =
 and handle_end_turn st =
   let curr_p = get_current_player st in
   if curr_p.rack = [] && check_valid curr_p st then (
+    (* To immediately go to end-game, uncomment the line below and
+       comment out the code one line above. *)
     (* if true then ( *)
     let new_st = update_end_game_scores st in
     print_string (win_board new_st (score_msg new_st.players));
@@ -337,21 +351,6 @@ and commands command st =
     | Quit -> quit_msg ()
   with e -> play_turn st (get_exception_msg e)
 
-let rec welcome st msg =
-  clear_board ();
-  print_string welcome_board;
-  print_string msg;
-  print_string
-    (g
-       "  Let's start! Type \"play\" to start game or \"quit\" to exit.\n"
-    ^ ip);
-  match read_line () with
-  | input ->
-      if input = "play" || input = "p" then
-        play_turn st "  Enter your command to play.\n"
-      else if input = "quit" || input = "q" then quit_msg ()
-      else welcome st help_msg
-
 let repeat_init_game_aux () =
   print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
   match read_line () with
@@ -360,22 +359,26 @@ let repeat_init_game_aux () =
 
 (* [game_start] attempts to initilize state using entered number of
    players and player names. *)
-let rec game_start str =
-  try
-    let state = init_state (parse_start str) |> random_order_round in
-    welcome state help_msg
-  with
-  | NameTooLong ->
-      print_string
-        (g "\n  Player names must be shorter than 20 characters.\n");
-      game_start (repeat_init_game_aux ())
-  | NotUniqueNames ->
-      print_string (g "\n  Each player's name must be unique.\n");
-      game_start (repeat_init_game_aux ())
-  | Malformed ->
-      print_string
-        (g "\n  The start game command was not entered correctly.\n");
-      game_start (repeat_init_game_aux ())
+let rec game_start (str : string) =
+  clear_board ();
+  print_string (welcome_board ^ start_game_msg);
+  match read_line () with
+  | str -> (
+      try
+        let st = init_state (parse_start str) |> random_order_round in
+        play_turn st "  Enter your command to play.\n"
+      with
+      | NameTooLong ->
+          print_string
+            (g "\n  Player names must be shorter than 20 characters.\n");
+          game_start (repeat_init_game_aux ())
+      | NotUniqueNames ->
+          print_string (g "\n  Each player's name must be unique.\n");
+          game_start (repeat_init_game_aux ())
+      | Malformed ->
+          print_string
+            (g "\n  The start game command was not entered correctly.\n");
+          game_start (repeat_init_game_aux ()))
 
 (* [main] is the initial welcome screen and has player input in number
    of players and player names to start a new game. *)
@@ -384,12 +387,11 @@ let main () =
   ANSITerminal.set_cursor 1 1;
   ANSITerminal.erase Screen;
   print_string
-    (welcome_board
-    ^ g
-        "  Enter the number of players (2 or 4) and, optionally, the \
-         player names. For example:\n"
-    ^ ip ^ "4 Clarkson Gries Dijkstra Turing\n" ^ ip);
-  match read_line () with init_game -> game_start init_game
+    (welcome_board ^ help_msg
+    ^ g "\n  Press enter to set up a new game.");
+  match read_line () with
+  | "q" | "quit" -> quit_msg ()
+  | _ -> game_start ""
 
 (* Execute the game engine. *)
 let () = main ()

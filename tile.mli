@@ -63,8 +63,8 @@ val make_tile_stack : unit -> t Stack.t
 
 (** [make_ordered_tile_stack ()] is an in order, i.e., (J, J, Blue
     13..1, Orange 13..1, Red 13..1, Black 13..1, Blue 13..1, Orange
-    13..1, Red 13..1, Black 13..1) Stack [s] tile pile. This stack is
-    used only for testing purposes. of all 106 tiles. *)
+    13..1, Red 13..1, Black 13..1) Stack of tiles. This stack is used
+    only for testing purposes. *)
 val make_ordered_tile_stack : unit -> t Stack.t
 
 (** [tile_stakc_size s] is the number of tiles in the stack [s]. *)

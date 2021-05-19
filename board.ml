@@ -37,7 +37,7 @@ let valid_group lst =
 let rec valid_run_aux = function
   | [ h ] -> true
   | h :: t -> if h + 1 <> List.hd t then false else valid_run_aux t
-  | [] -> failwith "Should never be empty."
+  | [] -> failwith "valid_run_aux - should never reach"
 
 let valid_run lst =
   let len = List.length lst in
