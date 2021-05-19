@@ -618,7 +618,60 @@ let state_tests =
 (*****************************************************************)
 (* Start of Command Module Tests                                 *)
 (*****************************************************************)
-let command_tests = []
+
+let parse_start_test name str expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (parse_start str)
+
+let parse_start_exception_test name str exc =
+  name >:: fun _ -> (fun () -> parse_start str) |> assert_raises exc
+
+let command_tests =
+  [
+    parse_start_test "2 players, 2 names" "2   a   B "
+      [ (1, "a"); (2, "B") ];
+    parse_start_test "2 players, no names" "2 "
+      [ (1, "Player 1"); (2, "Player 2") ];
+    parse_start_test "2 players, 1 name" "2 one"
+      [ (1, "one"); (2, "Player 2") ];
+    parse_start_exception_test "2 players, 4 name -> malformed"
+      "2 one 2 3 4" Malformed;
+    parse_start_exception_test "two players,  - name too long"
+      "two   afljksljfklajfkdlsjfk  " NameTooLong;
+    parse_start_exception_test "3 players, 3 names - name too long"
+      "3   B B " NotUniqueNames;
+    parse_start_test "3 players, 1 name" "THREE first "
+      [ (1, "first"); (2, "Player 2"); (3, "Player 3") ];
+    parse_start_test "3 players, 2 names" "3 a b "
+      [ (1, "a"); (2, "b"); (3, "Player 3") ];
+    parse_start_test "3 players, 3 names" "three a b c "
+      [ (1, "a"); (2, "b"); (3, "c") ];
+    parse_start_test "3 players, no names" "three "
+      [ (1, "Player 1"); (2, "Player 2"); (3, "Player 3") ];
+    parse_start_exception_test "3 players, 4 name -> malformed"
+      "3 one 2 3 4" Malformed;
+    parse_start_test "4 players, 1 name" "4 first "
+      [
+        (1, "first"); (2, "Player 2"); (3, "Player 3"); (4, "Player 4");
+      ];
+    parse_start_test "4 players, 2 names" "four a b "
+      [ (1, "a"); (2, "b"); (3, "Player 3"); (4, "Player 4") ];
+    parse_start_test "4 players, 3 names" "FOUR a b c "
+      [ (1, "a"); (2, "b"); (3, "c"); (4, "Player 4") ];
+    parse_start_test "4 players, 4 names" "FOUR a b c D"
+      [ (1, "a"); (2, "b"); (3, "c"); (4, "D") ];
+    parse_start_test "4 players, no names" "4 "
+      [
+        (1, "Player 1");
+        (2, "Player 2");
+        (3, "Player 3");
+        (4, "Player 4");
+      ];
+    parse_start_exception_test "4 players, 5 name -> malformed"
+      "4 one 2 3 4 MALFORMED" Malformed;
+    parse_start_exception_test "malformed START Command" "trhee"
+      Malformed;
+  ]
 
 let suite =
   "test suite for A2"
@@ -628,7 +681,7 @@ let suite =
            player_tests;
            board_tests;
            state_tests;
-           (*command_tests; *)
+           command_tests;
          ]
 
 let _ = run_test_tt_main suite

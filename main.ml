@@ -5,8 +5,6 @@ open Command
 open Textgui
 open Board
 
-(** Need Main Module Description *)
-
 (***********************************************************************)
 (* Following functions provide a message are for caught exceptions.    *)
 (***********************************************************************)

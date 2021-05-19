@@ -28,8 +28,6 @@ let rec make_players acc stack = function
         :: acc)
         stack t
 
-(** [player_to_update turn player_lst] is player [p] in [player_lst]
-    that has the player numer [turn]. *)
 let player_to_update turn player_lst =
   List.find (fun { p_number = x } -> x = turn) player_lst
 
@@ -76,7 +74,7 @@ let get_score_from_rack t_lst =
   in
   aux 0 t_lst
 
-(** [get scores losing_players] is an updated player list with their
+(** [get scores losing_players] is an updated player list with the
     scores of the [losing_players] at the end of a game. *)
 let get_scores losing_players =
   let rec aux acc = function

@@ -1,7 +1,5 @@
 open Tile
 
-(** Need Board Module Description *)
-
 type b_row = {
   row : string;
   tiles : t list;

@@ -28,20 +28,20 @@ type t =
   | Tile of t_rec
   | Joker of t_rec
 
-(** The exception [NotEnoughTiles] is thrown when there aren't enough
-    tile to pick from. *)
+(** [NotEnoughTiles] is thrown when there aren't enough tile to pick
+    from. *)
 exception NotEnoughTiles
 
-(** The exception [NotAJoker] is thrown when the tile is not a valid
-    [Joker] type tile. *)
+(** [NotAJoker] is thrown when the tile is not a valid [Joker] type
+    tile. *)
 exception NotAJoker
 
-(** The exception [InvalidTile] is thrown when the tile being searched
-    doesn't not exist. *)
+(** [InvalidTile] is thrown when the tile being searched doesn't not
+    exist. *)
 exception InvalidTile
 
-(** The exception [InvalidIndex (k, v)] is thrown when the there doesn't
-    exist an element on index [i] in the row named [k]. *)
+(** [InvalidIndex (k, v)] is thrown when the there doesn't exist an
+    element on index [i] in the row named [k]. *)
 exception InvalidIndex of (string * int)
 
 (** [make_t t_str n c] is a Tile type tile [t] with number [n] and color
@@ -107,7 +107,8 @@ val sort_by_number : t list -> t list
 (** [get_tile_of_index i t_lst] is element [e] of [t_lst] where the
     index of [e] matches [i - 1] because [i] is 1-based index value. If
     there are no elements in [t_lst] that matches the index value [i],
-    [InvalidIndex] exception is raised. *)
+    [InvalidIndex (r, i)] exception is raised where [r] is the row
+    letter and [i] is the index number the tile was searched for. *)
 val get_tile_of_index : string -> int -> 'a list -> 'a
 
 (** [make_joker_options] is the 52 Joker list of the numbers 1..13 in
