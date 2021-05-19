@@ -207,9 +207,10 @@ let parse_rack_and_board before_to_lst after_to_lst =
   else
     Move
       {
-        from_board = split_board [] f_board;
-        from_rack = List.map (fun x -> int_of_string x) f_rack;
-        to_row = List.hd to_row;
+        from_board = split_board [] (List.map String.uppercase_ascii f_board);
+        from_rack = List.map (fun x -> int_of_string x) 
+        (List.map String.uppercase_ascii f_rack);
+        to_row = List.hd (List.map String.uppercase_ascii to_row);
       }
 
 (** [parse_move acc slst] is a [Move info] command with tile references
@@ -228,7 +229,7 @@ let parse str =
       | [ "move" ] | [ "mv" ] | [ "m" ] | [ "play" ] | [ "add" ] ->
           raise EmptyMove
       | "move" :: t | "mv" :: t | "m" :: t | "play" :: t | "add" :: t ->
-          parse_move [] (List.map (fun s -> String.uppercase_ascii s) t)
+          parse_move [] t
       | [ "undo" ] | [ "u" ] -> Undo
       | [ "reset" ] | [ "r" ] -> Reset
       | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->

@@ -9,11 +9,11 @@ type b_row = {
 
 type b = b_row list
 
-exception InvalidBoardRow of string
+(** exception InvalidBoardRow of string *)
 
 exception RowAlreadyFull of string
 
-exception EmptyBoard
+(** exception EmptyBoard *)
 
 let rows =
   (List.init 26 (( + ) 65)

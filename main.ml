@@ -230,7 +230,7 @@ let get_exception_msg = function
   | InvalidBoardSets -> invalid_board_sets_msg
   | InvalidIndex i -> invalid_index_msg i
   | InvalidTile -> invalid_tile_msg
-  | InvalidBoardRow s -> invalid_board_row_msg s
+  (**| InvalidBoardRow s -> invalid_board_row_msg s *)
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s
