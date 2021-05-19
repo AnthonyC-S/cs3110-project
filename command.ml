@@ -54,6 +54,16 @@ let init_two_players = function
   | [ p1; p2 ] -> [ (1, p1); (2, p2) ]
   | _ -> raise Malformed
 
+(** [init_three_players slst] is the same as [init_two_players] function
+    but the length of the [pinfo_lst] is 3 since this function is called
+    when there are three players. *)
+let init_three_players = function
+  | [] -> [ (1, "Player 1"); (2, "Player 2"); (3, "Player 3") ]
+  | [ p1 ] -> [ (1, p1); (2, "Player 2"); (3, "Player 3") ]
+  | [ p1; p2 ] -> [ (1, p1); (2, p2); (3, "Player 3") ]
+  | [ p1; p2; p3 ] -> [ (1, p1); (2, p2); (3, p3) ]
+  | _ -> raise Malformed
+
 (** [init_four_players slst] is the same as [init_two_players] function
     but the length of the [pinfo_lst] is 4 since this function is called
     when there are four players. *)
@@ -103,6 +113,10 @@ let parse_start str =
       check_name_len t;
       check_unique_names t;
       init_two_players t
+  | "3" :: t | "three" :: t ->
+      check_name_len t;
+      check_unique_names t;
+      init_three_players t
   | "4" :: t | "four" :: t ->
       check_name_len t;
       check_unique_names t;
