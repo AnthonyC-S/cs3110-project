@@ -11,8 +11,6 @@ exception InvalidBoardSets of string list
 
 exception RowAlreadyFull of string
 
-(** exception EmptyBoard *)
-
 let rows =
   (List.init 26 (( + ) 65)
   |> List.map Char.chr
@@ -42,16 +40,6 @@ let valid_run lst =
   len >= 3
   && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
   && valid_run_aux (List.sort compare (numbers_of_t [] lst))
-
-(* let rec tiles_of_board board = match board with [] -> [] | h :: t ->
-   h.tiles :: tiles_of_board t
-
-   let rec valid_rows acc tile_rows = match tile_rows with | [] -> acc |
-   h :: t -> valid_rows ((List.length h = 0 || valid_run h ||
-   valid_group h) && acc) t
-
-   let valid_board board = let tile_rows = tiles_of_board board in
-   valid_rows true tile_rows *)
 
 let valid_board (board : b) : bool =
   let rec check_rows acc = function
