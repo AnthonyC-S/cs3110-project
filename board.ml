@@ -7,7 +7,7 @@ type b_row = {
 
 type b = b_row list
 
-(** exception InvalidBoardRow of string *)
+exception InvalidBoardSets of string list
 
 exception RowAlreadyFull of string
 
@@ -43,20 +43,28 @@ let valid_run lst =
   && colors_of_t [] lst |> List.sort_uniq compare |> List.length = 1
   && valid_run_aux (List.sort compare (numbers_of_t [] lst))
 
-let rec tiles_of_board board =
-  match board with [] -> [] | h :: t -> h.tiles :: tiles_of_board t
+(* let rec tiles_of_board board = match board with [] -> [] | h :: t ->
+   h.tiles :: tiles_of_board t
 
-let rec valid_rows acc tile_rows =
-  match tile_rows with
-  | [] -> acc
-  | h :: t ->
-      valid_rows
-        ((List.length h = 0 || valid_run h || valid_group h) && acc)
-        t
+   let rec valid_rows acc tile_rows = match tile_rows with | [] -> acc |
+   h :: t -> valid_rows ((List.length h = 0 || valid_run h ||
+   valid_group h) && acc) t
 
-let valid_board board =
-  let tile_rows = tiles_of_board board in
-  valid_rows true tile_rows
+   let valid_board board = let tile_rows = tiles_of_board board in
+   valid_rows true tile_rows *)
+
+let valid_board (board : b) : bool =
+  let rec check_rows acc = function
+    | [] -> if acc = [] then true else raise (InvalidBoardSets acc)
+    | h :: t ->
+        let row = h.tiles in
+        check_rows
+          (if List.length row = 0 || valid_run row || valid_group row
+          then acc @ []
+          else acc @ [ h.row ])
+          t
+  in
+  check_rows [] board
 
 let rec sort_board_by_num acc = function
   | [] -> acc

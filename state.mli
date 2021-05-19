@@ -12,10 +12,6 @@ type s = {
     played a successful meld. *)
 exception HaveNotPlayedMeld
 
-(** Raised when a player attempts to end their turn and there are
-    invalid runs or groups on the board. *)
-exception InvalidBoardSets
-
 (** Raised when a player attempts to end their turn and they have either
     not already completed a successful meld previously or the
     runs/groups played on the board do sum to 30 or more points. *)

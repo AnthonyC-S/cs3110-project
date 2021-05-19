@@ -25,10 +25,6 @@ let already_moved_msg =
 let have_not_played_meld_msg =
   "  You cannot move board tiles until you have played a 30 point meld.\n"
 
-let invalid_board_sets_msg =
-  "  You cannot end turn due to invalid sets on the board.\n\
-  \  Try to fix the invaid sets or go back with \"undo\" / \"reset\".\n"
-
 let invalid_index_msg i =
   "  Could not find the tile on "
   ^ g (if fst i = "" then "rack" else "row " ^ fst i)
@@ -41,11 +37,6 @@ let invalid_tile_msg =
   "  Could not find the tile you entered. Check if the tile has the \
    correct\n\
   \  index and/or row. Type \"help\" to see commands.\n"
-
-let invalid_board_row_msg s =
-  "  Could not find the board row " ^ s
-  ^ ". Check the capitalization of the row name. Type \"help\" to see \
-     commands.\n"
 
 let invalid_meld_msg =
   "  Cannot end turn since you do not have a valid meld of 30 tile \
@@ -102,6 +93,14 @@ let invalid_move_to_msg str_lst =
   else
     "You can only move to a single row.\n\
     \  Type \"help\" to see commands.\n"
+
+let invalid_board_sets_msg s =
+  "  You cannot end turn due to "
+  ^ (if List.length s < 2 then
+     "an invalid set on the board.\n  Try to fix row "
+    else "invalid sets on the board.\n  Try to fix rows ")
+  ^ str_lst_syntax s
+  ^ ".\n  You can also back a move(s) with \"undo\" / \"reset\".\n"
 
 let duplicate_move_from_msg str_lst =
   "  You are trying to move the tile"
@@ -231,10 +230,9 @@ let get_exception_msg = function
   | DuplicateMoveFrom s -> duplicate_move_from_msg s
   | MultipleMoveTo s -> multiple_move_to_msg s
   | HaveNotPlayedMeld -> have_not_played_meld_msg
-  | InvalidBoardSets -> invalid_board_sets_msg
+  | InvalidBoardSets s -> invalid_board_sets_msg s
   | InvalidIndex i -> invalid_index_msg i
   | InvalidTile -> invalid_tile_msg
-  (**| InvalidBoardRow s -> invalid_board_row_msg s *)
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s

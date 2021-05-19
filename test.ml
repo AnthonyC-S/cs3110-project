@@ -5,52 +5,43 @@ open Board
 open State
 open Command
 
-(********************************************************************
-  Testing Plan:
+(*****************************************************************)
+(* Testing Plan:
 
-  The following units were automatically tested by unit testing / bisect
-  testing: Tile, Player, Board, State, and Command. Bisect coverage
-  greater than 90% was the achieved in these modules. 100% coverage was
-  not possible as some pattern matching cases should be impossible to
-  reach based on specifications - those matching cases were included to
-  allow the pattern match to be exhaustive.
+   The following units were automatically tested by unit testing /
+   bisect testing: Tile, Player, Board, State, and Command. Bisect
+   coverage greater than 90% was the achieved in these modules. 100%
+   coverage was not possible as some pattern matching cases should be
+   impossible to reach based on specifications - those matching cases
+   were included to allow the pattern match to be exhaustive.
 
-  All unit test cases were created using glass box methods with the goal
-  of covering edge cases. Higher order modules/functions were
-  prioritized as they would call several or many sub-functions and
-  therefore, be tested as well. For example, almost every function in
-  the State module was unit tested directly, and thus tested many of the
-  sub-functions that the State module called. This allowed high bisected
-  coverage without testing every smaller and simple function in the core
-  Modules, such as Tile, Player and Board.
+   All unit test cases were created using glass box methods with the
+   goal of covering edge cases and functions performed according to
+   their specifications. Higher order modules/functions were prioritized
+   as they would call several or many sub-functions, and therefore test
+   the sub-functions as well. For example, almost every function in the
+   State module was unit tested directly, and thus tested many of the
+   sub-functions that the State module called. This allowed high
+   bisected coverage without testing every smaller and more basic
+   function in the core Modules, such as Tile, Player and Board.
 
-  The Main module and Textgui were tested through playing the game and
-  testing for edge cases and using Utop and viewing the resulting state
-  type. The Main module was mostly not conducive to unit testing as many
-  of its functions returned the unit type. All three group members
-  contributed to testing and trying to discover unusual game setups that
-  could cause any errors.
+   The Main module and Textgui were tested through playing the game and
+   using Utop to view the resulting state type. The Main module was
+   mostly not conducive to unit testing as many of its functions
+   returned the unit type. All three group members contributed to
+   testing and trying to discover unusual game setups that could cause
+   any errors.
 
-  While this testing strategy cannot guarantee complete correctness of
-  the system, it does meet the standards needed for an initial release.
-  A game such as Rummikub can generate an extremely high number of tile
-  combinations on the board and it would be nearly impossible to test
-  all cases. However, many of these cases can be broken into smaller
-  groups of similar structure and we aimed to tested against these more
-  generalized groups.
-
-  Plan - Need to Add
-
-  Test Plan Rubric [4 points] The test plan should be located in a
-  comment at the top of the test file.
-
-  -4: The test plan is missing. -1: The test plan does not explain which
-  parts of the system were automatically tested by OUnit vs. manually
-  tested. -1: The test plan does not explain what modules were tested by
-  OUnit and how test cases were developed (black box, glass box,
-  randomized, etc.). -1: The test plan does not provide an argument for
-  why the testing approach demonstrates the correctness of the system.
-  *****************************************************************)
+   While this testing strategy cannot guarantee complete correctness of
+   the system, it does meet the standards needed for an initial release.
+   A game such as Rummikub can generate an extremely high number of tile
+   combinations on the board and it would be nearly impossible to test
+   all cases. However, many of these cases can be broken into smaller
+   groups of similar structure and we aimed to tested against these more
+   generalized groups. The high bisect coverage, the time spent testing
+   in the toplevel, and hours spent playing the game, gives our group
+   confidence in the programs overall correctness. *)
+(*****************************************************************)
 
 (*****************************************************************)
 (* Test Helper Functions                                         *)
@@ -316,6 +307,10 @@ let remove_tile_test name tile row board expected_output =
 let valid_board_test name board expected_output =
   name >:: fun _ -> assert_equal expected_output (valid_board board)
 
+let valid_board_ex_test name board expected_output =
+  name >:: fun _ ->
+  assert_raises expected_output (fun () -> valid_board board)
+
 let board_tests =
   [
     add_tile_test "Add Red 1 tile to empty board" (make_t "T" 1 Red) "B"
@@ -385,7 +380,8 @@ let board_tests =
       board;
     valid_board_test "Valid board with one group" board5 true;
     valid_board_test "Empty board" board true;
-    valid_board_test "One valid group, one invalid" board6 false;
+    valid_board_ex_test "One valid group, one invalid" board6
+      (InvalidBoardSets [ "G" ]);
   ]
 
 (*****************************************************************)
@@ -594,7 +590,7 @@ let state_tests =
       "check valid board after one invalid move"
       (new_test_state ()
       |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
-      InvalidBoardSets;
+      (InvalidBoardSets [ "A" ]);
     check_valid_raises_exn_test
       "check valid board after valid moves but meld not met"
       (new_test_state ()
@@ -607,7 +603,7 @@ let state_tests =
     end_turn_raises_exn_test "end turn with invalid board sets"
       (new_test_state ()
       |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
-      InvalidBoardSets;
+      (InvalidBoardSets [ "A" ]);
     update_end_game_scores_test "correct score for player one"
       (new_test_state ()) 93;
     init_new_round_test "start new round, score is carried over"
@@ -674,7 +670,7 @@ let command_tests =
   ]
 
 let suite =
-  "test suite for A2"
+  "test suite for final project"
   >::: List.flatten
          [
            tile_tests;
