@@ -34,8 +34,7 @@ bisect: clean bisect-test
 	bisect-ppx-report html
 
 zip:
-	zip camlkub.zip *.ml* *.json *.sh \
-	 _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
+	zip camlkub.zip *.ml* *.sh _tags .merlin .ocamlformat .ocamlinit Makefile	
 	
 docs: docs-public docs-private
 	
