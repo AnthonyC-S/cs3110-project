@@ -237,7 +237,8 @@ let parse_rack_and_board before_to_lst after_to_lst =
 (** [parse_move acc slst] is a [Move info] command with tile references
     and row letter the tiles are being moved to from [slst]. *)
 let rec parse_move acc = function
-  | "to" :: t -> parse_rack_and_board (List.rev acc) t
+  | "to" :: t | "To" :: t | "TO" :: t | "tO" :: t ->
+      parse_rack_and_board (List.rev acc) t
   | h :: t -> parse_move (h :: acc) t
   | [] -> raise InvalidMoveMissingTo
 
@@ -251,12 +252,10 @@ let parse str =
       | "move" :: t | "mv" :: t | "m" :: t -> parse_move [] t
       | [ "undo" ] | [ "u" ] -> Undo
       | [ "reset" ] | [ "r" ] -> Reset
-      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->
-          SortByColor
-      | [ "number"; "sort" ] | [ "sort"; "number" ] | [ "sn" ] ->
-          SortByNumber
+      | [ "colorsort" ] | [ "sortcolor" ] | [ "sc" ] -> SortByColor
+      | [ "numbersort" ] | [ "sortnumber" ] | [ "sn" ] -> SortByNumber
       | [ "draw" ] | [ "d" ] -> Draw
-      | [ "end"; "turn" ] | [ "e" ] -> EndTurn
+      | [ "endturn" ] | [ "e" ] -> EndTurn
       | [ "score" ] | [ "s" ] -> Score
       | [ "help" ] | [ "h" ] -> Help
       | _ -> raise Malformed

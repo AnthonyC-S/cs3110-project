@@ -195,18 +195,19 @@ let score_msg player_lst =
 
 let help_msg =
   g "  Game Commands:\n\n"
-  ^ ip ^ "move t to r       Moves the tile(s) [t] to board row [r].\n"
+  ^ ip
+  ^ "move (m) t to r       Moves the tile(s) [t] to board row [r].\n"
   ^ g "  For Example:\n" ^ ip
-  ^ "move 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board \
-     row A tile at index 3, to row B.\n" ^ ip
-  ^ "undo              Undo most recent move.\n" ^ ip
-  ^ "reset             Resets board and rack to start of turn.\n" ^ ip
-  ^ "sort color        Sorts rack by tile color.\n" ^ ip
-  ^ "sort number       Sorts rack by tile number.\n" ^ ip
-  ^ "draw              Draws a new tile and ends turn.\n" ^ ip
-  ^ "end turn          Checks for a valid board and ends turn.\n" ^ ip
-  ^ "score             Score of previous games.\n" ^ ip
-  ^ "help              Display game play commands.\n\n\
+  ^ "m 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board row A \
+     tile at index 3, to row B.\n" ^ ip
+  ^ "undo (u)              Undo most recent move.\n" ^ ip
+  ^ "reset (r)             Resets board and rack to start of turn.\n"
+  ^ ip ^ "sortcolor (sc)        Sorts rack by tile color.\n" ^ ip
+  ^ "sortnumber (sn)       Sorts rack by tile number.\n" ^ ip
+  ^ "draw (d)              Draws a new tile and ends turn.\n" ^ ip
+  ^ "endturn (e)           Checks for a valid board and ends turn.\n"
+  ^ ip ^ "score (s)             Score of previous games.\n" ^ ip
+  ^ "help (h)              Display game play commands.\n\n\
     \  The following shortcut commands can be also used:\n\
     \  m, u, r, sc, sn, d, e, s, h.\n\n"
 
