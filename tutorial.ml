@@ -17,6 +17,6 @@ let start_tutorial =
       \  This tutorial will teach you how to play the game and the \
        commands used.\n\n\
       \  To quit this tutorial at any time, enter \"q\". To continue \
-       through the tutorial, press any key.\n")
+       through the tutorial, press enter.\n")
 
 let tutorial_pages = [ start_tutorial ]
