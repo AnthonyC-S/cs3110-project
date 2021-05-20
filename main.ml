@@ -139,7 +139,8 @@ let sort_num_msg = "  Sorted by number.\n"
 let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
 let end_turn_msg st =
-  if
+  if Stack.is_empty st.t_stack then "  Starting next players turn.\n"
+  else if
     (not (get_current_player st).drawn_current_turn)
     && st.past_state = []
   then

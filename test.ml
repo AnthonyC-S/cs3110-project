@@ -630,6 +630,12 @@ let parse_start_test name str expected_output =
 let parse_start_exception_test name str exc =
   name >:: fun _ -> (fun () -> parse_start str) |> assert_raises exc
 
+let parse_test name str expected_output =
+  name >:: fun _ -> OUnit2.assert_equal expected_output (parse str)
+
+let parse_exception_test name str exc =
+  name >:: fun _ -> (fun () -> parse str) |> assert_raises exc
+
 let command_tests =
   [
     parse_start_test "2 players, 2 names" "2   a   B "
@@ -675,6 +681,57 @@ let command_tests =
       "4 one 2 3 4 MALFORMED" Malformed;
     parse_start_exception_test "malformed START Command" "trhee"
       Malformed;
+    parse_exception_test "malformed move" "" BlankInput;
+    parse_test "parse quit" "quit" Quit;
+    parse_test "parse q = quit" "q" Quit;
+    parse_test "parse exit = quit" "exit" Quit;
+    parse_exception_test "malformed move" "move" EmptyMove;
+    parse_exception_test "malformed m = move" "m" EmptyMove;
+    parse_exception_test "malformed mv = move" "mv" EmptyMove;
+    parse_exception_test "malformed move w/o to" "mv 4 2"
+      InvalidMoveMissingTo;
+    parse_test "parse valid move" "move 4 8 A3 u12 TO i"
+      (Move
+         {
+           from_board = [ ("A", 3); ("U", 12) ];
+           from_rack = [ 4; 8 ];
+           to_row = "I";
+         });
+    parse_exception_test "move to dupes tile" "mv 4 4 to I"
+      (DuplicateMoveFrom [ "4" ]);
+    parse_exception_test "move to malformed tile" "mv 4 44a to I"
+      (InvalidMoveFrom [ "44a" ]);
+    parse_exception_test "move to malformed tile" "mv 4 4a to I"
+      (InvalidMoveFrom [ "4a" ]);
+    parse_exception_test "move no tiles" "mv to I" EmptyMoveFrom;
+    parse_exception_test "move to malformed destination" "mv g5 to bb"
+      (InvalidMoveTo [ "bb" ]);
+    parse_exception_test "move to multiple destination" "mv g5 to b i"
+      (MultipleMoveTo [ "b"; "i" ]);
+    parse_exception_test "move to empty destination" "mv g14 to"
+      EmptyMoveTo;
+    parse_test "parse valid move" "m 4 u12 TO l"
+      (Move
+         { from_board = [ ("U", 12) ]; from_rack = [ 4 ]; to_row = "L" });
+    parse_test "parse undo" "undo" Undo;
+    parse_test "parse u = undo" "u" Undo;
+    parse_test "parse reset" "RESET" Reset;
+    parse_test "parse R = reset" "R" Reset;
+    parse_test "parse color sort" "CoLor Sort" SortByColor;
+    parse_test "parse sort color" "SORT color" SortByColor;
+    parse_test "parse sc = color sort" "sc" SortByColor;
+    parse_test "parse number sort" "number sort" SortByNumber;
+    parse_test "parse sort number" " sort    number" SortByNumber;
+    parse_test "parse sn = number sort" "sn" SortByNumber;
+    parse_test "parse draw" "draw" Draw;
+    parse_test "parse d = draw" "D" Draw;
+    parse_test "parse end turn" "EnD    TURn" EndTurn;
+    parse_test "parse e = end turn" "e " EndTurn;
+    parse_test "parse score" "scORE" Score;
+    parse_test "parse s = score" "s" Score;
+    parse_test "parse help" "help" Help;
+    parse_test "parse h = help" "h" Help;
+    parse_exception_test "parse malformed" "nothing" Malformed;
   ]
 
 (*****************************************************************)

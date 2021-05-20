@@ -15,8 +15,6 @@ type s = {
 
 exception HaveNotPlayedMeld
 
-(* exception InvalidBoardSets *)
-
 exception InvalidMeld
 
 exception AlreadyDrawn of string
@@ -190,7 +188,9 @@ let end_turn_new_st st =
 
 let end_turn_st st =
   let cp = get_current_player st in
-  if (cp.drawn_current_turn || st.past_state <> []) && check_valid cp st
+  if Stack.is_empty st.t_stack then end_turn_new_st st
+  else if
+    (cp.drawn_current_turn || st.past_state <> []) && check_valid cp st
   then end_turn_new_st st
   else st
 
