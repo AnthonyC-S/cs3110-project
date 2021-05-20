@@ -1,4 +1,4 @@
-MODULES=tile player board state command main authors textgui
+MODULES=tile player board state command main authors textgui tutorial
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

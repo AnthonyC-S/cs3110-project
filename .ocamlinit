@@ -10,6 +10,7 @@
 #load "textgui.cmo";;
 #load "command.cmo";;
 #load "str.cma";;
+#load "tutorial.cma";;
 
 open Tile
 open Board
@@ -17,3 +18,4 @@ open Player
 open State
 open Textgui
 open Command
+open Tutorial
