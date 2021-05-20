@@ -156,9 +156,6 @@ let rack_row t_lst =
   in
   build_rack_rows [] [] 1 t_lst
 
-(* | [] -> List.concat List.map (fun x -> rack_index_r x ^ g " Rack: " ^
-   string_of_tiles "" 1 x) final_acc *)
-
 (** [get_spaces t_lst] is the number of spaces needed to give a total
     string length of 43 for each row of the board. Note tile indexes < 9
     use 3 characters each and indexes > 9 use 4 characters each, i.e.

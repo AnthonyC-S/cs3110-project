@@ -4,11 +4,12 @@ open Player
 open Board
 open State
 open Command
+open Textgui
 
 (*****************************************************************)
 (* Testing Plan:
 
-   The following units were automatically tested by unit testing /
+   The following modules were automatically tested by unit testing /
    bisect testing: Tile, Player, Board, State, and Command. Bisect
    coverage greater than 90% was the achieved in these modules. 100%
    coverage was not possible as some pattern matching cases should be
@@ -141,6 +142,13 @@ let update_valid_meld_player =
     |> move
          { from_board = []; from_rack = [ 2; 3; 4; 5 ]; to_row = "A" })
       .players
+
+(* Helpers used in Textgui Tests. *)
+let build_board_output =
+  let channel = open_in "build_board_test.txt" in
+  let line = input_line channel in
+  close_in channel;
+  line
 
 (*****************************************************************)
 (* Start of Tile Module Tests                                    *)
@@ -669,6 +677,24 @@ let command_tests =
       Malformed;
   ]
 
+(*****************************************************************)
+(* Start of Textgui Module Tests                                 *)
+(*****************************************************************)
+let build_board_test name st msg expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (String.escaped (build_board st msg))
+
+let textgui_tests =
+  [
+    build_board_test "checks build_board with new_test_state"
+      (new_test_state ()) "this is a test" build_board_output;
+  ]
+
+(*****************************************************************)
+(* Start of Suite Tests                                          *)
+(*****************************************************************)
+
 let suite =
   "test suite for final project"
   >::: List.flatten
@@ -678,6 +704,7 @@ let suite =
            board_tests;
            state_tests;
            command_tests;
+           textgui_tests;
          ]
 
 let _ = run_test_tt_main suite

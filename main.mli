@@ -6,3 +6,5 @@
     calculates scores, and displays messages and the current game state
     through [textgui]. [main] is the highest level module in the
     program. *)
+
+val main : unit -> unit

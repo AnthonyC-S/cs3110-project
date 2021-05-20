@@ -4,6 +4,7 @@ open State
 open Command
 open Textgui
 open Board
+open Tutorial
 
 (***********************************************************************)
 (* Following functions provide a message are for caught exceptions.    *)
@@ -378,16 +379,34 @@ let rec game_start (str : string) =
 
 (* [main] is the initial welcome screen and has player input in number
    of players and player names to start a new game. *)
-let main () =
+let rec main () =
   ANSITerminal.resize 107 45;
   ANSITerminal.set_cursor 1 1;
   ANSITerminal.erase Screen;
   print_string
     (welcome_board ^ help_msg
-    ^ g "\n  Press enter to set up a new game.");
+    ^ g
+        "\n\
+        \  Press enter to set up a new game. To view game tutorial, \
+         enter \"t\"\n"
+    ^ ip);
   match read_line () with
   | "q" | "quit" -> quit_msg ()
+  | "t" -> run_tutorial tutorial_pages
   | _ -> game_start ""
+
+and run_tutorial = function
+  | [ h ] -> (
+      clear_board ();
+      print_string h;
+      match read_line () with _ -> main ())
+  | h :: t -> (
+      clear_board ();
+      print_string h;
+      match read_line () with
+      | "q" | "quit" -> main ()
+      | _ -> run_tutorial t)
+  | [] -> failwith "Should never reach."
 
 (* Execute the game engine. *)
 let () = main ()
