@@ -1,7 +1,7 @@
-(** Represents type and functions of board used in the game
+(** Representation of type and functions of board used in the game.
 
-    This includes the initilizing of a new board, adding and removing of
-    tiles from the board, and board validation and sorting. *)
+    This module includes the initilizing of a new board, adding and
+    removing of tiles from the board, and board validation and sorting. *)
 
 (** [b_row] represents a row on the board with row letter [row] and
     [tiles], a list of tiles in that row. *)
@@ -17,8 +17,8 @@ type b = b_row list
     on the board. *)
 exception InvalidBoardSets of string list
 
-(** The exception [RowAlreadyFull] is raised when a player attempts to
-    add a tile to a row that is full with 13 tiles. *)
+(** [RowAlreadyFull] is raised when a player attempts to add a tile to a
+    row that is full with 13 tiles. *)
 exception RowAlreadyFull of string
 
 (** [init_board] is the initial state of the board with no tiles. *)

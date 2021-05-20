@@ -25,7 +25,7 @@ let ig s = "\027[38;5;70;3m" ^ s ^ "\027[0m"
 (* regular green *)
 let g s = "\027[38;5;70m" ^ s ^ "\027[0m"
 
-(* [ip] is short for input and is frequently used before a read_line. *)
+(* [ip s] is short for input and is frequently used before a read_line. *)
 let ip : string = g "  > "
 
 let top_row = " " ^ String.make 105 '_' ^ " \n"

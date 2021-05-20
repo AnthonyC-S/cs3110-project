@@ -64,7 +64,6 @@ let get_current_player st = player_to_update st.current_turn st.players
 let get_other_players st =
   List.filter (fun x -> x <> get_current_player st) st.players
 
-(* Spec is in signature. *)
 let undo_move st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "undo")
@@ -72,7 +71,6 @@ let undo_move st =
   else
     { (List.hd st.past_state) with past_state = List.tl st.past_state }
 
-(* Spec is in signature. *)
 let reset_turn st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "reset")
@@ -134,7 +132,6 @@ let rec multiple_moves_from_board from_lst to_row st =
 let add_past_state start_turn_state st =
   { st with past_state = start_turn_state :: st.past_state }
 
-(* Spec is in signature. *)
 let move moves st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "move after drawn")
@@ -144,7 +141,6 @@ let move moves st =
     |> multiple_moves_from_rack moves.from_rack moves.to_row
     |> add_past_state start_st
 
-(* Spec is in signature. *)
 let draw st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "draw again")
@@ -156,7 +152,6 @@ let draw st =
     }
   else raise AlreadyMoved
 
-(* Spec is in signature. *)
 let sort_rack_by_color st =
   let cur_player = get_current_player st in
   let new_player =
@@ -164,7 +159,6 @@ let sort_rack_by_color st =
   in
   { st with players = new_player :: get_other_players st }
 
-(* Spec is in signature. *)
 let sort_rack_by_num st =
   let cur_player = get_current_player st in
   let new_player =
@@ -199,11 +193,6 @@ let end_turn_st st =
   if (cp.drawn_current_turn || st.past_state <> []) && check_valid cp st
   then end_turn_new_st st
   else st
-
-(* if (not cp.drawn_current_turn) && st.past_state = [] then st else if
-   check_valid cp st; then (* Note, this exn should never be reached,
-   should always be raised in [check_valid] first. *) else raise
-   InvalidBoardSets *)
 
 let update_end_game_scores st =
   { st with players = add_scores st.current_turn st.players }

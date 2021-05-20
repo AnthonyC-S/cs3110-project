@@ -8,7 +8,8 @@
    or use it for commercial purposes.
  ************************************************************)
 
-(** CS 3110 Spring 2021 Assignment Final Group Project - Camlkub
+(** Authorship and copyright information. CS 3110 Spring 2021 Assignment
+    Final Group Project - Camlkub
 
     @author Anthony Coffin-Schmitt (awc93), Mina Huh (mh859), and
     Christy Song (cs966) in alphabetical order of last name*)

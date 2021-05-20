@@ -53,8 +53,8 @@ exception NotUniqueNames
     the "to" keyword in its use. *)
 exception InvalidMoveMissingTo
 
-(** [EmptyMove] is raised when only the "move" keyword was entered in
-    the use of [Move] command without any other information following. *)
+(** [EmptyMove] is raised when only the "move" command was entered
+    without any other information following. *)
 exception EmptyMove
 
 (** [EmptyMoveFrom] is raised when no tiles are selected in the use of
