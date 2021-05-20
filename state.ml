@@ -134,7 +134,6 @@ let rec multiple_moves_from_board from_lst to_row st =
 let add_past_state start_turn_state st =
   { st with past_state = start_turn_state :: st.past_state }
 
-(* Spec is in signature. *)
 let move moves st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "move after drawn")
@@ -144,7 +143,6 @@ let move moves st =
     |> multiple_moves_from_rack moves.from_rack moves.to_row
     |> add_past_state start_st
 
-(* Spec is in signature. *)
 let draw st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "draw again")
@@ -194,7 +192,9 @@ let end_turn_new_st st =
 
 let end_turn_st st =
   let cp = get_current_player st in
-  if (not cp.drawn_current_turn) && st.past_state = [] then st
+  (* if stack empty able to end turn *)
+  if Stack.is_empty st.t_stack then end_turn_new_st st
+  else if (not cp.drawn_current_turn) && st.past_state = [] then st
   else if check_valid cp st then end_turn_new_st st
     (* Note, this exn should never be reached, should always be raised
        in [check_valid] first. *)

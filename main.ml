@@ -139,7 +139,8 @@ let sort_num_msg = "  Sorted by number.\n"
 let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
 let end_turn_msg st =
-  if
+  if Stack.is_empty st.t_stack then "  Starting next players turn.\n"
+  else if
     (not (get_current_player st).drawn_current_turn)
     && st.past_state = []
   then
@@ -234,7 +235,6 @@ let get_exception_msg = function
   | InvalidBoardSets -> invalid_board_sets_msg
   | InvalidIndex i -> invalid_index_msg i
   | InvalidTile -> invalid_tile_msg
-  (**| InvalidBoardRow s -> invalid_board_row_msg s *)
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s

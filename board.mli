@@ -13,8 +13,6 @@ type b_row = {
 (** [b] represents the board as a list of [b_row]. *)
 type b = b_row list
 
-(** exception InvalidBoardRow of string *)
-
 (** The exception [RowAlreadyFull] is raised when a player attempts to
     add a tile to a row that is full with 13 tiles. *)
 exception RowAlreadyFull of string
