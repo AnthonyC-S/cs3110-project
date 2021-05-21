@@ -34,7 +34,8 @@ bisect: clean bisect-test
 	bisect-ppx-report html
 
 zip:
-	zip camlkub.zip *.ml* *.sh _tags .merlin .ocamlformat .ocamlinit Makefile	
+	zip camlkub.zip *.ml* *.sh _tags .merlin .ocamlformat .ocamlinit Makefile
+	@echo "\nThe MD5 hash of camlkub.zip is: $$(md5sum camlkub.zip)."	
 	
 docs: docs-public docs-private
 	
