@@ -89,12 +89,6 @@ let trim_lc_fst_word str =
   |> List.mapi (fun i x ->
          if i = 0 then String.lowercase_ascii x else x)
 
-(** [trim_lc_lowercase s] is the same as [trim_lc_fst_word] but with all
-    elements of [slst] in lowercase *)
-let trim_lc_lowercase str =
-  List.filter (fun x -> x <> "") (String.split_on_char ' ' str)
-  |> List.map (fun x -> String.lowercase_ascii x)
-
 (** [check_name_len slst] checks if the length of all the strings in
     [slst] is under 20 and returns [()]. If not, [NameTooLong] is
     raised. *)
@@ -245,7 +239,7 @@ let rec parse_move acc = function
 let parse str =
   if String.length (String.trim str) = 0 then raise BlankInput
   else
-    let str_lst = trim_lc_lowercase str in
+    let str_lst = trim_lc_fst_word str in
     let check_lst = function
       | [ "quit" ] | [ "q" ] | [ "exit" ] -> Quit
       | [ "move" ] | [ "mv" ] | [ "m" ] -> raise EmptyMove

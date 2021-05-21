@@ -690,7 +690,7 @@ let command_tests =
     parse_exception_test "malformed mv = move" "mv" EmptyMove;
     parse_exception_test "malformed move w/o to" "mv 4 2"
       InvalidMoveMissingTo;
-    parse_test "parse valid move" "move 4 8 A3 u12 TO i"
+    parse_test "parse valid move TO" "move 4 8 A3 u12 TO i"
       (Move
          {
            from_board = [ ("A", 3); ("U", 12) ];
@@ -710,7 +710,17 @@ let command_tests =
       (MultipleMoveTo [ "b"; "i" ]);
     parse_exception_test "move to empty destination" "mv g14 to"
       EmptyMoveTo;
-    parse_test "parse valid move" "m 4 u12 TO l"
+    parse_test "parse valid move to" "m 4 12 u12 to l"
+      (Move
+         {
+           from_board = [ ("U", 12) ];
+           from_rack = [ 4; 12 ];
+           to_row = "L";
+         });
+    parse_test "parse valid move To" "m 4 u12 To l"
+      (Move
+         { from_board = [ ("U", 12) ]; from_rack = [ 4 ]; to_row = "L" });
+    parse_test "parse valid move tO" "m 4 u12 tO l"
       (Move
          { from_board = [ ("U", 12) ]; from_rack = [ 4 ]; to_row = "L" });
     parse_test "parse undo" "undo" Undo;
