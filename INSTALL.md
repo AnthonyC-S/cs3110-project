@@ -1,12 +1,12 @@
 # Installation
 
-## Needed Software
+## Required Software
 This installation assumes you have the following installed and updated:
-- OCaml (version 4.11.0 or higher) - check with `ocaml --version`.
-- OPAM (version 2.0 or higher) - check with `opam --version`. You can update packages with `opam update` followed by `opam upgrade`.
-- Make - check with `make --version`.
+- **OCaml** (version 4.11.0 or higher) - check with `ocaml --version`.
+- **OPAM** (version 2.0 or higher) - check with `opam --version`. You can update packages with `opam update` followed by `opam upgrade`.
+- **Make** - check with `make --version`.
 
-## Install the the Required opam Dependencies
+## Install the OPAM Dependencies
 `opam install ANSITerminal bisect_ppx ounit2 utop`
 
 ## Set Up the Game
@@ -16,7 +16,7 @@ This installation assumes you have the following installed and updated:
 4. Run `make play` to start the game.
 
 ## Other Make Features
-- `make test` will run OUnit2 tests.
-- `make bisect` will run Bisect test coverage.
-- `make docs` will generate public and private documenations / specifications.
-- `make clean` will remove compiled files, etc.
+- `make test` runs OUnit2 tests.
+- `make bisect` runs Bisect test coverage.
+- `make docs` generates public and private documenations / specifications.
+- `make clean` removes compiled files, etc.
