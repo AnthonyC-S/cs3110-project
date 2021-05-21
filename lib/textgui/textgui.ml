@@ -25,7 +25,7 @@ let ig s = "\027[38;5;70;3m" ^ s ^ "\027[0m"
 (* regular green *)
 let g s = "\027[38;5;70m" ^ s ^ "\027[0m"
 
-(* [ip] is short for input and is frequently used before a read_line. *)
+(* [ip s] is short for input and is frequently used before a read_line. *)
 let ip : string = g "  > "
 
 let top_row = " " ^ String.make 105 '_' ^ " \n"
@@ -70,7 +70,7 @@ let bottom_row = " |" ^ String.make 103 '_' ^ "|\n\n"
 (* [rack_index_r t_lst] gives the rack index string that is equal in
    length to size of rack [t_lst]. Accounts for spacing needed between
    numbers single digit numbers vs. double digit numbers. *)
-let rec rack_index_r t_lst idx =
+let rack_index_r t_lst idx =
   g "  Index:  "
   ^ (List.init (List.length t_lst) (( + ) idx)
     |> List.map (fun i -> string_of_int i ^ "  ")
@@ -127,8 +127,8 @@ let string_of_tile idx_count tile =
       rw (string_of_int i) ^ space i idx_count
   | Tile { number = i; color = Black } ->
       kw (string_of_int i) ^ space i idx_count
-  | Tile { number = i; color = None } -> ""
-  | Joker { number = i } -> kw "J" ^ space 1 idx_count
+  | Tile _ -> ""
+  | Joker _ -> kw "J" ^ space 1 idx_count
 
 let rec string_of_tiles acc idx_count tiles =
   match tiles with
@@ -155,9 +155,6 @@ let rack_row t_lst =
         else build_rack_rows (acc @ [ h ]) final_acc (count + 1) t
   in
   build_rack_rows [] [] 1 t_lst
-
-(* | [] -> List.concat List.map (fun x -> rack_index_r x ^ g " Rack: " ^
-   string_of_tiles "" 1 x) final_acc *)
 
 (** [get_spaces t_lst] is the number of spaces needed to give a total
     string length of 43 for each row of the board. Note tile indexes < 9

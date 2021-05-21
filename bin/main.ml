@@ -4,6 +4,7 @@ open State
 open Command
 open Textgui
 open Board
+open Tutorial
 
 (***********************************************************************)
 (* Following functions provide a message are for caught exceptions.    *)
@@ -25,10 +26,6 @@ let already_moved_msg =
 let have_not_played_meld_msg =
   "  You cannot move board tiles until you have played a 30 point meld.\n"
 
-let invalid_board_sets_msg =
-  "  You cannot end turn due to invalid sets on the board.\n\
-  \  Try to fix the invaid sets or go back with \"undo\" / \"reset\".\n"
-
 let invalid_index_msg i =
   "  Could not find the tile on "
   ^ g (if fst i = "" then "rack" else "row " ^ fst i)
@@ -41,11 +38,6 @@ let invalid_tile_msg =
   "  Could not find the tile you entered. Check if the tile has the \
    correct\n\
   \  index and/or row. Type \"help\" to see commands.\n"
-
-let invalid_board_row_msg s =
-  "  Could not find the board row " ^ s
-  ^ ". Check the capitalization of the row name. Type \"help\" to see \
-     commands.\n"
 
 let invalid_meld_msg =
   "  Cannot end turn since you do not have a valid meld of 30 tile \
@@ -103,6 +95,14 @@ let invalid_move_to_msg str_lst =
     "You can only move to a single row.\n\
     \  Type \"help\" to see commands.\n"
 
+let invalid_board_sets_msg s =
+  "  You cannot end turn due to "
+  ^ (if List.length s < 2 then
+     "an invalid set on the board.\n  Try to fix row "
+    else "invalid sets on the board.\n  Try to fix rows ")
+  ^ str_lst_syntax s
+  ^ ".\n  You can also back a move(s) with \"undo\" / \"reset\".\n"
+
 let duplicate_move_from_msg str_lst =
   "  You are trying to move the tile"
   ^ (if List.length str_lst = 1 then " at position "
@@ -139,7 +139,8 @@ let sort_num_msg = "  Sorted by number.\n"
 let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
 
 let end_turn_msg st =
-  if
+  if Stack.is_empty st.t_stack then "  Starting next players turn.\n"
+  else if
     (not (get_current_player st).drawn_current_turn)
     && st.past_state = []
   then
@@ -194,18 +195,19 @@ let score_msg player_lst =
 
 let help_msg =
   g "  Game Commands:\n\n"
-  ^ ip ^ "move t to r       Moves the tile(s) [t] to board row [r].\n"
+  ^ ip
+  ^ "move (m) t to r       Moves the tile(s) [t] to board row [r].\n"
   ^ g "  For Example:\n" ^ ip
-  ^ "move 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board \
-     row A tile at index 3, to row B.\n" ^ ip
-  ^ "undo              Undo most recent move.\n" ^ ip
-  ^ "reset             Resets board and rack to start of turn.\n" ^ ip
-  ^ "sort color        Sorts rack by tile color.\n" ^ ip
-  ^ "sort number       Sorts rack by tile number.\n" ^ ip
-  ^ "draw              Draws a new tile and ends turn.\n" ^ ip
-  ^ "end turn          Checks for a valid board and ends turn.\n" ^ ip
-  ^ "score             Score of previous games.\n" ^ ip
-  ^ "help              Display game play commands.\n\n\
+  ^ "m 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board row A \
+     tile at index 3, to row B.\n" ^ ip
+  ^ "undo (u)              Undo most recent move.\n" ^ ip
+  ^ "reset (r)             Resets board and rack to start of turn.\n"
+  ^ ip ^ "sortcolor (sc)        Sorts rack by tile color.\n" ^ ip
+  ^ "sortnumber (sn)       Sorts rack by tile number.\n" ^ ip
+  ^ "draw (d)              Draws a new tile and ends turn.\n" ^ ip
+  ^ "endturn (e)           Checks for a valid board and ends turn.\n"
+  ^ ip ^ "score (s)             Score of previous games.\n" ^ ip
+  ^ "help (h)              Display game play commands.\n\n\
     \  The following shortcut commands can be also used:\n\
     \  m, u, r, sc, sn, d, e, s, h.\n\n"
 
@@ -231,31 +233,23 @@ let get_exception_msg = function
   | DuplicateMoveFrom s -> duplicate_move_from_msg s
   | MultipleMoveTo s -> multiple_move_to_msg s
   | HaveNotPlayedMeld -> have_not_played_meld_msg
-  | InvalidBoardSets -> invalid_board_sets_msg
+  | InvalidBoardSets s -> invalid_board_sets_msg s
   | InvalidIndex i -> invalid_index_msg i
   | InvalidTile -> invalid_tile_msg
-  (**| InvalidBoardRow s -> invalid_board_row_msg s *)
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s
   | Malformed | BlankInput | _ -> malformed_msg
 
-let rec random_order_round_draw stack name =
-  match read_line () with
-  | input ->
-      if input = "draw" || input = "d" then (
-        let tile = draw_tile stack in
-        print_string
-          (g "  " ^ name ^ " has drawn " ^ string_of_tile 1 tile
-         ^ "\n\n");
-        (get_tile_number tile, name))
-      else if input = "quit" then quit_msg ()
-      else (
-        print_string
-          ("  The command was not entered correctly. Retry.\n" ^ ip);
-        random_order_round_draw stack name)
+(* let rec random_order_round_draw stack name = match read_line () with
+   | input -> if input = "draw" || input = "d" then ( let tile =
+   draw_tile stack in print_string (g " " ^ name ^ " has drawn " ^
+   string_of_tile 1 tile ^ "\n\n"); (get_tile_number tile, name)) else
+   if input = "quit" then quit_msg () else ( print_string (" The command
+   was not entered correctly. Retry.\n" ^ ip); random_order_round_draw
+   stack name) *)
 
-let rec wait_start () =
+let wait_start () =
   print_string (g "  Press enter to start the game!\n" ^ ip);
   match read_line () with
   | input -> (
@@ -349,15 +343,10 @@ and commands command st =
     | Quit -> quit_msg ()
   with e -> play_turn st (get_exception_msg e)
 
-let repeat_init_game_aux () =
-  print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
-  match read_line () with
-  | "quit" | "q" -> quit_msg ()
-  | init_game -> init_game
-
 (* [game_start] attempts to initilize state using entered number of
    players and player names. *)
-let rec game_start (str : string) =
+(* let rec game_start (str : string) = *)
+let rec game_start () =
   clear_board ();
   print_string (welcome_board ^ start_game_msg);
   match read_line () with
@@ -369,27 +358,54 @@ let rec game_start (str : string) =
       | NameTooLong ->
           print_string
             (g "\n  Player names must be shorter than 20 characters.\n");
-          game_start (repeat_init_game_aux ())
+          repeat_init_game_aux ();
+          game_start ()
       | NotUniqueNames ->
           print_string (g "\n  Each player's name must be unique.\n");
-          game_start (repeat_init_game_aux ())
+          repeat_init_game_aux ();
+          game_start ()
       | Malformed ->
           print_string
             (g "\n  The start game command was not entered correctly.\n");
-          game_start (repeat_init_game_aux ()))
+          repeat_init_game_aux ();
+          game_start ())
+
+and repeat_init_game_aux () =
+  print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
+  match read_line () with
+  | "quit" | "q" -> quit_msg ()
+  | _ -> game_start ()
 
 (* [main] is the initial welcome screen and has player input in number
    of players and player names to start a new game. *)
-let main () =
+let rec main () =
   ANSITerminal.resize 107 45;
   ANSITerminal.set_cursor 1 1;
   ANSITerminal.erase Screen;
   print_string
     (welcome_board ^ help_msg
-    ^ g "\n  Press enter to set up a new game.");
+    ^ g
+        "\n\
+        \  Press enter to set up a new game. To view game tutorial, \
+         enter \"t\"\n"
+    ^ ip);
   match read_line () with
   | "q" | "quit" -> quit_msg ()
-  | _ -> game_start ""
+  | "t" -> run_tutorial tutorial_pages
+  | _ -> game_start ()
+
+and run_tutorial = function
+  | [ h ] -> (
+      clear_board ();
+      print_string h;
+      match read_line () with _ -> main ())
+  | h :: t -> (
+      clear_board ();
+      print_string h;
+      match read_line () with
+      | "q" | "quit" -> main ()
+      | _ -> run_tutorial t)
+  | [] -> failwith "Should never reach."
 
 (* Execute the game engine. *)
 let () = main ()

@@ -29,7 +29,7 @@ let rec make_players acc stack = function
         stack t
 
 let player_to_update turn player_lst =
-  List.find (fun { p_number = x } -> x = turn) player_lst
+  List.find (fun { p_number = x; _ } -> x = turn) player_lst
 
 let add_to_rack turn player_lst tile =
   let update_player = player_to_update turn player_lst in
@@ -68,7 +68,7 @@ let update_played_valid_meld player =
     tiles are worth their negative tile number. *)
 let get_score_from_rack t_lst =
   let rec aux acc = function
-    | Joker t1 :: tail -> aux (acc - 30) tail
+    | Joker _ :: tail -> aux (acc - 30) tail
     | Tile h :: tail -> aux (acc - h.number) tail
     | [] -> acc
   in

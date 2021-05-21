@@ -1,7 +1,7 @@
-(** Represents type and functions of board used in the game
+(** Representation of type and functions of board used in the game.
 
-    This includes the initilizing of a new board, adding and removing of
-    tiles from the board, and board validation and sorting. *)
+    This module includes the initilizing of a new board, adding and
+    removing of tiles from the board, and board validation and sorting. *)
 
 (** [b_row] represents a row on the board with row letter [row] and
     [tiles], a list of tiles in that row. *)
@@ -13,10 +13,12 @@ type b_row = {
 (** [b] represents the board as a list of [b_row]. *)
 type b = b_row list
 
-(** exception InvalidBoardRow of string *)
+(** [InvalidBoardSets slst] represents the invalid tile runs or groups
+    on the board. *)
+exception InvalidBoardSets of string list
 
-(** The exception [RowAlreadyFull] is raised when a player attempts to
-    add a tile to a row that is full with 13 tiles. *)
+(** [RowAlreadyFull] is raised when a player attempts to add a tile to a
+    row that is full with 13 tiles. *)
 exception RowAlreadyFull of string
 
 (** [init_board] is the initial state of the board with no tiles. *)
@@ -37,7 +39,9 @@ val add_tile : Tile.t -> string -> b -> b
 val remove_tile : Tile.t -> string -> b -> b
 
 (** [valid_board board] is true if each row in [board] is either empty,
-    or consists of tiles making a valid run or a valid group. *)
+    or consists of tiles making a valid run or a valid group. Raises
+    [InvalidBoardRow string list] to warn user which rows are invalid on
+    the board. *)
 val valid_board : b -> bool
 
 (** [sort_board_by_num acc b] is a new board [b'] consisting of the same

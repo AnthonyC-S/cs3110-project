@@ -1,0 +1,4 @@
+(library
+ (name board)
+ (public_name camlkub.board)
+ (libraries tile))

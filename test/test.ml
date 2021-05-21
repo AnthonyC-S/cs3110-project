@@ -4,53 +4,45 @@ open Player
 open Board
 open State
 open Command
+open Textgui
 
-(********************************************************************
-  Testing Plan:
+(*****************************************************************)
+(* Testing Plan:
 
-  The following units were automatically tested by unit testing / bisect
-  testing: Tile, Player, Board, State, and Command. Bisect coverage
-  greater than 90% was the achieved in these modules. 100% coverage was
-  not possible as some pattern matching cases should be impossible to
-  reach based on specifications - those matching cases were included to
-  allow the pattern match to be exhaustive.
+   The following modules were automatically tested by unit testing /
+   bisect testing: Tile, Player, Board, State, and Command. Bisect
+   coverage greater than 90% was the achieved in these modules. 100%
+   coverage was not possible as some pattern matching cases should be
+   impossible to reach based on specifications - those matching cases
+   were included to allow the pattern match to be exhaustive.
 
-  All unit test cases were created using glass box methods with the goal
-  of covering edge cases. Higher order modules/functions were
-  prioritized as they would call several or many sub-functions and
-  therefore, be tested as well. For example, almost every function in
-  the State module was unit tested directly, and thus tested many of the
-  sub-functions that the State module called. This allowed high bisected
-  coverage without testing every smaller and simple function in the core
-  Modules, such as Tile, Player and Board.
+   All unit test cases were created using glass box methods with the
+   goal of covering edge cases and functions performed according to
+   their specifications. Higher order modules/functions were prioritized
+   as they would call several or many sub-functions, and therefore test
+   the sub-functions as well. For example, almost every function in the
+   State module was unit tested directly, and thus tested many of the
+   sub-functions that the State module called. This allowed high
+   bisected coverage without testing every smaller and more basic
+   function in the core Modules, such as Tile, Player and Board.
 
-  The Main module and Textgui were tested through playing the game and
-  testing for edge cases and using Utop and viewing the resulting state
-  type. The Main module was mostly not conducive to unit testing as many
-  of its functions returned the unit type. All three group members
-  contributed to testing and trying to discover unusual game setups that
-  could cause any errors.
+   The Main module and Textgui were tested through playing the game and
+   using Utop to view the resulting state type. The Main module was
+   mostly not conducive to unit testing as many of its functions
+   returned the unit type. All three group members contributed to
+   testing and trying to discover unusual game setups that could cause
+   any errors.
 
-  While this testing strategy cannot guarantee complete correctness of
-  the system, it does meet the standards needed for an initial release.
-  A game such as Rummikub can generate an extremely high number of tile
-  combinations on the board and it would be nearly impossible to test
-  all cases. However, many of these cases can be broken into smaller
-  groups of similar structure and we aimed to tested against these more
-  generalized groups.
-
-  Plan - Need to Add
-
-  Test Plan Rubric [4 points] The test plan should be located in a
-  comment at the top of the test file.
-
-  -4: The test plan is missing. -1: The test plan does not explain which
-  parts of the system were automatically tested by OUnit vs. manually
-  tested. -1: The test plan does not explain what modules were tested by
-  OUnit and how test cases were developed (black box, glass box,
-  randomized, etc.). -1: The test plan does not provide an argument for
-  why the testing approach demonstrates the correctness of the system.
-  *****************************************************************)
+   While this testing strategy cannot guarantee complete correctness of
+   the system, it does meet the standards needed for an initial release.
+   A game such as Rummikub can generate an extremely high number of tile
+   combinations on the board and it would be nearly impossible to test
+   all cases. However, many of these cases can be broken into smaller
+   groups of similar structure and we aimed to tested against these more
+   generalized groups. The high bisect coverage, the time spent testing
+   in the toplevel, and hours spent playing the game, gives our group
+   confidence in the programs overall correctness. *)
+(*****************************************************************)
 
 (*****************************************************************)
 (* Test Helper Functions                                         *)
@@ -150,6 +142,13 @@ let update_valid_meld_player =
     |> move
          { from_board = []; from_rack = [ 2; 3; 4; 5 ]; to_row = "A" })
       .players
+
+(* Helpers used in Textgui Tests. *)
+let build_board_output =
+  let channel = open_in "build_board_test.txt" in
+  let line = input_line channel in
+  close_in channel;
+  line
 
 (*****************************************************************)
 (* Start of Tile Module Tests                                    *)
@@ -316,6 +315,10 @@ let remove_tile_test name tile row board expected_output =
 let valid_board_test name board expected_output =
   name >:: fun _ -> assert_equal expected_output (valid_board board)
 
+let valid_board_ex_test name board expected_output =
+  name >:: fun _ ->
+  assert_raises expected_output (fun () -> valid_board board)
+
 let board_tests =
   [
     add_tile_test "Add Red 1 tile to empty board" (make_t "T" 1 Red) "B"
@@ -385,7 +388,8 @@ let board_tests =
       board;
     valid_board_test "Valid board with one group" board5 true;
     valid_board_test "Empty board" board true;
-    valid_board_test "One valid group, one invalid" board6 false;
+    valid_board_ex_test "One valid group, one invalid" board6
+      (InvalidBoardSets [ "G" ]);
   ]
 
 (*****************************************************************)
@@ -594,7 +598,7 @@ let state_tests =
       "check valid board after one invalid move"
       (new_test_state ()
       |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
-      InvalidBoardSets;
+      (InvalidBoardSets [ "A" ]);
     check_valid_raises_exn_test
       "check valid board after valid moves but meld not met"
       (new_test_state ()
@@ -607,7 +611,7 @@ let state_tests =
     end_turn_raises_exn_test "end turn with invalid board sets"
       (new_test_state ()
       |> move { from_board = []; from_rack = [ 1 ]; to_row = "A" })
-      InvalidBoardSets;
+      (InvalidBoardSets [ "A" ]);
     update_end_game_scores_test "correct score for player one"
       (new_test_state ()) 93;
     init_new_round_test "start new round, score is carried over"
@@ -625,6 +629,12 @@ let parse_start_test name str expected_output =
 
 let parse_start_exception_test name str exc =
   name >:: fun _ -> (fun () -> parse_start str) |> assert_raises exc
+
+let parse_test name str expected_output =
+  name >:: fun _ -> OUnit2.assert_equal expected_output (parse str)
+
+let parse_exception_test name str exc =
+  name >:: fun _ -> (fun () -> parse str) |> assert_raises exc
 
 let command_tests =
   [
@@ -671,10 +681,89 @@ let command_tests =
       "4 one 2 3 4 MALFORMED" Malformed;
     parse_start_exception_test "malformed START Command" "trhee"
       Malformed;
+    parse_exception_test "malformed move" "" BlankInput;
+    parse_test "parse quit" "quit" Quit;
+    parse_test "parse q = quit" "q" Quit;
+    parse_test "parse exit = quit" "exit" Quit;
+    parse_exception_test "malformed move" "move" EmptyMove;
+    parse_exception_test "malformed m = move" "m" EmptyMove;
+    parse_exception_test "malformed mv = move" "mv" EmptyMove;
+    parse_exception_test "malformed move w/o to" "mv 4 2"
+      InvalidMoveMissingTo;
+    parse_test "parse valid move TO" "move 4 8 A3 u12 TO i"
+      (Move
+         {
+           from_board = [ ("A", 3); ("U", 12) ];
+           from_rack = [ 4; 8 ];
+           to_row = "I";
+         });
+    parse_exception_test "move to dupes tile" "mv 4 4 to I"
+      (DuplicateMoveFrom [ "4" ]);
+    parse_exception_test "move to malformed tile" "mv 4 44a to I"
+      (InvalidMoveFrom [ "44a" ]);
+    parse_exception_test "move to malformed tile" "mv 4 4a to I"
+      (InvalidMoveFrom [ "4a" ]);
+    parse_exception_test "move no tiles" "mv to I" EmptyMoveFrom;
+    parse_exception_test "move to malformed destination" "mv g5 to bb"
+      (InvalidMoveTo [ "bb" ]);
+    parse_exception_test "move to multiple destination" "mv g5 to b i"
+      (MultipleMoveTo [ "b"; "i" ]);
+    parse_exception_test "move to empty destination" "mv g14 to"
+      EmptyMoveTo;
+    parse_test "parse valid move to" "m 4 12 u12 to l"
+      (Move
+         {
+           from_board = [ ("U", 12) ];
+           from_rack = [ 4; 12 ];
+           to_row = "L";
+         });
+    parse_test "parse valid move To" "m 4 u12 To l"
+      (Move
+         { from_board = [ ("U", 12) ]; from_rack = [ 4 ]; to_row = "L" });
+    parse_test "parse valid move tO" "m 4 u12 tO l"
+      (Move
+         { from_board = [ ("U", 12) ]; from_rack = [ 4 ]; to_row = "L" });
+    parse_test "parse undo" "undo" Undo;
+    parse_test "parse u = undo" "u" Undo;
+    parse_test "parse reset" "RESET" Reset;
+    parse_test "parse R = reset" "R" Reset;
+    parse_test "parse color sort" "CoLorSort" SortByColor;
+    parse_test "parse sort color" "SORTcolor" SortByColor;
+    parse_test "parse sc = color sort" "sc" SortByColor;
+    parse_test "parse number sort" "numbersort" SortByNumber;
+    parse_test "parse sort number" " sortnumber" SortByNumber;
+    parse_test "parse sn = numbersort" "sn" SortByNumber;
+    parse_test "parse draw" "draw" Draw;
+    parse_test "parse d = draw" "D" Draw;
+    parse_test "parse end turn" "EnDTURn" EndTurn;
+    parse_test "parse e = end turn" "e " EndTurn;
+    parse_test "parse score" "scORE" Score;
+    parse_test "parse s = score" "s" Score;
+    parse_test "parse help" "help" Help;
+    parse_test "parse h = help" "h" Help;
+    parse_exception_test "parse malformed" "nothing" Malformed;
   ]
 
+(*****************************************************************)
+(* Start of Textgui Module Tests                                 *)
+(*****************************************************************)
+let build_board_test name st msg expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (String.escaped (build_board st msg))
+
+let textgui_tests =
+  [
+    build_board_test "checks build_board with new_test_state"
+      (new_test_state ()) "this is a test" build_board_output;
+  ]
+
+(*****************************************************************)
+(* Start of Suite Tests                                          *)
+(*****************************************************************)
+
 let suite =
-  "test suite for A2"
+  "test suite for final project"
   >::: List.flatten
          [
            tile_tests;
@@ -682,6 +771,7 @@ let suite =
            board_tests;
            state_tests;
            command_tests;
+           textgui_tests;
          ]
 
 let _ = run_test_tt_main suite

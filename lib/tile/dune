@@ -1,0 +1,3 @@
+(library
+ (name tile)
+ (public_name camlkub.tile))

@@ -131,7 +131,7 @@ let parse_start str =
     is the row letter on the board and [v] is the index location of the
     tile selected. *)
 let rec split_board acc = function
-  | [] -> acc
+  | [] -> List.rev acc
   | h :: t ->
       if String.length h = 2 then
         split_board
@@ -154,7 +154,7 @@ let valid_board_syntax s =
 (** [valid_rack_syntax s] is true if format of [s] is concatenation of 1
     or 2 number digits. *)
 let valid_rack_syntax s =
-  Str.string_match (Str.regexp "[0-9]") s 0
+  Str.string_match (Str.regexp "^[1-9][0-9]?$") s 0
   && (String.length s = 1 || String.length s = 2)
 
 (** [check_for_dups lst] is a list [lst'] that contains the elements
@@ -219,16 +219,20 @@ let parse_rack_and_board before_to_lst after_to_lst =
   else
     Move
       {
-        from_board = split_board [] (List.map String.uppercase_ascii f_board);
-        from_rack = List.map (fun x -> int_of_string x) 
-        (List.map String.uppercase_ascii f_rack);
+        from_board =
+          split_board [] (List.map String.uppercase_ascii f_board);
+        from_rack =
+          List.map
+            (fun x -> int_of_string x)
+            (List.map String.uppercase_ascii f_rack);
         to_row = List.hd (List.map String.uppercase_ascii to_row);
       }
 
 (** [parse_move acc slst] is a [Move info] command with tile references
     and row letter the tiles are being moved to from [slst]. *)
 let rec parse_move acc = function
-  | "to" :: t | "TO" :: t -> parse_rack_and_board (List.rev acc) t
+  | "to" :: t | "To" :: t | "TO" :: t | "tO" :: t ->
+      parse_rack_and_board (List.rev acc) t
   | h :: t -> parse_move (h :: acc) t
   | [] -> raise InvalidMoveMissingTo
 
@@ -238,18 +242,14 @@ let parse str =
     let str_lst = trim_lc_fst_word str in
     let check_lst = function
       | [ "quit" ] | [ "q" ] | [ "exit" ] -> Quit
-      | [ "move" ] | [ "mv" ] | [ "m" ] | [ "play" ] | [ "add" ] ->
-          raise EmptyMove
-      | "move" :: t | "mv" :: t | "m" :: t | "play" :: t | "add" :: t ->
-          parse_move [] t
+      | [ "move" ] | [ "mv" ] | [ "m" ] -> raise EmptyMove
+      | "move" :: t | "mv" :: t | "m" :: t -> parse_move [] t
       | [ "undo" ] | [ "u" ] -> Undo
       | [ "reset" ] | [ "r" ] -> Reset
-      | [ "color"; "sort" ] | [ "sort"; "color" ] | [ "sc" ] ->
-          SortByColor
-      | [ "number"; "sort" ] | [ "sort"; "number" ] | [ "sn" ] ->
-          SortByNumber
+      | [ "colorsort" ] | [ "sortcolor" ] | [ "sc" ] -> SortByColor
+      | [ "numbersort" ] | [ "sortnumber" ] | [ "sn" ] -> SortByNumber
       | [ "draw" ] | [ "d" ] -> Draw
-      | [ "end"; "turn" ] | [ "e" ] -> EndTurn
+      | [ "endturn" ] | [ "e" ] -> EndTurn
       | [ "score" ] | [ "s" ] -> Score
       | [ "help" ] | [ "h" ] -> Help
       | _ -> raise Malformed

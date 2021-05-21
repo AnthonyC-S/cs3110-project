@@ -1,0 +1,4 @@
+(library
+ (name player)
+ (public_name camlkub.player)
+ (libraries tile))

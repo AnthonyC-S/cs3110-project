@@ -1,0 +1,4 @@
+(library
+ (name state)
+ (public_name camlkub.state)
+ (libraries player board tile command))

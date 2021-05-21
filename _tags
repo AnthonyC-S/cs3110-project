@@ -1,3 +1,0 @@
-<{board,command,main,player,state,textgui,tile}.ml>: coverage
-<test.{byte,native}>: coverage
-true: package(ounit2),package(ANSITerminal),package(str)

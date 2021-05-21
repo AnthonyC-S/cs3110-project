@@ -1,0 +1,4 @@
+(library
+ (name textgui)
+ (public_name camlkub.textgui)
+ (libraries state player tile ANSITerminal))

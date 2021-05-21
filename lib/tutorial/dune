@@ -1,0 +1,4 @@
+(library
+ (name tutorial)
+ (public_name camlkub.tutorial)
+ (libraries tile board state textgui))

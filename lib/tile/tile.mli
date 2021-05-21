@@ -1,4 +1,4 @@
-(** Representation of static tile data.
+(** Representation of tile data.
 
     This module represents the data tile used in the game, including the
     initilizing of new tiles and complete pile of tiles (106 tiles),
