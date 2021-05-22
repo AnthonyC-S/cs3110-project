@@ -11,13 +11,12 @@ open Tutorial
 (***********************************************************************)
 
 let already_drawn_msg = function
-  | "undo" -> "  Tile already drawn. Cannot undo. Type \"end turn\".\n"
-  | "reset" ->
-      "  Tile already drawn. Cannot reset. Type \"end turn\".\n"
+  | "undo" -> "  Tile already drawn. Cannot undo. Type \"endturn\".\n"
+  | "reset" -> "  Tile already drawn. Cannot reset. Type \"endturn\".\n"
   | "move after drawn" ->
-      "  Tile already drawn. Cannot move any tiles. Type \"end turn\".\n"
+      "  Tile already drawn. Cannot move any tiles. Type \"endturn\".\n"
   | "draw again" ->
-      "  Tile already drawn. Cannot draw again. Type \"end turn\".\n"
+      "  Tile already drawn. Cannot draw again. Type \"endturn\".\n"
   | _ -> failwith "Invalid AlreadyDrawn exception"
 
 let already_moved_msg =
@@ -136,7 +135,7 @@ let sort_col_msg = "  Sorted by color.\n"
 
 let sort_num_msg = "  Sorted by number.\n"
 
-let draw_msg = "  Drawed tile from pile. Type \"end turn\".\n"
+let draw_msg = "  Drawed tile from pile. Type \"endturn\".\n"
 
 let end_turn_msg st =
   if Stack.is_empty st.t_stack then "  Starting next players turn.\n"
@@ -195,21 +194,19 @@ let score_msg player_lst =
 
 let help_msg =
   g "  Game Commands:\n\n"
+  ^ ip ^ "move (m) t to r    Moves the tile(s) [t] to board row [r].\n"
+  ^ g "  Move Command Example:\n"
   ^ ip
-  ^ "move (m) t to r       Moves the tile(s) [t] to board row [r].\n"
-  ^ g "  For Example:\n" ^ ip
-  ^ "m 1 4 A3 to B  Moves rack tiles at index 1 and 4, and board row A \
-     tile at index 3, to row B.\n" ^ ip
-  ^ "undo (u)              Undo most recent move.\n" ^ ip
-  ^ "reset (r)             Resets board and rack to start of turn.\n"
-  ^ ip ^ "sortcolor (sc)        Sorts rack by tile color.\n" ^ ip
-  ^ "sortnumber (sn)       Sorts rack by tile number.\n" ^ ip
-  ^ "draw (d)              Draws a new tile and ends turn.\n" ^ ip
-  ^ "endturn (e)           Checks for a valid board and ends turn.\n"
-  ^ ip ^ "score (s)             Score of previous games.\n" ^ ip
-  ^ "help (h)              Display game play commands.\n\n\
-    \  The following shortcut commands can be also used:\n\
-    \  m, u, r, sc, sn, d, e, s, h.\n\n"
+  ^ "m 1 4 A3 to B      Moves rack tiles at index 1 and 4, and board \
+     row A tile at index 3, to row B.\n" ^ ip
+  ^ "undo (u)           Undo most recent move.\n" ^ ip
+  ^ "reset (r)          Resets board and rack to start of turn.\n" ^ ip
+  ^ "sortcolor (sc)     Sorts rack by tile color.\n" ^ ip
+  ^ "sortnumber (sn)    Sorts rack by tile number.\n" ^ ip
+  ^ "draw (d)           Draws a new tile and ends turn.\n" ^ ip
+  ^ "endturn (e)        Checks for a valid board and ends turn.\n" ^ ip
+  ^ "score (s)          Score of previous games.\n" ^ ip
+  ^ "help (h)           Display game play commands.\n\n"
 
 let start_game_msg =
   g
@@ -305,7 +302,7 @@ let random_order_round st =
 
 let rec play_turn st msg =
   clear_board ();
-  print_string (build_board st msg);
+  print_string (build_board st (msg ^ ip));
   match read_line () with
   | exception End_of_file -> ()
   | str -> (
