@@ -19,6 +19,12 @@ val welcome_board : string
 (** [g s] is the Xterm 256 color green of the string [s]. *)
 val g : string -> string
 
+(** [h s] is [s] formatted to be a header. *)
+val h : string -> string
+
+(** [i s] is a string italicized. *)
+val i : string -> string
+
 (** [ip] is the user command prompt in the game is frequently used
     before a read_line. *)
 val ip : string
@@ -31,3 +37,29 @@ val win_board : State.s -> string -> string
     the terminal board, based on the needed spaces [i] and the tile's
     [t] number. *)
 val string_of_tile : int -> Tile.t -> string
+
+
+(* [build_board st msg] is the string representation of the game defined
+    in current state [st] followed by a message [msg] either asking user 
+    for a command or stating error in a previous command. 
+    val build_board : State.s -> string -> string
+
+    (** [welcome_board] is a string representation of the game's title screen. *)
+    val welcome_board : string
+    
+    (** [g s] is the string [s] in green. *)
+    val g : string -> string
+    
+    (** [ip] is a string indicates when user input is being asked for. *)
+    val ip : string
+    
+    (** [win_board st msg] is a string representation of the game at state [st]
+        where a player has emptied their rack and won. This consists of a message
+        for the winner, total scores so far [msg], and a prompt for the player to 
+        either start a new round or end the game. *)
+    val win_board : State.s -> string -> string
+    
+    (** [string_of_tile idx_count tile] is the string representation of [tile]
+        with text color corresponding to the tile's color and the correct number
+        of spaces concatenated to keep the spacing between tiles consistent on 
+        the board. *) *)

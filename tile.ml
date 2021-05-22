@@ -39,6 +39,11 @@ let make_t t n c =
     initializing an unset Joker tile. *)
 let joker = make_t "J" 100 None
 
+let is_j n = 
+  match n with  
+  |Joker n -> true 
+  | Tile n -> false
+
 let update_joker n c = function
   | Joker t ->
       if n < 1 || n > 13 then raise NotAJoker else make_t "J" n c

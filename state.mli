@@ -15,9 +15,9 @@ type s = {
   past_state : s list;
 }
 
-(** [HaveNotPlayedMeld] is raised when a player attempts to move a board
-    tile and has not played a successful meld. *)
-exception HaveNotPlayedMeld
+(** [HaveNotPlayedMeld s] is raised when a player attempts to move a board
+    or Joker tile and has not played a successful meld. *)
+exception HaveNotPlayedMeld of string
 
 (** [InvalidMeld] is raised at end of turn if there is an invalid meld
     or [played_valid_meld] is false when the player moved tiles to the

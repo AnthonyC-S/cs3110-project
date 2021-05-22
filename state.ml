@@ -13,7 +13,7 @@ type s = {
   past_state : s list;
 }
 
-exception HaveNotPlayedMeld
+exception HaveNotPlayedMeld of string
 
 exception InvalidMeld
 
@@ -79,6 +79,9 @@ let move_from_rack st index row =
   let cur_player = get_current_player st in
   let rack = cur_player.rack in
   let tile_to_move = get_tile_of_index "" index rack in
+  if cur_player.played_valid_meld = false && (is_j tile_to_move)
+    then raise (HaveNotPlayedMeld "rack")
+  else
   let new_player =
     {
       cur_player with
@@ -103,7 +106,8 @@ let rec multiple_moves_from_rack index_lst row st =
 
 let move_from_board st from_row index to_row =
   let cur_player = get_current_player st in
-  if cur_player.played_valid_meld = false then raise HaveNotPlayedMeld
+  if cur_player.played_valid_meld = false then 
+    raise (HaveNotPlayedMeld "board")
   else
     let tile =
       get_tile_of_index from_row index

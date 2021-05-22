@@ -25,6 +25,12 @@ let ig s = "\027[38;5;70;3m" ^ s ^ "\027[0m"
 (* regular green *)
 let g s = "\027[38;5;70m" ^ s ^ "\027[0m"
 
+(* heading, 8 is gray*)
+let h s = "\027[38;5;70;1m\027[48;5;0;1m" ^ s ^ "\027[0m"
+
+(* italics *)
+let i s = "\027[3m" ^ s ^ "\027[0m"
+
 (* [ip s] is short for input and is frequently used before a read_line. *)
 let ip : string = g "  > "
 
@@ -83,7 +89,7 @@ let welcome_msg =
   ^ rw "C" ^ " " ^ kw "A" ^ " " ^ ow "M" ^ " " ^ bw "L" ^ " " ^ kw "K"
   ^ " " ^ ow "U" ^ " " ^ bw "B" ^ ig "  GAME  🐫   "
   ^ String.make 29 ' ' ^ "|\n" ^ empty_row ^ " |" ^ String.make 38 ' '
-  ^ ig "Based on the game Rummikub"
+  ^ ig "Based on the game Rummikub" 
   ^ String.make 39 ' ' ^ "|\n"
 
 let developed_by_msg =

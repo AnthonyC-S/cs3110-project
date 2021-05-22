@@ -22,8 +22,11 @@ let already_drawn_msg = function
 let already_moved_msg =
   "  You have already made a move. Reset all moves to draw.\n"
 
-let have_not_played_meld_msg =
-  "  You cannot move board tiles until you have played a 30 point meld.\n"
+let have_not_played_meld_msg = function
+  | "board" -> "  You cannot move board tiles until you have played a 30 point meld.\n"
+  | "rack" -> "You cannot use Joker tiles until you have played a 30 point meld.\n"
+  | _ -> failwith "Invalid HaveNotPlayedMeld exception"
+
 
 let invalid_index_msg i =
   "  Could not find the tile on "
@@ -192,13 +195,17 @@ let score_msg player_lst =
     \  You need to finish your first game before seeing your score.\n"
   else num_games_row ^ string_of_scores player_lst ^ "\n"
 
+
+
+
+
 let help_msg =
-  g "  Game Commands:\n\n"
+  h "  Game Commands:  \n\n"
   ^ ip ^ "move (m) t to r    Moves the tile(s) [t] to board row [r].\n"
-  ^ g "  Move Command Example:\n"
-  ^ ip
-  ^ "m 1 4 A3 to B      Moves rack tiles at index 1 and 4, and board \
-     row A tile at index 3, to row B.\n" ^ ip
+  ^ "      " ^ i (g "Move Command Example:\n") ^ "        " ^ ip
+  ^ i "m 1 4 A3 to B      \n"
+  ^ "      " ^ i "Moves rack tiles at index 1 and 4, and board \
+  row A tile at index 3, to row B.\n" ^ ip
   ^ "undo (u)           Undo most recent move.\n" ^ ip
   ^ "reset (r)          Resets board and rack to start of turn.\n" ^ ip
   ^ "sortcolor (sc)     Sorts rack by tile color.\n" ^ ip
@@ -229,7 +236,7 @@ let get_exception_msg = function
   | InvalidMoveTo s -> invalid_move_to_msg s
   | DuplicateMoveFrom s -> duplicate_move_from_msg s
   | MultipleMoveTo s -> multiple_move_to_msg s
-  | HaveNotPlayedMeld -> have_not_played_meld_msg
+  | HaveNotPlayedMeld s -> have_not_played_meld_msg s
   | InvalidBoardSets s -> invalid_board_sets_msg s
   | InvalidIndex i -> invalid_index_msg i
   | InvalidTile -> invalid_tile_msg

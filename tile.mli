@@ -50,6 +50,9 @@ exception InvalidIndex of (string * int)
     the raises a [InvalidTile]. *)
 val make_t : string -> int -> color -> t
 
+(** [is_joker n] is a true if [n] is a joker and false otherwise. *)
+val is_j: t -> bool
+
 (** [update_joker n c t] is a Joker tile [t'] with the number updated to
     [n] and color updated to [c]. If [n] is not a valid integer value of
     the game (more than 13, less than 1), then [NotAJoker] exception is

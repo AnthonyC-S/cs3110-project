@@ -76,6 +76,9 @@ let staring_rack_sorted_number =
   |> List.cons (make_t "T" 1 Red)
   |> List.cons (make_t "T" 1 Black)
 
+let joker_rack =
+  List.cons (make_t "J" 1 Red) [(make_t "J" 100 None)]
+
 let new_player_rec =
   {
     name = "A";
@@ -112,6 +115,25 @@ let valid_meld_state () =
     }
   in
   move { from_board = []; from_rack = [ 14 ]; to_row = "A" } new_st
+
+(* State with Joker in rack and played_valid_meld set to false for
+   player 1.*)
+let invalid_meld_state () =
+  let st = new_test_state () in
+  let player_one = List.hd st.players in
+  let new_st = 
+    {
+      st with
+      players =
+        { player_one with 
+          rack = joker_rack}
+        :: List.tl st.players;
+    }
+  in
+  new_st 
+ 
+
+
 
 (* Helpers used in Player Tests*)
 let player_lst_with_jokers =
@@ -422,6 +444,10 @@ let move_from_rack_test_check_board name moves st expected_output =
   name >:: fun _ ->
   OUnit2.assert_equal expected_output (List.hd (move moves st).board)
 
+let move_from_rack_meld_not_met_test name moves st expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_raises expected_output (fun _ -> move moves st)
+
 let move_from_board_meld_not_met_test name moves st expected_output =
   name >:: fun _ ->
   OUnit2.assert_raises expected_output (fun _ -> move moves st)
@@ -497,10 +523,14 @@ let state_tests =
       { from_board = []; from_rack = [ 1 ]; to_row = "A" }
       (new_test_state ())
       { row = "A"; tiles = [ make_t "T" 1 Red ] };
+    move_from_rack_meld_not_met_test
+      "exception raised for move from rack with meld not met"
+      { from_board = []; from_rack = [ 1 ]; to_row = "A" }
+      (invalid_meld_state ()) (HaveNotPlayedMeld "rack");
     move_from_board_meld_not_met_test
       "exception raised for move from board with meld not met"
       { from_board = [ ("A", 1) ]; from_rack = []; to_row = "B" }
-      (new_test_state ()) HaveNotPlayedMeld;
+      (new_test_state ()) (HaveNotPlayedMeld "board");
     move_from_board_test_check_from_row "board row A should be empty"
       { from_board = [ ("A", 1) ]; from_rack = []; to_row = "B" }
       (valid_meld_state ())
