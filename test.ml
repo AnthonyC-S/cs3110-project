@@ -144,8 +144,11 @@ let update_valid_meld_player =
       .players
 
 (* Helpers used in Textgui Tests. *)
-let build_board_output =
-  let channel = open_in "build_board_test.txt" in
+
+let str_to_str a = Printf.sprintf "%s" a
+
+let result_from_file filename =
+  let channel = open_in filename in
   let line = input_line channel in
   close_in channel;
   line
@@ -752,10 +755,19 @@ let build_board_test name st msg expected_output =
   OUnit2.assert_equal expected_output
     (String.escaped (build_board st msg))
 
+let win_board_test name st msg expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output
+    (String.escaped (win_board st msg))
+
 let textgui_tests =
   [
     build_board_test "checks build_board with new_test_state"
-      (new_test_state ()) "this is a test" build_board_output;
+      (new_test_state ()) "this is a test"
+      (result_from_file "build_board_test.txt");
+    win_board_test "checks win_board with new_test_state"
+      (new_test_state ()) "You Won!!"
+      (result_from_file "win_board_test.txt");
   ]
 
 (*****************************************************************)
