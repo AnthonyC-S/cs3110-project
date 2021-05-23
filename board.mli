@@ -3,14 +3,14 @@
     This module includes the initilizing of a new board, adding and
     removing of tiles from the board, and board validation and sorting. *)
 
-(** [b_row] represents a row on the board with row letter [row] and
-    [tiles], a list of tiles in that row. *)
+(** The type [b_row] represents a row on the board with row letter [row]
+    and [tiles], a list of tiles in that row. *)
 type b_row = {
   row : string;
   tiles : Tile.t list;
 }
 
-(** [b] represents the board as a list of [b_row]. *)
+(** The type [b] represents the board as a list of [b_row]. *)
 type b = b_row list
 
 (** [InvalidBoardSets slst] represents the invalid tile runs or groups
@@ -38,10 +38,10 @@ val add_tile : Tile.t -> string -> b -> b
     unaltered. *)
 val remove_tile : Tile.t -> string -> b -> b
 
-(** [valid_board board] is true if each row in [board] is either empty,
-    or consists of tiles making a valid run or a valid group. Raises
-    [InvalidBoardRow string list] to warn user which rows are invalid on
-    the board. *)
+(** [valid_board board] is [true] if each row in [board] is either empty
+    or consists of tiles making a valid run or a valid group.
+    [InvalidBoardRow slst] is raised where [slst] is the list of row
+    letters that are invalid on the board. *)
 val valid_board : b -> bool
 
 (** [sort_board_by_num acc b] is a new board [b'] consisting of the same

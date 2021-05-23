@@ -3,8 +3,6 @@ open Board
 open Tile
 open Command
 
-(** Need State Module Description *)
-
 type s = {
   current_turn : int;
   board : b;
@@ -20,6 +18,8 @@ exception InvalidMeld
 exception AlreadyDrawn of string
 
 exception AlreadyMoved
+
+exception InvalidMeldUnemptyRow of string
 
 (* Spec is in signature. *)
 let init_state player_lst =
@@ -134,14 +134,25 @@ let rec multiple_moves_from_board from_lst to_row st =
 let add_past_state start_turn_state st =
   { st with past_state = start_turn_state :: st.past_state }
 
+let rec get_row row b =
+  match b with
+  | [] -> failwith "not a valid row letter"
+  | r :: t -> if r.row = row then r.tiles else get_row row t
+
 let move moves st =
   if (get_current_player st).drawn_current_turn then
     raise (AlreadyDrawn "move after drawn")
   else
-    let start_st = st in
-    multiple_moves_from_board moves.from_board moves.to_row st
-    |> multiple_moves_from_rack moves.from_rack moves.to_row
-    |> add_past_state start_st
+    let init_s = reset_turn st in
+    if
+      get_row moves.to_row init_s.board <> []
+      && not (get_current_player st).played_valid_meld
+    then raise (InvalidMeldUnemptyRow moves.to_row)
+    else
+      let start_st = st in
+      multiple_moves_from_board moves.from_board moves.to_row st
+      |> multiple_moves_from_rack moves.from_rack moves.to_row
+      |> add_past_state start_st
 
 let draw st =
   if (get_current_player st).drawn_current_turn then
