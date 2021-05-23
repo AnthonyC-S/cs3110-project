@@ -5,18 +5,19 @@
     kept track. The module includes the initilizing of new players and
     managing their rack, score, and initial meld. *)
 
-(** [rack] represents the tile list [t_lst] that the player holds. *)
+(** The type [rack] represents the tile list [t_lst] that the player
+    holds. *)
 type rack = Tile.t list
 
-(** [p] represents a player with string name [name], player number
-    integer [p_number]. [played_valid_meld] is a bool showing whether
-    the player [p]'s moves in a turn was all valid. [meld_count] is a
-    tile list that keeps track of the tiles the [p] moved to make pass
-    the initial meld rule. [rack] is the tile list that [p] currently
-    holds. [score] is the integer score(s) of [p] games with the last
-    element being the most recent game score. [drawn_current_turn] is a
-    bool that reflects whether or not [p] drawed a tile in the current
-    turn. *)
+(** The type [p] represents a player with string name [name], player
+    number integer [p_number]. [played_valid_meld] is a bool showing
+    whether the player [p]'s moves in a turn was all valid. [meld_count]
+    is a tile list that keeps track of the tiles the [p] moved to make
+    pass the initial meld rule. [rack] is the tile list that [p]
+    currently holds. [score] is the integer score(s) of [p] games with
+    the last element being the most recent game score.
+    [drawn_current_turn] is a bool that reflects whether or not [p]
+    drawed a tile in the current turn. *)
 type p = {
   name : string;
   p_number : int;
@@ -64,10 +65,11 @@ val get_current_rack : int -> p list -> rack
     player [p] used to meet its initial meld condition. *)
 val meld_sum : p -> int
 
-(** [check_for_valid_meld p] is true if the sum of the tile numbers
+(** [check_for_valid_meld p] is [true] if the sum of the tile numbers
     player [p] used to meet the initial meld condition is more than or
-    equal to 30 or is 0. Meld sum of 0 also results in true to account
-    for when [p] chose to draw without making any moves. *)
+    equal to 30 or is 0. Meld sum of 0 also results in [true] to account
+    for when [p] chose to draw without making any moves. Otherwise,
+    [false] is returned *)
 val check_for_valid_meld : p -> bool
 
 (** [update_played_valid_meld p] is player [p'] same as [p] but with
@@ -77,13 +79,13 @@ val check_for_valid_meld : p -> bool
     record when [p] ends turn. *)
 val update_played_valid_meld : p -> p
 
-(** [add_score turn pl] is an updated player's list with new scores
-    added for each player at the end of a game. The winning player in
-    the player list [pl], determiend by the current [turn], is awared
-    the positive sum of the losing players tile rack sum, with jokers
-    counting for 30 points. The losing players get the negative sum of
-    the tile numbers for tiles remaining in their own rack, with Jokers
-    counting for -30. *)
+(** [add_score turn pl] is an updated player's list [pl'] with new
+    scores added for each player at the end of a game. The winning
+    player in the player list [pl], determiend by the current [turn], is
+    awared the positive sum of the losing players tile rack sum, with
+    jokers counting for 30 points. The losing players get the negative
+    sum of the tile numbers for tiles remaining in their own rack, with
+    Jokers counting for -30. *)
 val add_scores : int -> p list -> p list
 
 (** [compare_player_number p1 p2] is integer [i] Stdlib.compare is

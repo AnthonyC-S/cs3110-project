@@ -6,21 +6,21 @@
     according to the number of players playing the game that was passed
     in as user input when first initializing the game. *)
 
-(** [move_phrase] type represents the sturcture of the [Move] command.
-    The from_board field is (k, v) list [blst] where [k] is the row name
-    and [v] is the index where the tile is located on the board. The
-    from_rack field is an int list [rlst] with each element being the
-    index number of the tile selected from the rack. The to_row field is
-    the row letter [r] that indicates where the tiles referenced in
-    from_board and from_rack are being moved to. *)
+(** The type [move_phrase] represents the sturcture of the [Move]
+    command. The from_board field is (k, v) list [blst] where [k] is the
+    row name and [v] is the index where the tile is located on the
+    board. The from_rack field is an int list [rlst] with each element
+    being the index number of the tile selected from the rack. The
+    to_row field is the row letter [r] that indicates where the tiles
+    referenced in from_board and from_rack are being moved to. *)
 type move_phrase = {
   from_board : (string * int) list;
   from_rack : int list;
   to_row : string;
 }
 
-(** [command] type represents all possible commands that are used in the
-    the game. *)
+(** The type [command] represents all possible commands that are used in
+    the the game. *)
 type command =
   | Move of move_phrase
   | Undo
@@ -87,19 +87,19 @@ exception MultipleMoveTo of string list
     [Move] command. Ex: "move 1 3 to " *)
 exception EmptyMoveTo
 
-(** [parse s] is a [Command] type. Let [slst] be the list of words in
-    [s]. If [slst] is equivalent to [\["quit"\]], [Quit] is returned. If
+(** [parse s] is a command [c]. Let [slst] be the list of words in [s].
+    If [slst] is equivalent to [\["quit"\]], [Quit] is returned. If
     [slst] is equivalent to [\["move"\]], [EmptyMove] is raised. If
     [slst] is equivalent to ["move" :: t], [t] is parsed as a [Move i]
     command. if [slst] is equivalent to [\["undo"\]], [Undo] is
     returned. If [slst] is equivalent to [\["reset"\]], [Reset] is
-    returned. If [slst] is equivalent to [\["color"; "sort"\]],
+    returned. If [slst] is equivalent to [\["colorsort"\]],
     [SortByColor] is returned. If [slst] is equivalent to
-    [\["number"; "sort"\]], [SortByNumber] is returned. If [slst] is
+    [\["numbersort"\]], [SortByNumber] is returned. If [slst] is
     equivalent to [\["draw"\]], [Draw] is returned. If [slst] is
-    equivalent to [\["end"; "turn"\]], [EndTurn] is returned. If [slst]
-    is equivalent to [\["help"\]], [Help] is returned. In all other
-    cases, [Malformed] exception is raised. *)
+    equivalent to [\["endturn"\]], [EndTurn] is returned. If [slst] is
+    equivalent to [\["help"\]], [Help] is returned. In all other cases,
+    [Malformed] exception is raised. *)
 val parse : string -> command
 
 (** [parse_start s] is string list [slst] . If [s] contains information

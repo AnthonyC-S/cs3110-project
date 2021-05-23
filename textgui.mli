@@ -8,8 +8,9 @@
     reset, and the cursor position is set to the top left. *)
 val clear_board : unit -> unit
 
-(** [build_board st s] is the terminal output of the current game state
-    [st] and a message to the user [s]. *)
+(** [build_board st s] is the string representation [s'] of the current
+    game state [st] and a message to the user [s] that is displayed
+    below the string representation of the board in [st]. *)
 val build_board : State.s -> string -> string
 
 (** [welcome_board s] is the terminal output of the welcome screen to
@@ -23,8 +24,9 @@ val g : string -> string
     before a read_line. *)
 val ip : string
 
-(** [win_board st s] is the end of game display showing the game winner,
-    scores and asking if user would like to play a new game. *)
+(** [win_board st s] is the end of game display string [s] that shows
+    the game winner, scores and asking if user would like to play a new
+    game. *)
 val win_board : State.s -> string -> string
 
 (** [string_of_tile i t] is the string of spaces needed for formatting

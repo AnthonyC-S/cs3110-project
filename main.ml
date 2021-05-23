@@ -119,6 +119,11 @@ let multiple_move_to_msg str_lst =
     \  But you can only move to a single row. Type \"help\" to see \
      commands.\n"
 
+let invalid_meld_unempty_row s =
+  "  You cannot move a tile to a row that another player has played \
+   until you meet the initial meld.\n\
+  \  Check row \"" ^ s ^ "\"\n"
+
 (***********************************************************************)
 (* Following functions provide a message for executed commands.        *)
 (***********************************************************************)
@@ -239,6 +244,7 @@ let get_exception_msg = function
   | InvalidMeld -> invalid_meld_msg
   | NotEnoughTiles -> not_enough_tiles_msg
   | RowAlreadyFull s -> row_already_full_msg s
+  | InvalidMeldUnemptyRow s -> invalid_meld_unempty_row s
   | Malformed | BlankInput | _ -> malformed_msg
 
 let rec random_order_round_draw stack name =

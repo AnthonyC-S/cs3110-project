@@ -5,10 +5,10 @@
     shuffling the pile, initilizing a tile stack to be used as a draw
     pile, and making a new rack from the draw pile of 14 tiles. *)
 
-(** [color] type represents the types of color of the tiles. The only
-    valid colors are [Blue], [Orange], [Red], and [Black]. [None] is for
-    first initializing the Joker tiles since the color of a Joker tile
-    is set when the user uses the tile. *)
+(** They type [color] represents the types of color of the tiles. The
+    only valid colors are [Blue], [Orange], [Red], and [Black]. [None]
+    is for first initializing the Joker tiles since the color of a Joker
+    tile is set when the user uses the tile. *)
 type color =
   | Blue
   | Orange
@@ -16,31 +16,33 @@ type color =
   | Black
   | None
 
-(** [t_rec] is all the information a tile should hold. This includes the
-    [number] integer the tile holds and the [color] of the tile. *)
+(** The type [t_rec] represents all the information a tile should hold.
+    This includes the [number] integer the tile holds and the [color] of
+    the tile. *)
 type t_rec = {
   number : int;
   color : color;
 }
 
-(** [t] represents tiles which has two types normal [Tile] and [Joker]. *)
+(** The type [t] represents tiles which has two types normal [Tile] and
+    [Joker]. *)
 type t =
   | Tile of t_rec
   | Joker of t_rec
 
-(** [NotEnoughTiles] is thrown when there aren't enough tile to pick
+(** [NotEnoughTiles] is raised when there aren't enough tile to pick
     from. *)
 exception NotEnoughTiles
 
-(** [NotAJoker] is thrown when the tile is not a valid [Joker] type
+(** [NotAJoker] is raised when the tile is not a valid [Joker] type
     tile. *)
 exception NotAJoker
 
-(** [InvalidTile] is thrown when the tile being searched doesn't not
+(** [InvalidTile] is raised when the tile being searched doesn't not
     exist. *)
 exception InvalidTile
 
-(** [InvalidIndex (k, v)] is thrown when the there doesn't exist an
+(** [InvalidIndex (k, v)] is raised when the there doesn't exist an
     element on index [i] in the row named [k]. *)
 exception InvalidIndex of (string * int)
 
@@ -61,13 +63,13 @@ val update_joker : int -> color -> t -> t
     of all 106 tiles. *)
 val make_tile_stack : unit -> t Stack.t
 
-(** [make_ordered_tile_stack ()] is an in order, i.e., (J, J, Blue
-    13..1, Orange 13..1, Red 13..1, Black 13..1, Blue 13..1, Orange
-    13..1, Red 13..1, Black 13..1) Stack of tiles. This stack is used
-    only for testing purposes. *)
+(** [make_ordered_tile_stack ()] is a stack of tiles in order, i.e., (J,
+    J, Blue 13..1, Orange 13..1, Red 13..1, Black 13..1, Blue 13..1,
+    Orange 13..1, Red 13..1, Black 13..1). This stack is used only for
+    testing purposes. *)
 val make_ordered_tile_stack : unit -> t Stack.t
 
-(** [tile_stakc_size s] is the number of tiles in the stack [s]. *)
+(** [tile_stakc_size s] is the number of tiles [i] in the stack [s]. *)
 val tile_stack_size : t Stack.t -> int
 
 (** [draw_tile s] is a tile [t] popped from stack of tiles [s]. If there
@@ -111,11 +113,11 @@ val sort_by_number : t list -> t list
     letter and [i] is the index number the tile was searched for. *)
 val get_tile_of_index : string -> int -> 'a list -> 'a
 
-(** [make_joker_options] is the 52 Joker list of the numbers 1..13 in
-    Blue, Orange, Red, or Black. Used to assign jokers to make valid
-    board rows. *)
+(** [make_joker_options] is the 52 Joker list [jlst] of the numbers
+    1..13 in Blue, Orange, Red, or Black. Used to assign jokers to make
+    valid board rows. *)
 val make_joker_options : unit -> t list
 
-(** [p_order_tile_stack] is a stack of tiles with single digit numbers
-    that will be used for setting the random start order. *)
+(** [p_order_tile_stack] is a stack of tiles [s] with single digit
+    numbers that will be used for setting the random start order. *)
 val p_order_tile_stack : unit -> t Stack.t
