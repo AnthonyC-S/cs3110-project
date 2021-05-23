@@ -1,4 +1,4 @@
-# Camlkub Game - Based on the Game Rummikub
+# Camlkub Game - Based on Rummikub
 
 
 ## About the Project
@@ -18,8 +18,9 @@ The goal of the project was to build a fun and easy to play Rummikub game, named
   - REPL based
   - Standard Rummikubs rules enforced
   - New player tutorial
-  - Can play with 2, 3, or 4 players
+  - 2, 3, or 4 player options
   - Comprehensive gameplay rule checking and warnings to player
+  - Undo recent moves or reset to start of turn
   - Play multiple rounds with score keeping
   - Sort rack based on color or number
   - Automatic joker tile number and color assignment
