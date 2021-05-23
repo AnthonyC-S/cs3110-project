@@ -23,7 +23,7 @@ The goal of the project was to build a fun and easy to play Rummikub game, named
   - Undo recent moves or reset to start of turn
   - Play multiple rounds with score keeping
   - Sort rack based on color or number
-  - Automatic joker tile number and color assignment
+  - Automatic joker number and color assignment
 
 
 ## Installation
