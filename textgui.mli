@@ -17,6 +17,18 @@ val build_board : State.s -> string -> string
     the user. *)
 val welcome_board : string
 
+(** [kw s] is the black text on white background representaion of [s]. *)
+val kw : string -> string
+
+(** [rw s] is the red text on white background representaion of [s]. *)
+val rw : string -> string
+
+(** [ow s] is the ornage text on white background representaion of [s]. *)
+val ow : string -> string
+
+(** [bw s] is the blue text on white background representaion of [s]. *)
+val bw : string -> string
+
 (** [g s] is the Xterm 256 color green of the string [s]. *)
 val g : string -> string
 

@@ -76,8 +76,7 @@ let staring_rack_sorted_number =
   |> List.cons (make_t "T" 1 Red)
   |> List.cons (make_t "T" 1 Black)
 
-let joker_rack =
-  List.cons (make_t "J" 1 Red) [(make_t "J" 100 None)]
+let joker_rack = List.cons (make_t "J" 1 Red) [ make_t "J" 100 None ]
 
 let new_player_rec =
   {
@@ -121,19 +120,14 @@ let valid_meld_state () =
 let invalid_meld_state () =
   let st = new_test_state () in
   let player_one = List.hd st.players in
-  let new_st = 
+  let new_st =
     {
       st with
       players =
-        { player_one with 
-          rack = joker_rack}
-        :: List.tl st.players;
+        { player_one with rack = joker_rack } :: List.tl st.players;
     }
   in
-  new_st 
- 
-
-
+  new_st
 
 (* Helpers used in Player Tests*)
 let player_lst_with_jokers =
@@ -794,10 +788,10 @@ let textgui_tests =
   [
     build_board_test "checks build_board with new_test_state"
       (new_test_state ()) "this is a test"
-      (result_from_file "build_board_test.txt");
+      (result_from_file "test_results/build_board_test.txt");
     win_board_test "checks win_board with new_test_state"
       (new_test_state ()) "You Won!!"
-      (result_from_file "win_board_test.txt");
+      (result_from_file "test_results/win_board_test.txt");
   ]
 
 (*****************************************************************)
@@ -805,7 +799,7 @@ let textgui_tests =
 (*****************************************************************)
 
 let suite =
-  "test suite for final project"
+  "test suite for Camlkub Final Project"
   >::: List.flatten
          [
            tile_tests;

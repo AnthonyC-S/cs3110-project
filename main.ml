@@ -31,7 +31,8 @@ let have_not_played_meld_msg = function
       "  You cannot move board tiles until you have played a 30 point \
        meld.\n"
   | "rack" ->
-      "You cannot use Joker tiles until you have played a 30 point meld.\n"
+      "  You cannot use Joker tiles until you have played a 30 point \
+       meld.\n"
   | _ -> failwith "Invalid HaveNotPlayedMeld exception"
 
 let invalid_index_msg i =
