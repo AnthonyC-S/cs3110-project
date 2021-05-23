@@ -11,41 +11,47 @@ open Tutorial
 (***********************************************************************)
 
 let already_drawn_msg = function
-  | "undo" -> "  Tile already drawn. Cannot undo. Type \"endturn\".\n"
-  | "reset" -> "  Tile already drawn. Cannot reset. Type \"endturn\".\n"
+  | "undo" ->
+      "  Tile already drawn. Cannot undo. Type " ^ c "endturn" ^ ".\n"
+  | "reset" ->
+      "  Tile already drawn. Cannot reset. Type " ^ c "endturn" ^ ".\n"
   | "move after drawn" ->
-      "  Tile already drawn. Cannot move any tiles. Type \"endturn\".\n"
+      "  Tile already drawn. Cannot move any tiles. Type " ^ c "endturn"
+      ^ ".\n"
   | "draw again" ->
-      "  Tile already drawn. Cannot draw again. Type \"endturn\".\n"
+      "  Tile already drawn. Cannot draw again. Type " ^ c "endturn"
+      ^ ".\n"
   | _ -> failwith "Invalid AlreadyDrawn exception"
 
 let already_moved_msg =
   "  You have already made a move. Reset all moves to draw.\n"
 
 let have_not_played_meld_msg = function
-  | "board" -> "  You cannot move board tiles until you have played a 30 point meld.\n"
-  | "rack" -> "You cannot use Joker tiles until you have played a 30 point meld.\n"
+  | "board" ->
+      "  You cannot move board tiles until you have played a 30 point \
+       meld.\n"
+  | "rack" ->
+      "You cannot use Joker tiles until you have played a 30 point meld.\n"
   | _ -> failwith "Invalid HaveNotPlayedMeld exception"
-
 
 let invalid_index_msg i =
   "  Could not find the tile on "
   ^ g (if fst i = "" then "rack" else "row " ^ fst i)
   ^ g ", index "
   ^ g (string_of_int (snd i))
-  ^ ". Check if the tile has the correct\n\
-    \  index and/or row. Type \"help\" to see commands.\n"
+  ^ ". Check if the tile has the correct\n  index and/or row. Type "
+  ^ c "help" ^ " to see commands.\n"
 
 let invalid_tile_msg =
   "  Could not find the tile you entered. Check if the tile has the \
    correct\n\
-  \  index and/or row. Type \"help\" to see commands.\n"
+  \  index and/or row. Type " ^ c "help" ^ " to see commands.\n"
 
 let invalid_meld_msg =
   "  Cannot end turn since you do not have a valid meld of 30 tile \
    points or higher.\n\
-  \  You can either play more tiles to make a meld or undo the tiles \
-   and draw to end your turn.\n"
+  \  You can either " ^ c "move" ^ " more tiles to make a meld or "
+  ^ c "undo" ^ " the move and " ^ c "draw" ^ " to end your turn.\n"
 
 let not_enough_tiles_msg =
   "  The pile is empty and there are no tiles left to draw.\n\
@@ -57,23 +63,24 @@ let row_already_full_msg s =
      to a new row.\n"
 
 let malformed_msg =
-  "  Did you enter the command correctly? Type \"help\" for commands.\n"
+  "  Did you enter the command correctly? Type " ^ c "help"
+  ^ " for commands.\n"
 
 let empty_move_msg =
-  "  The move command is empty. Type \"help\" to see the move command \
-   structure.\n"
+  "  The move command is empty. Type " ^ c "help"
+  ^ " to see the move command structure.\n"
 
 let empty_move_from_msg =
-  "  The move command does not have tiles to move. Type \"help\" to \
-   see the move command structure.\n"
+  "  The move command does not have tiles to move. Type " ^ c "help"
+  ^ " to see the move command structure.\n"
 
 let empty_move_to_msg =
-  "  The move command is missing a row to move the tiles to. Type \
-   \"help\" to see the move command structure.\n"
+  "  The move command is missing a row to move the tiles to. Type "
+  ^ c "help" ^ " to see the move command structure.\n"
 
 let invalid_move_missing_to_msg =
-  "  The move command is missing \"to\". Type \"help\" to see the move \
-   command structure.\n"
+  "  The move command is missing \"to\". Type " ^ c "help"
+  ^ " to see the move command structure.\n"
 
 let rec str_lst_syntax (str_lst : string list) : string =
   match str_lst with
@@ -86,24 +93,25 @@ let invalid_move_from_msg str_lst =
   "  Could not find " ^ str_lst_syntax str_lst
   ^ ".\n  Double check the tile"
   ^ (if List.length str_lst = 1 then "" else "s")
-  ^ " you are trying to move. Type \"help\" to see commands.\n"
+  ^ " you are trying to move. Type " ^ c "help" ^ " to see commands.\n"
 
 let invalid_move_to_msg str_lst =
   "  Could not move to " ^ str_lst_syntax str_lst
   ^ ".\n  Double check the row name you are trying to move to. "
   ^
-  if List.length str_lst = 1 then "Type \"help\" to see commands.\n"
+  if List.length str_lst = 1 then
+    "Type " ^ c "help" ^ " to see commands.\n"
   else
-    "You can only move to a single row.\n\
-    \  Type \"help\" to see commands.\n"
+    "You can only move to a single row.\n  Type " ^ c "help"
+    ^ " to see commands.\n"
 
 let invalid_board_sets_msg s =
   "  You cannot end turn due to "
   ^ (if List.length s < 2 then
      "an invalid set on the board.\n  Try to fix row "
     else "invalid sets on the board.\n  Try to fix rows ")
-  ^ str_lst_syntax s
-  ^ ".\n  You can also back a move(s) with \"undo\" / \"reset\".\n"
+  ^ str_lst_syntax s ^ ".\n  You can also back a move(s) with "
+  ^ c "undo" ^ " / " ^ c "reset" ^ ".\n"
 
 let duplicate_move_from_msg str_lst =
   "  You are trying to move the tile"
@@ -111,20 +119,19 @@ let duplicate_move_from_msg str_lst =
     else "s at positions ")
   ^ str_lst_syntax str_lst
   ^ " multiple times.\n\
-    \  Each tile you move must have a unique location. Type \"help\" \
-     to see commands.\n"
+    \  Each tile you move must have a unique location. Type " ^ c "help"
+  ^ " to see commands.\n"
 
 let multiple_move_to_msg str_lst =
   "  You are trying to move to these locations: "
   ^ str_lst_syntax str_lst
-  ^ ".\n\
-    \  But you can only move to a single row. Type \"help\" to see \
-     commands.\n"
+  ^ ".\n  But you can only move to a single row. Type " ^ c "help"
+  ^ " to see commands.\n"
 
 let invalid_meld_unempty_row s =
   "  You cannot move a tile to a row that another player has played \
    until you meet the initial meld.\n\
-  \  Check row \"" ^ s ^ "\"\n"
+  \  Check row \"" ^ g s ^ "\".\n"
 
 (***********************************************************************)
 (* Following functions provide a message for executed commands.        *)
@@ -143,7 +150,7 @@ let sort_col_msg = "  Sorted by color.\n"
 
 let sort_num_msg = "  Sorted by number.\n"
 
-let draw_msg = "  Drawed tile from pile. Type \"endturn\".\n"
+let draw_msg = "  Drawed tile from pile. Type " ^ c "endturn" ^ ".\n"
 
 let end_turn_msg st =
   if Stack.is_empty st.t_stack then "  Starting next players turn.\n"
@@ -151,8 +158,8 @@ let end_turn_msg st =
     (not (get_current_player st).drawn_current_turn)
     && st.past_state = []
   then
-    "  You cannot end turn without making any move. Type \"help\" to \
-     see commands.\n"
+    "  You cannot end turn without making any move. Type " ^ c "help"
+    ^ " to see commands.\n"
   else "  Starting next players turn.\n"
 
 let spaces_scores n = String.make (10 - n) ' '
@@ -200,18 +207,18 @@ let score_msg player_lst =
     \  You need to finish your first game before seeing your score.\n"
   else num_games_row ^ string_of_scores player_lst ^ "\n"
 
-
-
-
-
 let help_msg =
   h "  Game Commands:  \n\n"
   ^ ip ^ "move (m) t to r    Moves the tile(s) [t] to board row [r].\n"
-  ^ "      " ^ i (g "Move Command Example:\n") ^ "        " ^ ip
+  ^ "      "
+  ^ i (g "Move Command Example:\n")
+  ^ "        " ^ ip
   ^ i "m 1 4 A3 to B      \n"
-  ^ "      " ^ i "Moves rack tiles at index 1 and 4, and board \
-  row A tile at index 3, to row B.\n" ^ ip
-  ^ "undo (u)           Undo most recent move.\n" ^ ip
+  ^ "      "
+  ^ i
+      "Moves rack tiles at index 1 and 4, and board row A tile at \
+       index 3, to row B.\n"
+  ^ ip ^ "undo (u)           Undo most recent move.\n" ^ ip
   ^ "reset (r)          Resets board and rack to start of turn.\n" ^ ip
   ^ "sortcolor (sc)     Sorts rack by tile color.\n" ^ ip
   ^ "sortnumber (sn)    Sorts rack by tile number.\n" ^ ip
@@ -221,10 +228,13 @@ let help_msg =
   ^ "help (h)           Display game play commands.\n\n"
 
 let start_game_msg =
-  g
-    "  Enter the number of players (2, 3, or 4) and, optionally, the \
-     player names. For example:\n"
-  ^ ip ^ "4 Clarkson Gries Dijkstra Turing\n" ^ ip
+  h "  Set Up New Game:  \n\n"
+  ^ g
+      "  Enter the number of players (2, 3, or 4) and, optionally, the \
+       player names. For example:\n"
+  ^ ip
+  ^ i "4 Clarkson Gries Dijkstra Turing\n"
+  ^ ip
 
 let quit_msg () =
   print_string ("\n" ^ g "  Thank you for playing, goodbye!\n\n");
@@ -267,7 +277,7 @@ let rec random_order_round_draw stack name =
         random_order_round_draw stack name)
 
 let rec wait_start () =
-  print_string (g "  Press enter to start the game!\n" ^ ip);
+  print_string (g "  Press " ^ c "enter" ^ " to start the game!\n" ^ ip);
   match read_line () with
   | input -> (
       match input with
@@ -286,7 +296,8 @@ let rec random_order_round_aux stack acc = function
       first_p_name
   | p :: t -> (
       print_string
-        ("  " ^ p.name ^ ", press enter to draw a tile.  " ^ ip);
+        ("  " ^ p.name ^ ", press " ^ c "enter" ^ " to draw a tile.  "
+       ^ ip);
       match read_line () with
       | "q" | "quit" -> quit_msg ()
       | _ ->
@@ -361,7 +372,7 @@ and commands command st =
   with e -> play_turn st (get_exception_msg e)
 
 let repeat_init_game_aux () =
-  print_string ("  Try again or type \"quit\" to exit.\n" ^ ip);
+  print_string ("  Try again or type " ^ c "quit" ^ " to exit.\n" ^ ip);
   match read_line () with
   | "quit" | "q" -> quit_msg ()
   | init_game -> init_game
@@ -396,12 +407,9 @@ let rec main () =
   ANSITerminal.set_cursor 1 1;
   ANSITerminal.erase Screen;
   print_string
-    (welcome_board ^ help_msg
-    ^ g
-        "\n\
-        \  Press enter to set up a new game. To view game tutorial, \
-         enter \"t\"\n"
-    ^ ip);
+    (welcome_board ^ help_msg ^ g "\n  Press " ^ c "enter"
+   ^ " to set up a new game. To view game tutorial, enter " ^ c "t"
+   ^ ".\n" ^ ip);
   match read_line () with
   | "q" | "quit" -> quit_msg ()
   | "t" -> run_tutorial tutorial_pages

@@ -98,22 +98,12 @@ let board_with_jokers =
   |> mult_add_to_board "M"
        [ make_t "T" 4 Black; make_t "J" 5 Black; make_t "T" 6 Black ]
   |> mult_add_to_board "Q"
-       [
-         make_t "T" 10 Red;
-         make_t "T" 11 Red;
-         make_t "T" 12 Red;
-         make_t "J" 13 Red;
-       ]
+       (gen_tile_run_lst 10 3 Red @ [ make_t "J" 13 Red ])
   |> mult_add_to_board "U"
-       [
-         make_t "T" 1 Blue;
-         make_t "T" 2 Blue;
-         make_t "J" 3 Blue;
-         make_t "T" 4 Blue;
-         make_t "T" 5 Blue;
-         make_t "J" 6 Blue;
-         make_t "T" 7 Blue;
-       ]
+       (gen_tile_run_lst 1 2 Blue
+       @ [ make_t "J" 3 Blue ]
+       @ gen_tile_run_lst 4 2 Blue
+       @ [ make_t "J" 6 Blue; make_t "T" 7 Blue ])
 
 let start_state r =
   let blank_state =
@@ -133,8 +123,6 @@ let start_state_with_rack =
   in
   { blank_state with players = [ new_player ] }
 
-let c s = "\027[38;5;0;30m\027[48;5;8;1m " ^ s ^ " \027[0m" 
-
 let start_tutorial =
   build_board (start_state [])
     (h "  Welcome to the Camlkub Tutorial!  "
@@ -143,8 +131,9 @@ let start_tutorial =
        commands used.\n\
       \  Camlkub is the same as Rummikub, the game is named Camlkub as \
        it was programmed in OCaml. \n\n\
-      \  To quit this tutorial at any time, enter "^ c "q" ^". To continue \
-       through the tutorial, press " ^ c "enter" ^ ".\n" ^ ip)
+      \  To quit this tutorial at any time, enter " ^ c "q"
+    ^ ". To continue through the tutorial, press " ^ c "enter" ^ ".\n"
+    ^ ip)
 
 let tutorial_1 =
   build_board
@@ -240,50 +229,56 @@ let tutorial_9 =
     (start_state start_rack)
     (h "  Start of the Game - Meld  "
     ^ "\n\n\
-      \  The Meld field on the board states whether the current player has met the meld count. \n\
-      \  Until Meld is met, players are unable to rearrange tiles on the board or use Joker tiles. \n\n\
-      \  To meet the meld count, a player must place tiles on the board so that the sum of the \n\
-      \  tile numbers is greater than or equal to 30. \
-      \n\n\
-      \  In the game above, Player 1 can meet the meld count by first entering:\n" 
-      ^ ip ^ i "move 6 10 14 to A")
-let st_10 = move {from_board = []; from_rack = [6;10;14]; to_row = "A"} (start_state start_rack) 
+      \  The Meld field on the board states whether the current player \
+       has met the meld count. \n\
+      \  Until Meld is met, players are unable to rearrange tiles on \
+       the board or use Joker tiles. \n\n\
+      \  To meet the meld count, a player must place tiles on the \
+       board so that the sum of the \n\
+      \  tile numbers is greater than or equal to 30. \n\n\
+      \  In the game above, Player 1 can meet the meld count by first \
+       entering:\n" ^ ip ^ i "move 6 10 14 to A ")
+
+let st_10 =
+  move
+    { from_board = []; from_rack = [ 6; 10; 14 ]; to_row = "A" }
+    (start_state start_rack)
 
 let tutorial_10 =
-  build_board
-    (st_10)
+  build_board st_10
     (h "  Start of the Game - Meld  "
     ^ "\n\n\
       \  This brings the meld count to 21.\n\
-      \  Players can use multiple commands to reach the count of 30 as long as it's within one turn. \n\
-      \  Player 1 can next enter: \
-      \n\n" 
-      ^ ip ^ i "move 10 6 8 to B")
+      \  Players can use multiple commands to reach the count of 30 as \
+       long as it's within one turn. \n\
+      \  Player 1 can next enter: \n\n" ^ ip ^ i "move 10 6 8 to B ")
 
-let st_11 = end_turn_st ( move {from_board = []; from_rack = [10;6;8]; to_row = "B"} (st_10))
-
+let st_11 =
+  end_turn_st
+    (move
+       { from_board = []; from_rack = [ 10; 6; 8 ]; to_row = "B" }
+       st_10)
 
 let tutorial_11 =
-  build_board
-    (st_11)
+  build_board st_11
     (h "  Start of the Game - Meld  "
     ^ "\n\n\
       \  This brings the meld count to 45, well above the required 30.\n\n\
-      \  After ending turn, Player 1's Meld status will change to \"Met\" as seen above.\n\
-      \  Starting from their next turn, Player 1 can use Joker tiles and move tiles on the board. \
-      \n\n" 
-      ^ ip )
+      \  After ending turn, Player 1's Meld status will change to \
+       \"Met\" as seen above.\n\
+      \  Starting from their next turn, Player 1 can use Joker tiles \
+       and move tiles on the board. \n\n" ^ ip)
 
 let tutorial_12 =
-  build_board
-    (st_11)
+  build_board st_11
     (h "  Player Actions  "
-    ^ "\n\n\
-      \  During a turn, a player can either move tiles onto the board, or rearrange tiles on\n\
-      \  the board to make space for their own tiles before entering endturn. \n\
-      \  If neither option is possible, the player must draw a tile from the pile and endturn.
-      \n\n" 
-      ^ ip )
+   ^ "\n\n\
+     \  During a turn, a player can either move tiles onto the board, \
+      or rearrange tiles on\n\
+     \  the board to make space for their own tiles before entering \
+      endturn. \n\
+     \  If neither option is possible, the player must draw a tile \
+      from the pile and endturn.\n\n" ^ ip)
 
 let tutorial_pages =
   [
@@ -301,108 +296,3 @@ let tutorial_pages =
     tutorial_11;
     tutorial_12;
   ]
-
-
-
-
-
-
- (*
- let t_board = 
-  let b1 = add_tile (make_t "T" 10 Blue) "A" (init_board ()) in
-  let b2 = add_tile (make_t "T" 11 Blue) "A" b1 in
-  let b3 = add_tile (make_t "T" 12 Blue) "A" b2 in
-  let b4 = add_tile (make_t "T" 13 Blue) "B" b3 in
-  let b5 = add_tile (make_t "T" 13 Red) "B" b4 in 
-  add_tile (make_t "T" 13 Orange) "B" b5
-
-let t_st = 
-  let stack = make_tile_stack () in
-  {
-    current_turn = 1;
-    board = t_board;
-    players = make_players [] stack [(1, "Player 1"); (2, "Player 2")];
-    t_stack = stack;
-    past_state = [];
-  }
-
-let tut_end st msg = 
-  clear_board ();
-  print_string (build_board st msg)
-
-let rec tut_wrong st msg = 
-  clear_board ();
-  print_string (build_board st msg);
-  print_string "lol"
-
-let rec tut_four st msg = 
-  clear_board ();
-  print_string (build_board st msg);
-  print_string "fuck"
-
-let tut_three st msg initial = 
-  clear_board ();
-  print_string (build_board st msg);
-  print_string 
-    (g
-      "  A valid row is either a set or a run. In a set, all tiles are the same number with different colors.\n
-      In a run, all tiles are the same color but in numerical order (e.g. 2, 3, 4) \n
-      Row C is invalid. You can restart your turn with \"reset\".\n"
-    ^ ip);
-  match read_line () with
-  | exception End_of_file -> ()
-  | input -> 
-      if input = "reset" then 
-        tut_four st "fuck you"
-      else tut_wrong st "fuck you"
-let tut_two st msg initial = 
-  clear_board ();
-  print_string (build_board st msg);
-  print_string 
-    (g
-      "  Now try moving multiple tiles in one command. Type in the command \"move 1 2 to C\" 
-      (or mv/m instead of move) to move the first and second tile in your rack to C.\n"
-    ^ ip);
-  match read_line () with
-  | exception End_of_file -> ()
-  | str -> 
-      if String.lowercase_ascii str = "move 1 2 to c" || str = "mv 1 2 to c" || str = "m 1 2 to c" then
-      let new_st = move {from_board = []; from_rack = [1;2]; to_row = "C"} st in
-        tut_three new_st "" st
-      else tut_wrong st "fuck you"
-
-let tut_start st = 
-  clear_board ();
-  print_string (build_board st "");
-  print_string
-    (g
-      "The goal of Camlkub is to empty your tile rack by creating sets and runs on the board.\n
-      Let's start teh tutorial! Try moving the first tile of your rack to the board.\n
-      You can either type out \"move 1 to C\" or use \"mv\" or \"m\" instead of \"move\".\n"
-    ^ ip);
-  match read_line () with
-  | str -> 
-      if String.lowercase_ascii str = "move 1 to c" || str = "mv 1 to c" || str = "m 1 to c" then
-        let new_st = move {from_board = []; from_rack = [1]; to_row = "C"} st in
-        tut_two new_st "" st
-      else if str = "" then tut_two st "bye" st
-      else tut_wrong st "fuck"
-
-
-
-
-      let rec welcome st msg =
-        clear_board ();
-        print_string welcome_board;
-        print_string msg;
-        print_string
-          (g
-             "  Let's start! Type \"play\" to start game. \"t\" for a tutorial, or \"quit\" to exit.\n"
-          ^ ip);
-        match read_line () with
-        | input ->
-            if input = "play" || input = "p" then
-              play_turn st "  Enter your command to play.\n"
-            else if input = "t"  then tut_start t_st
-            else if input = "quit" || input = "q" then quit_msg ()
-            else welcome st help_msg  *)
