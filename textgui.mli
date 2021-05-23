@@ -46,35 +46,11 @@ val i : string -> string
 val ip : string
 
 (** [win_board st s] is the end of game display string [s] that shows
-    the game winner, scores and asking if user would like to play a new
-    game. *)
+    the game winner and scores for state [st] and gives the option to
+    play a new game. *)
 val win_board : State.s -> string -> string
 
 (** [string_of_tile i t] is the string of spaces needed for formatting
     the terminal board, based on the needed spaces [i] and the tile's
     [t] number. *)
 val string_of_tile : int -> Tile.t -> string
-
-(* [build_board st msg] is the string representation of the game defined
-   in current state [st] followed by a message [msg] either asking user
-   for a command or stating error in a previous command. val build_board
-   : State.s -> string -> string
-
-   (** [welcome_board] is a string representation of the game's title
-   screen. *) val welcome_board : string
-
-   (** [g s] is the string [s] in green. *) val g : string -> string
-
-   (** [ip] is a string indicates when user input is being asked for. *)
-   val ip : string
-
-   (** [win_board st msg] is a string representation of the game at
-   state [st] where a player has emptied their rack and won. This
-   consists of a message for the winner, total scores so far [msg], and
-   a prompt for the player to either start a new round or end the game.
-   *) val win_board : State.s -> string -> string
-
-   (** [string_of_tile idx_count tile] is the string representation of
-   [tile] with text color corresponding to the tile's color and the
-   correct number of spaces concatenated to keep the spacing between
-   tiles consistent on the board. *) *)

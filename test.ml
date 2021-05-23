@@ -784,8 +784,17 @@ let win_board_test name st msg expected_output =
   OUnit2.assert_equal expected_output
     (String.escaped (win_board st msg))
 
+let str_format_test name func str expected_output =
+  name >:: fun _ -> OUnit2.assert_equal expected_output (func str)
+
 let textgui_tests =
   [
+    str_format_test "checks heading formatting" h "This is a test"
+      "\027[38;5;70;1m\027[48;5;0;1mThis is a test\027[0m";
+    str_format_test "checks italics formatting" i "This is a test"
+      "\027[3mThis is a test\027[0m";
+    str_format_test "checks command formatting" c "This is a test"
+      "\027[38;5;0;30m\027[48;5;8;1m This is a test \027[0m";
     build_board_test "checks build_board with new_test_state"
       (new_test_state ()) "this is a test"
       (result_from_file "test_results/build_board_test.txt");

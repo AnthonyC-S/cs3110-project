@@ -39,14 +39,7 @@ let ip : string = g "  > "
 
 let top_row = " " ^ String.make 105 '_' ^ " \n"
 
-let center_str str =
-  let str_len = String.length str in
-  let spaces_needed = 103 - str_len in
-  let space = String.make (spaces_needed / 2) ' ' in
-  if spaces_needed mod 2 = 0 then " |" ^ space ^ str ^ space ^ "|\n"
-  else " |" ^ space ^ str ^ space ^ " |\n"
-
-let empty_row = center_str ""
+let empty_row = " |" ^ String.make 103 ' ' ^ "|\n"
 
 let turn_row cur_player =
   " |  " ^ g "Turn:  " ^ cur_player
