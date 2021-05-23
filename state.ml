@@ -3,8 +3,6 @@ open Board
 open Tile
 open Command
 
-(** Need State Module Description *)
-
 type s = {
   current_turn : int;
   board : b;
@@ -21,7 +19,6 @@ exception AlreadyDrawn of string
 
 exception AlreadyMoved
 
-(* Spec is in signature. *)
 let init_state player_lst =
   let stack = make_tile_stack () in
   let plst = make_players [] stack player_lst in
