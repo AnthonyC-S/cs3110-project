@@ -1,18 +1,8 @@
-(************************************************************ 
-   Copyright (C) 2021 Cornell University.
-   The following files: authors.ml, Makefile, check.sh, and .gitignore were
-   created by Michael Clarkson (mrc26@cornell.edu) and CS 3110 course staff.
-   All other code files were created by authors listed below.
-   
-   You may not redistribute this project, distribute any derivatives,
-   or use it for commercial purposes.
- ************************************************************)
+(** Authorship for CS 3110 Spring 2021 Final Project - Camlkub
 
-(** Authorship and copyright information. CS 3110 Spring 2021 Assignment
-    Final Group Project - Camlkub
-
-    @author Anthony Coffin-Schmitt (awc93), Mina Huh (mh859), and
-    Christy Song (cs966) in alphabetical order of last name*)
+    @author Anthony Coffin-Schmitt (awc93)
+    @author Mina Huh (mh859)
+    @author Christy Song (cs966) *)
 
 (************************************************************ 
 

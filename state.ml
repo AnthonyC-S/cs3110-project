@@ -21,7 +21,6 @@ exception AlreadyMoved
 
 exception InvalidMeldUnemptyRow of string
 
-(* Spec is in signature. *)
 let init_state player_lst =
   let stack = make_tile_stack () in
   let plst = make_players [] stack player_lst in

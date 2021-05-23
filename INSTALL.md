@@ -1,9 +1,22 @@
-1. Set your terminal preference to the default style configuration so that all of the colors for the Camlkub tiles show up correctly. 
-2. Check that ANSITerminal and OUnit2 (version 2.* or higher) packages are installed and up-to-date.
-    - If not, run the following commands on your terminal: “opam install ANSITerminal” and “opam install OUnit2”
-    - If your packages are not uptodate, run the following commands on your terminal: “opam update ANSITerminal” and “opam update OUnit2”
-3. Check that your OCaml is up-to-date (version 4.11.0 or higher)
-4. Run “unzip camlkub.zip” where you want the directory to be located.
-5. Run “cd camlkub” to go into the unzipped directory.
-6. Run “make build” inside the directory.
-7. Run “make play”
+# Installation
+
+### Required Software
+This installation assumes you have the following installed and updated:
+- **OCaml** (version 4.11.0 or higher) - check with `ocaml --version`.
+- **OPAM** (version 2.0 or higher) - check with `opam --version`. You can update packages with `opam update` followed by `opam upgrade`.
+- **Make** - check with `make --version`.
+
+### Install the OPAM Dependencies
+`opam install ANSITerminal bisect_ppx ounit2 utop`
+
+### Set Up the Game
+1. Set your terminal display preference to the default configuration so the Camlkub tiles will display correctly. 
+2. Download the camlkub.zip file and run `unzip camlkub.zip` in the desired directory.
+3. Run `cd camlkub` to go to unzipped directory.
+4. Run `make play` to start the game.
+
+### Other Make Features
+- `make test` runs OUnit2 tests.
+- `make bisect` runs Bisect test coverage.
+- `make docs` generates public and private documenations / specifications.
+- `make clean` removes compiled files, etc.

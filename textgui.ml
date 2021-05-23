@@ -189,7 +189,7 @@ let build_board st msg =
   let cur_rack = get_current_rack st.current_turn st.players in
   top_row ^ turn_row ^ meld_row ^ pile_row ^ dash_row ^ top_index_r
   ^ string_of_board_rows "" st.board
-  ^ bottom_row ^ rack_row cur_rack ^ "\n\n" ^ msg ^ ip
+  ^ bottom_row ^ rack_row cur_rack ^ "\n\n" ^ msg
 
 let win_msg st =
   let winner_name = (get_current_player st).name in
