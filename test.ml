@@ -160,7 +160,6 @@ let update_valid_meld_player =
       .players
 
 (* Helpers used in Textgui Tests. *)
-
 let str_to_str a = Printf.sprintf "%s" a
 
 let result_from_file filename =
@@ -787,6 +786,10 @@ let win_board_test name st msg expected_output =
 let str_format_test name func str expected_output =
   name >:: fun _ -> OUnit2.assert_equal expected_output (func str)
 
+let string_of_tile_test name idx_count tile expected_output =
+  name >:: fun _ ->
+  OUnit2.assert_equal expected_output (string_of_tile idx_count tile)
+
 let textgui_tests =
   [
     str_format_test "checks heading formatting" h "This is a test"
@@ -801,6 +804,15 @@ let textgui_tests =
     win_board_test "checks win_board with new_test_state"
       (new_test_state ()) "You Won!!"
       (result_from_file "test_results/win_board_test.txt");
+    string_of_tile_test "test string_of_tile blue tile" 1
+      (make_t "T" 5 Blue) "\027[38;5;26;1m\027[48;5;15;1m5\027[0m  ";
+    string_of_tile_test "test string_of_tile orange tile" 1
+      (make_t "T" 13 Orange) "\027[38;5;208;1m\027[48;5;15;1m13\027[0m ";
+    string_of_tile_test "test string_of_tile impossible None tile" 1
+      (make_t "T" 1 None) "";
+    string_of_tile_test "test string_of_tile joker" 1
+      (make_t "J" 100 None)
+      "\027[38;5;0;1m\027[48;5;15;1mJ\027[0m\027[0m  ";
   ]
 
 (*****************************************************************)

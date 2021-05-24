@@ -179,9 +179,7 @@ let rec string_of_board_rows acc (board : Board.b_row list) =
         ^ "|\n")
         t
   | [ { row = r1; tiles = t1 } ] ->
-      string_of_board_rows
-        (acc ^ " |     " ^ r1 ^ ":  " ^ string_of_tiles "" 1 t1 ^ "\n")
-        []
+      failwith "Should always have an even number of rows."
 
 let build_board st msg =
   let cur_player = get_current_player st in
