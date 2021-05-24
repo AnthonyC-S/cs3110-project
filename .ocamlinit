@@ -9,8 +9,9 @@
 #load "state.cmo";;
 #load "textgui.cmo";;
 #load "command.cmo";;
+#load "tutorial.cmo";;
 #load "str.cma";;
-#load "tutorial.cma";;
+
 
 open Tile
 open Board
