@@ -36,10 +36,15 @@ See [LICENSE.md](LICENSE.md) for more information.
 
 
 ## Game Play Examples
+
+
 ![Camlkub Game - Welcome screen and user commands.](images/camlkub_welcome.png "Camlkub Game - Welcome Screen")
-<figcaption>The welcome screen and command instructions.</figcaption>
+Game Play Example 1: The welcome screen and command instructions.
+<br>
 
 ![Camlkub Game - Tutorial example.](images/camlkub_tutorial.png "Camlkub Game - Tutorial Example")
-A page from the new player tutorial.
+Game Play Example 2: New player tutorial section.
+<br>
+
 ![Camlkub Game - Play action example.](images/camlkub_play.gif "Camlkub Game - Play Action Example")
-Example of a just started game between two players.
+Game Play Example 3: New game between two players.
